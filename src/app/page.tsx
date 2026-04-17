@@ -1,9 +1,12 @@
 import Link from 'next/link';
-import { ArrowRight, Sparkles, MapPin, Download, Truck, Gift, Star } from 'lucide-react';
+import { ArrowRight, Sparkles, Download, Truck, Gift, Star } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PrintPreview from '@/components/PrintPreview';
+import WallFrame from '@/components/WallFrame';
+import DesignCardWrapper from './DesignCardWrapper';
 import { PRINT_CONFIGS, PrintType, DEFAULT_GALLERY } from '@/data/prints';
+import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
 
 const CATEGORY_ORDER: PrintType[] = ['golf', 'stadium', 'airport', 'marathon', 'city'];
@@ -18,8 +21,34 @@ async function getReviews() {
   return data ?? [];
 }
 
+async function getFeaturedDesigns(): Promise<DesignSummary[]> {
+  const { data } = await supabase
+    .from('gallery_items')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url')
+    .eq('active', true)
+    .eq('featured', true)
+    .order('sort_order', { ascending: true })
+    .limit(4);
+
+  if (data && data.length > 0) {
+    return data.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
+  }
+
+  // Fallback: first design from each type
+  return CATEGORY_ORDER.slice(0, 4).map((type) => {
+    const it = DEFAULT_GALLERY[type][0];
+    return {
+      slug: it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      name: it.name,
+      location: it.location,
+      type,
+      values: it.values,
+    };
+  });
+}
+
 export default async function HomePage() {
-  const reviews = await getReviews();
+  const [reviews, featured] = await Promise.all([getReviews(), getFeaturedDesigns()]);
 
   return (
     <>
@@ -44,11 +73,11 @@ export default async function HomePage() {
                 Custom art prints of stadiums, airports, marathons, city streets, and golf courses — personalized with your details, delivered your way.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/prints/golf" className="btn-primary">
-                  Shop Prints <ArrowRight size={16} />
+                <Link href="/shop" className="btn-primary">
+                  Shop the Collection <ArrowRight size={16} />
                 </Link>
-                <Link href="#how" className="btn-secondary">
-                  How It Works
+                <Link href="/prints/golf" className="btn-secondary">
+                  Create Custom
                 </Link>
               </div>
             </div>
@@ -91,14 +120,38 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Shop Ready-Made */}
       <section className="py-20 md:py-28">
         <div className="max-w-[1280px] mx-auto px-6">
+          <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
+            <div>
+              <div className="section-label">Shop ready-made</div>
+              <h2 className="section-title">Popular right now.</h2>
+              <p className="text-mid max-w-lg">
+                Existing designs, ready to ship. Pick digital or physical, choose your size, done.
+              </p>
+            </div>
+            <Link href="/shop" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+              See all designs <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {featured.map((d) => (
+              <DesignCardWrapper key={d.slug} design={d} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories (custom create flow) */}
+      <section className="py-20 md:py-24 bg-soft">
+        <div className="max-w-[1280px] mx-auto px-6">
           <div className="text-center mb-14">
-            <div className="section-label">Pick Your Print</div>
-            <h2 className="section-title">Five templates. Endless locations.</h2>
+            <div className="section-label">Don&apos;t see your location?</div>
+            <h2 className="section-title">Create a custom print from scratch.</h2>
             <p className="text-mid max-w-lg mx-auto mt-3">
-              Choose a category, customize with your specific location and personalization, and preview it live before you order.
+              Pick a category, fill in your location and details, preview live, and we&apos;ll design it for you. 3–5 day turnaround.
             </p>
           </div>
 
@@ -130,7 +183,7 @@ export default async function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section id="how" className="py-20 md:py-28 bg-soft">
+      <section id="how" className="py-20 md:py-28">
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="text-center mb-14">
             <div className="section-label">How It Works</div>
@@ -138,8 +191,8 @@ export default async function HomePage() {
           </div>
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { n: '1', title: 'Pick your print', desc: 'Choose from five categories: stadium, airport, marathon, city, or golf course.', bg: 'bg-primary-light', fg: 'text-primary' },
-              { n: '2', title: 'Add your details', desc: 'Enter your location, personalization text, and stats. Optional fields — we fill the gaps.', bg: 'bg-mint-light', fg: 'text-mint' },
+              { n: '1', title: 'Pick your print', desc: 'Browse ready-made designs or start a custom print in one of five categories.', bg: 'bg-primary-light', fg: 'text-primary' },
+              { n: '2', title: 'Add your details', desc: 'Customize required info. Optional fields let us fill in the rest.', bg: 'bg-mint-light', fg: 'text-mint' },
               { n: '3', title: 'Preview live', desc: 'See your print come to life with your exact details before you check out.', bg: 'bg-coral-light', fg: 'text-coral' },
               { n: '4', title: 'Enjoy', desc: 'Instant digital download or museum-quality print delivered to your door.', bg: 'bg-warm-light', fg: 'text-warm' },
             ].map((step) => (
@@ -156,7 +209,7 @@ export default async function HomePage() {
       </section>
 
       {/* Gift Section */}
-      <section id="gift" className="py-20 md:py-28">
+      <section id="gift" className="py-20 md:py-28 bg-soft">
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="bg-gradient-to-br from-coral-light to-warm-light rounded-3xl p-8 md:p-16 grid md:grid-cols-2 gap-10 items-center">
             <div>
@@ -169,7 +222,7 @@ export default async function HomePage() {
               <p className="text-mid text-lg mb-6 leading-relaxed">
                 Every print can be a gift. Add a personal message, have it shipped directly to the recipient, and we&apos;ll leave the price off. Perfect for birthdays, anniversaries, and weddings.
               </p>
-              <Link href="/prints/marathon" className="btn-primary">
+              <Link href="/shop" className="btn-primary">
                 Find a Gift <ArrowRight size={16} />
               </Link>
             </div>
@@ -177,45 +230,6 @@ export default async function HomePage() {
               <WallFrame>
                 <PrintPreview type="marathon" values={DEFAULT_GALLERY.marathon[0].values} />
               </WallFrame>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-20 md:py-28 bg-soft">
-        <div className="max-w-[1280px] mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="section-label">Pricing</div>
-            <h2 className="section-title">Two ways to get your print.</h2>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="bg-white rounded-2xl p-8 border border-border">
-              <div className="inline-flex items-center gap-2 bg-primary-light text-primary px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-4">
-                <Download size={12} /> Digital
-              </div>
-              <div className="text-4xl font-extrabold text-ink mb-1">From $12</div>
-              <p className="text-mid text-sm mb-6">Instant download. Print anywhere, any size.</p>
-              <ul className="space-y-2 text-sm text-mid">
-                <li className="flex items-center gap-2"><span className="text-primary">✓</span> High-resolution PDF</li>
-                <li className="flex items-center gap-2"><span className="text-primary">✓</span> Delivered within minutes</li>
-                <li className="flex items-center gap-2"><span className="text-primary">✓</span> Print as many times as you want</li>
-              </ul>
-            </div>
-            <div className="bg-white rounded-2xl p-8 border-2 border-primary relative">
-              <div className="absolute -top-3 right-6 bg-primary text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase">
-                Most Popular
-              </div>
-              <div className="inline-flex items-center gap-2 bg-mint-light text-mint px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-4">
-                <Truck size={12} /> Physical
-              </div>
-              <div className="text-4xl font-extrabold text-ink mb-1">From $25</div>
-              <p className="text-mid text-sm mb-6">Museum-quality print. Ready to frame.</p>
-              <ul className="space-y-2 text-sm text-mid">
-                <li className="flex items-center gap-2"><span className="text-primary">✓</span> 8×10 to 24×36 sizes</li>
-                <li className="flex items-center gap-2"><span className="text-primary">✓</span> Matte archival paper</li>
-                <li className="flex items-center gap-2"><span className="text-primary">✓</span> Shipped in protective packaging</li>
-              </ul>
             </div>
           </div>
         </div>
@@ -256,34 +270,26 @@ export default async function HomePage() {
             Ready to make yours?
           </h2>
           <p className="text-white/70 mb-8 max-w-md mx-auto">
-            Five templates, endless locations. Start customizing in under a minute.
+            Shop ready-to-ship designs or create something completely custom.
           </p>
-          <Link
-            href="/prints/golf"
-            className="inline-flex items-center gap-2 bg-white text-ink px-8 py-4 rounded-full font-semibold text-sm hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,255,255,0.2)] transition-all"
-          >
-            Shop Prints <ArrowRight size={16} />
-          </Link>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-2 bg-white text-ink px-8 py-4 rounded-full font-semibold text-sm hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,255,255,0.2)] transition-all"
+            >
+              Shop the Collection <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/prints/golf"
+              className="inline-flex items-center gap-2 border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-sm hover:bg-white/10 transition-all"
+            >
+              Create Custom
+            </Link>
+          </div>
         </div>
       </section>
 
       <Footer />
     </>
-  );
-}
-
-function WallFrame({ children, compact = false }: { children: React.ReactNode; compact?: boolean }) {
-  return (
-    <div className={`relative rounded-2xl overflow-hidden ${compact ? '' : 'shadow-[0_20px_60px_rgba(26,26,46,0.15)]'}`}>
-      <div
-        className="relative w-full"
-        style={{
-          background: 'linear-gradient(180deg, #f0e8db 0%, #e8ddc7 60%, #dfd2b8 100%)',
-          padding: compact ? '8%' : '10%',
-        }}
-      >
-        <div className="relative">{children}</div>
-      </div>
-    </div>
   );
 }

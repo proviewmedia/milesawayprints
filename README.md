@@ -57,8 +57,13 @@ Copy `.env.local` and fill in your keys:
 
 ### 3. Database setup
 Go to Supabase Dashboard > SQL Editor > New Query.
-Paste the contents of `supabase-schema.sql` and run it.
+
+First-time setup: paste the contents of `supabase-schema.sql` and run it.
 This creates all tables, seed data, and security policies.
+
+**If you already ran the base schema**, run the shop migration next:
+`supabase-migration-001-shop.sql` — adds slug/description/tags to
+gallery_items and seeds 4 starter collections.
 
 ### 4. Run locally
 ```bash
@@ -79,11 +84,30 @@ Point milesawayprints.com DNS to Vercel.
 - **reviews** - Customer testimonials
 
 ## Key Features
-- Template-driven product pages (one component, 5 print types)
-- Live preview that updates as customer types
-- Stripe checkout (digital + physical)
-- Instant download for digital prints
-- Customer order page with proof review
-- Admin dashboard for order management
+- Storefront (`/shop`) — browse all designs with filters, search, sort, collections, Quick Shop modal
+- Design detail pages (`/shop/[slug]`) — buy ready-made, with related designs
+- Custom create flow (`/prints/[type]`) — live preview that updates as customer types
+- Cart with localStorage persistence + slide-over drawer
+- Checkout stub + order confirmation + customer order page with status timeline
+- Admin dashboard with order list, status filters, and fulfillment workflow
 - Gift flow with personal messages
-- SEO optimized with dynamic metadata
+- SEO optimized with dynamic metadata per print type and per design
+
+## Routes
+
+| Path | Purpose |
+| --- | --- |
+| `/` | Homepage — hero, featured designs, how it works, gifts, reviews |
+| `/shop` | Browse all designs: filter, search, sort, collections |
+| `/shop/[slug]` | Individual design detail — buy ready-made |
+| `/prints/[type]` | Custom create flow for a print category |
+| `/checkout` | Checkout form (Stripe integration pending) |
+| `/checkout/success` | Order confirmation |
+| `/order/[token]` | Customer order status + proof review |
+| `/admin` | Admin dashboard (auth not yet wired) |
+| `/api/checkout` | POST — creates order (stub until Stripe keys added) |
+
+## Printful
+
+Currently on **manual fulfillment workflow**. See `docs/PRINTFUL.md` for the
+current workflow and future API-integration plan.
