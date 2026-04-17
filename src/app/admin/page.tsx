@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Package, Clock, CheckCircle2, Mail, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import OrderActions from './OrderActions';
 import { createAdminClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -91,6 +92,7 @@ export default async function AdminPage() {
                       <th className="px-5 py-3 text-left">Format</th>
                       <th className="px-5 py-3 text-left">Status</th>
                       <th className="px-5 py-3 text-right">Total</th>
+                      <th className="px-5 py-3 text-right">Fulfillment</th>
                       <th className="px-5 py-3"></th>
                     </tr>
                   </thead>
@@ -133,6 +135,15 @@ export default async function AdminPage() {
                           ${(o.price_cents / 100).toFixed(2)}
                         </td>
                         <td className="px-5 py-4 text-right">
+                          <OrderActions
+                            orderId={o.id}
+                            format={o.format}
+                            printfulOrderId={o.printful_order_id}
+                            printfulStatus={o.printful_status}
+                            printfulError={o.printful_error}
+                          />
+                        </td>
+                        <td className="px-5 py-4 text-right">
                           <Link
                             href={`/order/${o.token}`}
                             className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
@@ -153,7 +164,10 @@ export default async function AdminPage() {
               Fulfillment workflow
             </div>
             <p className="text-sm text-mid leading-relaxed">
-              For physical orders, copy the customer shipping address + design name into Printful dashboard manually and submit there. Printful API auto-submission is queued for Phase 4.
+              Physical orders have a &ldquo;Submit to Printful&rdquo; button in the Fulfillment column. That creates a draft in Printful — review it in the Printful dashboard, then confirm to start fulfillment. Digital orders are delivered directly by email.
+            </p>
+            <p className="text-xs text-light-mid leading-relaxed mt-2">
+              See <code className="bg-soft px-1 rounded">docs/PRINTFUL.md</code> for setup (env vars, variant ID mapping, webhook config).
             </p>
           </div>
         </div>
