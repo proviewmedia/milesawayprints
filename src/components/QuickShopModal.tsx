@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { X, Download, Truck, ArrowRight } from 'lucide-react';
 import WallFrame from './WallFrame';
 import PrintPreview from './PrintPreview';
-import { DesignSummary } from '@/data/shop';
-import { PRICING } from '@/data/prints';
+import { DesignSummary, getPhysicalSizes, priceCentsFor, formatSize } from '@/data/shop';
 import { useCart } from '@/contexts/CartContext';
 
 type Format = 'digital' | 'physical';
@@ -17,14 +16,16 @@ interface Props {
 }
 
 export default function QuickShopModal({ design, onClose }: Props) {
+  const physicalSizes = design ? getPhysicalSizes(design) : [];
+  const defaultSize = physicalSizes[0] ?? '';
   const [format, setFormat] = useState<Format>('digital');
-  const [size, setSize] = useState(PRICING.sizes[0].value);
+  const [size, setSize] = useState(defaultSize);
   const { addItem } = useCart();
 
   useEffect(() => {
     if (!design) return;
     setFormat('digital');
-    setSize(PRICING.sizes[0].value);
+    setSize(getPhysicalSizes(design)[0] ?? '');
   }, [design]);
 
   useEffect(() => {
@@ -38,10 +39,11 @@ export default function QuickShopModal({ design, onClose }: Props) {
     };
   }, [design, onClose]);
 
-  const price = useMemo(() => {
-    const s = PRICING.sizes.find((x) => x.value === size) ?? PRICING.sizes[0];
-    return format === 'digital' ? s.digital : s.physical;
-  }, [size, format]);
+  const priceCents = useMemo(() => {
+    if (!design) return 0;
+    return priceCentsFor(design, format, size);
+  }, [design, size, format]);
+  const price = priceCents / 100;
 
   if (!design) return null;
 
@@ -53,7 +55,7 @@ export default function QuickShopModal({ design, onClose }: Props) {
       location: design.location,
       format,
       size,
-      priceCents: price * 100,
+      priceCents,
     });
     onClose();
   };
@@ -87,7 +89,16 @@ export default function QuickShopModal({ design, onClose }: Props) {
           <div className="p-6 bg-soft flex items-center justify-center">
             <div className="w-full max-w-xs">
               <WallFrame>
-                <PrintPreview type={design.type} values={design.values} />
+                {design.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={design.image_url}
+                    alt={design.name}
+                    className="w-full aspect-[3/4] bg-white rounded-sm object-contain shadow-xl"
+                  />
+                ) : (
+                  <PrintPreview type={design.type} values={design.values} />
+                )}
               </WallFrame>
             </div>
           </div>
@@ -121,24 +132,26 @@ export default function QuickShopModal({ design, onClose }: Props) {
               </div>
             </div>
 
-            <div className="mb-5">
-              <div className="text-xs font-semibold text-ink mb-2">Size</div>
-              <div className="grid grid-cols-3 gap-2">
-                {PRICING.sizes.map((s) => (
-                  <button
-                    key={s.value}
-                    onClick={() => setSize(s.value)}
-                    className={`py-2 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
-                      size === s.value
-                        ? 'border-primary bg-primary-light text-primary'
-                        : 'border-border bg-white text-ink hover:border-primary/50'
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
+            {format === 'physical' && physicalSizes.length > 0 && (
+              <div className="mb-5">
+                <div className="text-xs font-semibold text-ink mb-2">Size</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {physicalSizes.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={`py-2 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
+                        size === s
+                          ? 'border-primary bg-primary-light text-primary'
+                          : 'border-border bg-white text-ink hover:border-primary/50'
+                      }`}
+                    >
+                      {formatSize(s)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="mt-auto flex items-center justify-between pt-4 border-t border-border">
               <div>

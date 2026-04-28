@@ -7,8 +7,8 @@ import WallFrame from '@/components/WallFrame';
 import PrintPreview from '@/components/PrintPreview';
 import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
-import { DesignSummary } from '@/data/shop';
-import { PRICING, PRINT_CONFIGS } from '@/data/prints';
+import { DesignSummary, getPhysicalSizes, priceCentsFor, formatSize } from '@/data/shop';
+import { PRINT_CONFIGS } from '@/data/prints';
 import { useCart } from '@/contexts/CartContext';
 
 type Format = 'digital' | 'physical';
@@ -19,8 +19,9 @@ interface Props {
 }
 
 export default function DesignDetail({ design, related }: Props) {
+  const physicalSizes = useMemo(() => getPhysicalSizes(design), [design]);
   const [format, setFormat] = useState<Format>('digital');
-  const [size, setSize] = useState(PRICING.sizes[0].value);
+  const [size, setSize] = useState(physicalSizes[0] ?? '');
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
   const [quickShopDesign, setQuickShopDesign] = useState<DesignSummary | null>(null);
@@ -28,10 +29,8 @@ export default function DesignDetail({ design, related }: Props) {
 
   const { addItem } = useCart();
 
-  const price = useMemo(() => {
-    const s = PRICING.sizes.find((x) => x.value === size) ?? PRICING.sizes[0];
-    return format === 'digital' ? s.digital : s.physical;
-  }, [size, format]);
+  const priceCents = useMemo(() => priceCentsFor(design, format, size), [design, size, format]);
+  const price = priceCents / 100;
 
   const handleAdd = () => {
     addItem({
@@ -41,7 +40,7 @@ export default function DesignDetail({ design, related }: Props) {
       location: design.location,
       format,
       size,
-      priceCents: price * 100,
+      priceCents,
       isGift,
       giftMessage: isGift ? giftMessage : undefined,
     });
@@ -72,7 +71,16 @@ export default function DesignDetail({ design, related }: Props) {
             {/* Preview */}
             <div className="md:sticky md:top-28 md:self-start">
               <WallFrame>
-                <PrintPreview type={design.type} values={design.values} />
+                {design.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={design.image_url}
+                    alt={design.name}
+                    className="w-full aspect-[3/4] bg-white rounded-sm object-contain shadow-xl"
+                  />
+                ) : (
+                  <PrintPreview type={design.type} values={design.values} />
+                )}
               </WallFrame>
               <p className="text-center text-xs text-light-mid mt-4 italic">
                 Shown framed on wall — frame not included with physical order.
@@ -133,27 +141,34 @@ export default function DesignDetail({ design, related }: Props) {
               </div>
 
               {/* Size */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs font-semibold text-ink">Size</div>
-                  <button className="text-[11px] text-primary hover:underline">Size guide</button>
+              {format === 'physical' && physicalSizes.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs font-semibold text-ink">Size</div>
+                  </div>
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    {physicalSizes.map((s) => {
+                      const cents = design.printful_prices?.[s];
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => setSize(s)}
+                          className={`py-2.5 rounded-lg text-xs font-semibold border-[1.5px] transition-all flex flex-col items-center gap-0.5 ${
+                            size === s
+                              ? 'border-primary bg-primary-light text-primary'
+                              : 'border-border bg-white text-ink hover:border-primary/50'
+                          }`}
+                        >
+                          <span>{formatSize(s)}</span>
+                          {cents !== undefined && (
+                            <span className="text-[10px] opacity-70">${(cents / 100).toFixed(2)}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-                  {PRICING.sizes.map((s) => (
-                    <button
-                      key={s.value}
-                      onClick={() => setSize(s.value)}
-                      className={`py-2.5 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
-                        size === s.value
-                          ? 'border-primary bg-primary-light text-primary'
-                          : 'border-border bg-white text-ink hover:border-primary/50'
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
 
               {/* Gift toggle */}
               <label className="flex items-start gap-3 p-4 bg-soft rounded-xl cursor-pointer mb-6">

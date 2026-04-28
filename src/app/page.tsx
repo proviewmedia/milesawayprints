@@ -24,7 +24,7 @@ async function getReviews() {
 async function getFeaturedDesigns(): Promise<DesignSummary[]> {
   const { data } = await supabase
     .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('active', true)
     .eq('featured', true)
     .order('sort_order', { ascending: true })

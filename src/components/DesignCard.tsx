@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import Image from 'next/image';
 import { Heart, ShoppingBag } from 'lucide-react';
 import WallFrame from './WallFrame';
 import PrintPreview from './PrintPreview';
-import { DesignSummary } from '@/data/shop';
-import { PRICING } from '@/data/prints';
+import { DesignSummary, DEFAULT_DIGITAL_PRICE_CENTS } from '@/data/shop';
 
 interface Props {
   design: DesignSummary;
@@ -42,13 +42,30 @@ export default function DesignCard({ design, onQuickShop }: Props) {
     onQuickShop?.(design);
   };
 
-  const fromPrice = PRICING.sizes[0].digital;
+  // "From" price is the cheapest option between digital and smallest physical size
+  const digital = (design.digital_price_cents ?? DEFAULT_DIGITAL_PRICE_CENTS) / 100;
+  const physicalPrices = Object.values(design.printful_prices ?? {}).map((c) => c / 100);
+  const cheapestPhysical = physicalPrices.length ? Math.min(...physicalPrices) : Infinity;
+  const fromPrice = Math.min(digital, cheapestPhysical);
 
   return (
     <Link href={`/shop/${design.slug}`} className="group block">
       <div className="relative">
         <WallFrame compact interactive>
-          <PrintPreview type={design.type} values={design.values} />
+          {design.image_url ? (
+            <div className="w-full aspect-[3/4] bg-white rounded-sm shadow-xl overflow-hidden flex items-center justify-center">
+              <Image
+                src={design.image_url}
+                alt={`${design.name} — ${design.location}`}
+                width={600}
+                height={800}
+                className="w-full h-full object-contain"
+                unoptimized
+              />
+            </div>
+          ) : (
+            <PrintPreview type={design.type} values={design.values} />
+          )}
         </WallFrame>
 
         {/* Heart (top-right) */}

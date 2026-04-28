@@ -13,7 +13,7 @@ async function getDesign(slug: string): Promise<{
 } | null> {
   const { data } = await supabase
     .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('slug', slug)
     .eq('active', true)
     .maybeSingle();
@@ -23,7 +23,7 @@ async function getDesign(slug: string): Promise<{
 
     const { data: rel } = await supabase
       .from('gallery_items')
-      .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url')
+      .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
       .eq('print_type_slug', data.print_type_slug)
       .eq('active', true)
       .neq('slug', slug)

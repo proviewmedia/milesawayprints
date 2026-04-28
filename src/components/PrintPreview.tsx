@@ -15,6 +15,8 @@ export default function PrintPreview({ type, values, className = '' }: Props) {
     airport: AirportPreview,
     marathon: MarathonPreview,
     city: CityPreview,
+    skyline: SkylinePreview,
+    f1: F1Preview,
   };
   const Preview = components[type];
   return (
@@ -168,6 +170,68 @@ function MarathonPreview({ values }: { values: Values }) {
           <circle cx="120" cy="70" r="2" />
           <circle cx="160" cy="110" r="2" />
           <circle cx="140" cy="170" r="2" />
+        </g>
+      </svg>
+    </Frame>
+  );
+}
+
+function SkylinePreview({ values }: { values: Values }) {
+  return (
+    <Frame
+      title={values.name || 'City Skyline'}
+      location={values.location || 'Country'}
+      stats={[values.stat1 || '', values.stat2 || '', values.stat3 || '']}
+      statLabels={['Population', 'Founded', 'Location']}
+    >
+      <svg viewBox="0 0 220 140" className="w-[90%] h-auto">
+        <g fill="#1a1a2e">
+          {/* Layered skyline silhouette */}
+          <rect x="10" y="90" width="14" height="50" />
+          <rect x="24" y="70" width="10" height="70" />
+          <rect x="34" y="80" width="14" height="60" />
+          <rect x="48" y="55" width="12" height="85" />
+          <rect x="60" y="75" width="16" height="65" />
+          <rect x="76" y="40" width="10" height="100" />
+          <rect x="86" y="65" width="18" height="75" />
+          <rect x="104" y="50" width="8" height="90" />
+          <polygon points="112,50 116,30 120,50" />
+          <rect x="112" y="50" width="8" height="90" />
+          <rect x="120" y="60" width="16" height="80" />
+          <rect x="136" y="45" width="10" height="95" />
+          <rect x="146" y="70" width="14" height="70" />
+          <rect x="160" y="55" width="12" height="85" />
+          <rect x="172" y="80" width="18" height="60" />
+          <rect x="190" y="65" width="10" height="75" />
+          <rect x="200" y="85" width="12" height="55" />
+        </g>
+      </svg>
+    </Frame>
+  );
+}
+
+function F1Preview({ values }: { values: Values }) {
+  return (
+    <Frame
+      title={values.name || 'Grand Prix'}
+      location={values.location || 'Circuit'}
+      stats={[values.stat1 || '', values.stat2 || '', values.stat3 || '']}
+      statLabels={['Length', 'Laps', 'First Held']}
+    >
+      <svg viewBox="0 0 220 220" className="w-[85%] h-auto">
+        <path
+          d="M 30 110 Q 40 40, 110 50 Q 180 60, 180 110 Q 180 150, 140 150 Q 100 150, 100 180 Q 100 200, 60 200 Q 30 200, 30 170 Q 30 140, 30 110 Z"
+          fill="none"
+          stroke="#1a1a2e"
+          strokeWidth="5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <circle cx="30" cy="110" r="5" fill="#dc2626" />
+        <g fill="#1a1a2e" opacity="0.3" fontSize="7" fontFamily="sans-serif" fontWeight="bold">
+          <text x="95" y="45">S1</text>
+          <text x="175" y="100">S2</text>
+          <text x="50" y="195">S3</text>
         </g>
       </svg>
     </Frame>

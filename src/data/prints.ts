@@ -1,4 +1,4 @@
-export type PrintType = 'golf' | 'stadium' | 'airport' | 'marathon' | 'city';
+export type PrintType = 'golf' | 'stadium' | 'airport' | 'marathon' | 'city' | 'skyline' | 'f1';
 
 export interface PrintField {
   id: string;
@@ -142,6 +142,50 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     seoTitle: 'Custom City Street Map Print | Personalized Map Art',
     seoDescription: 'Create a custom city street map print of any city in the world. Personalized with coordinates and details. Digital download or museum-quality print.',
   },
+  skyline: {
+    type: 'skyline',
+    slug: 'skyline',
+    title: 'City Skyline Print',
+    subtitle: 'Iconic cities in minimalist silhouette. Your skyline, hanging on your wall.',
+    badge: 'New',
+    badgeColor: { bg: '#fef3c7', text: '#b45309' },
+    detailsLabel: 'Skyline',
+    fields: [
+      { id: 'name', label: 'City Name', placeholder: 'e.g. New York', required: true },
+      { id: 'location', label: 'Country', placeholder: 'e.g. United States', required: true },
+    ],
+    statFields: [
+      { id: 'stat1', label: 'Population', placeholder: '8.3M' },
+      { id: 'stat2', label: 'Founded', placeholder: '1624' },
+      { id: 'stat3', label: 'Coordinates', placeholder: '40.71° N' },
+    ],
+    statLabels: ['Population', 'Founded', 'Location'],
+    defaults: { name: 'City Skyline', location: 'Country', stat1: '—', stat2: '—', stat3: '—' },
+    seoTitle: 'City Skyline Art Print | Minimalist Skyline Poster',
+    seoDescription: 'City skyline prints of iconic cities around the world — minimalist silhouette posters. Digital download or museum-quality print.',
+  },
+  f1: {
+    type: 'f1',
+    slug: 'f1',
+    title: 'F1 Circuit Print',
+    subtitle: 'Grand Prix tracks mapped with precision. For the tifosi, the paddock club kids, and everyone who loves the sound of lights out.',
+    badge: 'Racing',
+    badgeColor: { bg: '#fee2e2', text: '#b91c1c' },
+    detailsLabel: 'F1 Circuit',
+    fields: [
+      { id: 'name', label: 'Race Name', placeholder: 'e.g. Monaco Grand Prix', required: true },
+      { id: 'location', label: 'Location', placeholder: 'e.g. Monte Carlo, Monaco', required: true },
+    ],
+    statFields: [
+      { id: 'stat1', label: 'Length', placeholder: '3.337 km' },
+      { id: 'stat2', label: 'Laps', placeholder: '78' },
+      { id: 'stat3', label: 'First Held', placeholder: '1950' },
+    ],
+    statLabels: ['Length', 'Laps', 'First Held'],
+    defaults: { name: 'Grand Prix', location: 'Circuit', stat1: '—', stat2: '—', stat3: '—' },
+    seoTitle: 'F1 Circuit Art Print | Grand Prix Track Poster',
+    seoDescription: 'F1 Grand Prix circuit art prints — the legendary tracks of Formula 1. Digital download or museum-quality print.',
+  },
 };
 
 export const PRICING = {
@@ -181,4 +225,6 @@ export const DEFAULT_GALLERY: Record<PrintType, GalleryItem[]> = {
     { name: 'Paris', location: 'France', values: { name: 'Paris', location: 'France', stat1: '48.8566° N', stat2: '2.3522° E', stat3: '3rd C. BC' }},
     { name: 'Tokyo', location: 'Japan', values: { name: 'Tokyo', location: 'Japan', stat1: '35.6762° N', stat2: '139.6503° E', stat3: '1457' }},
   ],
+  skyline: [],
+  f1: [],
 };

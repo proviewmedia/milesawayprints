@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 async function getAllDesigns(): Promise<DesignSummary[]> {
   const { data } = await supabase
     .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, sort_order')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, sort_order, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('active', true)
     .order('sort_order', { ascending: true });
 
@@ -52,7 +52,7 @@ async function getCollections(): Promise<Collection[]> {
 
   const { data: items } = await supabase
     .from('collection_items')
-    .select(`collection_id, sort_order, gallery_item:gallery_items (id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url)`)
+    .select(`collection_id, sort_order, gallery_item:gallery_items (id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents)`)
     .order('sort_order', { ascending: true });
 
   type JoinedItem = { collection_id: string; sort_order: number; gallery_item: GalleryItemWithMeta | GalleryItemWithMeta[] };
