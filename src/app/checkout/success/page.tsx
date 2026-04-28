@@ -2,13 +2,32 @@ import Link from 'next/link';
 import { CheckCircle2, ArrowRight, Mail } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { createAdminClient } from '@/lib/supabase';
 
-export default function CheckoutSuccessPage({
+export const dynamic = 'force-dynamic';
+
+async function getOrderBySession(sessionId: string) {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from('orders')
+    .select('token, customer_email, customer_name')
+    .eq('stripe_checkout_session_id', sessionId)
+    .single();
+  return data;
+}
+
+export default async function CheckoutSuccessPage({
   searchParams,
 }: {
-  searchParams: { token?: string };
+  searchParams: { session_id?: string; token?: string };
 }) {
-  const token = searchParams.token;
+  const sessionId = searchParams.session_id;
+  let token = searchParams.token ?? null;
+
+  if (sessionId && !token) {
+    const order = await getOrderBySession(sessionId);
+    token = order?.token ?? null;
+  }
 
   return (
     <>
