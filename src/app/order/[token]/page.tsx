@@ -118,14 +118,28 @@ export default async function OrderPage({ params }: { params: { token: string } 
             </div>
 
             {/* Digital download */}
-            {isDigital && order.digital_download_url && order.status === 'approved' && (
-              <a
-                href={order.digital_download_url}
-                className="mt-6 btn-primary w-full justify-center"
-                download
-              >
-                <Download size={14} /> Download your print
-              </a>
+            {isDigital && order.digital_download_token && (
+              <div className="mt-6">
+                <a
+                  href={`/download/${order.digital_download_token}`}
+                  className="btn-primary w-full justify-center"
+                >
+                  <Download size={14} /> Download your print
+                </a>
+                <p className="text-[12px] text-mid mt-3 text-center">
+                  {order.digital_download_count ?? 0} of {order.digital_download_max ?? 5} downloads used
+                  {order.digital_download_expires_at && (
+                    <>
+                      {' · expires '}
+                      {new Date(order.digital_download_expires_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </>
+                  )}
+                </p>
+              </div>
             )}
           </div>
 
