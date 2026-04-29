@@ -199,7 +199,7 @@ export default async function HomePage() {
       </section>
 
       {/* How It Works — minimal numbered steps */}
-      <section id="how" className="py-20 md:py-28 bg-soft scroll-mt-28">
+      <section id="how" className="py-20 md:py-28 bg-soft scroll-mt-40">
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="text-center mb-14 max-w-xl mx-auto">
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink mb-3">
@@ -225,7 +225,7 @@ export default async function HomePage() {
       </section>
 
       {/* Gift Section — lavender pastel block */}
-      <section id="gift" className="py-20 md:py-28 scroll-mt-28">
+      <section id="gift" className="py-20 md:py-28 scroll-mt-40">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="bg-lavender-light p-10 md:p-20 grid md:grid-cols-2 gap-10 items-center">
             <div>
