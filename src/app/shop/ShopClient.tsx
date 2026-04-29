@@ -20,6 +20,8 @@ type SortOption = 'featured' | 'name-asc' | 'name-desc';
 
 const CATEGORIES: { value: FilterCategory; label: string }[] = [
   { value: 'all', label: 'All Prints' },
+  { value: 'skyline', label: 'Skylines' },
+  { value: 'f1', label: 'F1 Circuits' },
   { value: 'golf', label: 'Golf' },
   { value: 'stadium', label: 'Stadium' },
   { value: 'airport', label: 'Airport' },
@@ -69,7 +71,7 @@ export default function ShopClient({ designs, collections }: Props) {
                 <span className="text-primary">full collection.</span>
               </h1>
               <p className="text-lg text-mid max-w-lg leading-relaxed mb-6">
-                Every golf course, stadium, airport, marathon, and city we&apos;ve designed — {designs.length} prints ready to order today. Pick digital or physical, your size, and done.
+                Skylines, F1 circuits, golf courses, stadiums, airports, marathons, and cities — {designs.length} prints ready to order today. Pick digital or physical, your size, and done.
               </p>
               <div className="flex gap-3">
                 <a href="#grid" className="btn-primary">
