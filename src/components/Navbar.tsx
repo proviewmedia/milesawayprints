@@ -65,12 +65,13 @@ export default function Navbar() {
               <Search size={18} strokeWidth={1.75} className="text-ink" />
             </button>
 
-            <button
+            <Link
+              href="/account"
               aria-label="Account"
               className="hidden md:flex w-10 h-10 rounded-full hover:bg-soft items-center justify-center transition-colors"
             >
               <User size={18} strokeWidth={1.75} className="text-ink" />
-            </button>
+            </Link>
 
             <button
               onClick={open}
