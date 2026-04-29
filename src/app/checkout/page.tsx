@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Lock, Trash2, X } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
@@ -20,47 +20,53 @@ const stripePromise = loadStripe(
 );
 
 export default function CheckoutPage() {
-  const { items, subtotalCents, removeItem } = useCart();
-  const [step, setStep] = useState<'review' | 'paying'>('review');
+  const { items, subtotalCents } = useCart();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
   const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
   const totalCents = subtotalCents + shippingCents;
 
-  const handleCheckout = async () => {
-    setSubmitting(true);
+  // Snapshot the cart on mount so subsequent edits don't keep refetching.
+  // The cart drawer is the place to edit items; this page just pays.
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    if (itemsRef.current.length === 0) return;
+    let cancelled = false;
+    setLoading(true);
     setError(null);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
+    fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: itemsRef.current }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (!data.clientSecret) {
+          throw new Error(data.detail || data.error || 'Could not start checkout');
+        }
+        setClientSecret(data.clientSecret);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Something went wrong');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
-      const data = await res.json();
-      if (!res.ok || !data.clientSecret) throw new Error(data.detail || data.error || 'Checkout failed');
-      setClientSecret(data.clientSecret);
-      setStep('paying');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const dismissPayment = () => {
-    setStep('review');
-    setClientSecret(null);
-    setError(null);
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const fetchClientSecret = useCallback(() => {
     return Promise.resolve(clientSecret ?? '');
   }, [clientSecret]);
 
-  if (items.length === 0 && step === 'review') {
+  if (items.length === 0) {
     return (
       <>
         <Navbar />
@@ -85,20 +91,15 @@ export default function CheckoutPage() {
       <Navbar />
       <section className="pt-28 md:pt-32 pb-20 min-h-screen">
         <div className="max-w-[1200px] mx-auto px-6">
-          <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-2">
-            Review your order
+          <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-10">
+            Checkout
           </h1>
-          <div className="flex items-center gap-2 text-sm mb-10">
-            <span className={step === 'review' ? 'text-ink' : 'text-mid'}>1. Review</span>
-            <span className="text-mid">·</span>
-            <span className={step === 'paying' ? 'text-ink' : 'text-mid'}>2. Pay</span>
-          </div>
 
           <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start md:h-[calc(100vh-220px)]">
-            {/* Left — cart + summary, scrolls independently */}
+            {/* Left — order summary, scrolls independently */}
             <div className="md:h-full md:overflow-y-auto md:pr-4">
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
-                Items
+                Order
               </h2>
               <div className="border-t border-border">
                 {items.map((it) => (
@@ -122,14 +123,6 @@ export default function CheckoutPage() {
                         {it.isGift && ' · Gift'}
                         {it.isCustom && ' · Custom'}
                       </div>
-                      {step === 'review' && (
-                        <button
-                          onClick={() => removeItem(it.id)}
-                          className="text-[12px] text-mid hover:text-ink underline underline-offset-2 mt-2 inline-flex items-center gap-1"
-                        >
-                          <Trash2 size={11} strokeWidth={1.75} /> Remove
-                        </button>
-                      )}
                     </div>
                     <div className="text-sm text-ink whitespace-nowrap">
                       ${(it.priceCents / 100).toFixed(2)}
@@ -161,51 +154,27 @@ export default function CheckoutPage() {
               >
                 ← Continue shopping
               </Link>
+              <p className="text-[12px] text-mid mt-3">
+                Need to change your order? Open the cart from the navbar to edit items.
+              </p>
             </div>
 
-            {/* Right — review CTA OR embedded payment, scrolls independently */}
+            {/* Right — embedded payment, scrolls independently */}
             <aside className="md:h-full md:overflow-y-auto md:pr-1">
-              {step === 'review' && (
-                <>
-                  <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
-                    Payment
-                  </h2>
-                  <div className="border-t border-border pt-6">
-                    {error && (
-                      <p className="text-sm text-accent mb-3">{error}</p>
-                    )}
-                    <button
-                      onClick={handleCheckout}
-                      disabled={submitting || items.length === 0}
-                      className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mb-3"
-                    >
-                      {submitting ? 'Loading payment…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
-                    </button>
-                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
-                      <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
-                    </p>
-                    <p className="text-[12px] text-mid text-center mt-3">
-                      Email and shipping address are collected on the next step.
-                    </p>
+              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
+                Payment
+              </h2>
+              <div className="border-t border-border pt-6">
+                {error && (
+                  <p className="text-sm text-accent mb-4">{error}</p>
+                )}
+                {loading && !clientSecret && (
+                  <div className="py-16 text-center text-sm text-mid">
+                    Loading secure payment…
                   </div>
-                </>
-              )}
-
-              {step === 'paying' && clientSecret && (
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider">
-                      Payment
-                    </h2>
-                    <button
-                      onClick={dismissPayment}
-                      aria-label="Close payment form"
-                      className="w-8 h-8 -mr-1 rounded-full hover:bg-soft flex items-center justify-center text-mid hover:text-ink transition-colors"
-                    >
-                      <X size={16} strokeWidth={1.75} />
-                    </button>
-                  </div>
-                  <div className="border-t border-border pt-2">
+                )}
+                {clientSecret && (
+                  <>
                     <EmbeddedCheckoutProvider
                       stripe={stripePromise}
                       options={{ fetchClientSecret }}
@@ -215,9 +184,9 @@ export default function CheckoutPage() {
                     <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5 mt-4">
                       <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
                     </p>
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
+              </div>
             </aside>
           </div>
         </div>
