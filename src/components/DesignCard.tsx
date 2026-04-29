@@ -45,8 +45,14 @@ export default function DesignCard({ design }: Props) {
 
   const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? '';
 
+  // If the slug is a `prints/<type>` placeholder (no real product), link
+  // directly to the custom-design flow instead of /shop/<slug>.
+  const href = design.slug.startsWith('prints/')
+    ? `/${design.slug}`
+    : `/shop/${design.slug}`;
+
   return (
-    <Link href={`/shop/${design.slug}`} className="group block">
+    <Link href={href} className="group block">
       {/* Image tile — Printful images already have lifestyle context, so no inner padding.
           For SVG previews (custom designs), use the WallFrame inside an off-white tile. */}
       <div className="relative aspect-[4/5] overflow-hidden bg-soft">
