@@ -9,7 +9,9 @@ import { PRINT_CONFIGS, PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
 
-const CATEGORY_ORDER: PrintType[] = ['golf', 'stadium', 'airport', 'marathon', 'city'];
+const CATEGORY_ORDER: PrintType[] = ['skyline', 'f1', 'golf', 'stadium', 'airport', 'marathon', 'city'];
+
+export const dynamic = 'force-dynamic';
 
 async function getReviews() {
   const { data } = await supabase
@@ -22,7 +24,8 @@ async function getReviews() {
 }
 
 async function getFeaturedDesigns(): Promise<DesignSummary[]> {
-  const { data } = await supabase
+  // Try featured items first, fall back to any active item if none are flagged featured
+  const { data: featured } = await supabase
     .from('gallery_items')
     .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('active', true)
@@ -30,21 +33,19 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
     .order('sort_order', { ascending: true })
     .limit(4);
 
-  if (data && data.length > 0) {
-    return data.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
+  if (featured && featured.length > 0) {
+    return featured.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
   }
 
-  // Fallback: first design from each type
-  return CATEGORY_ORDER.slice(0, 4).map((type) => {
-    const it = DEFAULT_GALLERY[type][0];
-    return {
-      slug: it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
-      name: it.name,
-      location: it.location,
-      type,
-      values: it.values,
-    };
-  });
+  const { data } = await supabase
+    .from('gallery_items')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
+    .eq('active', true)
+    .order('sort_order', { ascending: true })
+    .limit(4);
+
+  if (!data) return [];
+  return data.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
 }
 
 export default async function HomePage() {
