@@ -69,18 +69,18 @@ export default function DesignDetail({ design, related }: Props) {
       <section className="pb-16 md:pb-24">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-[1.2fr_1fr] gap-10 lg:gap-16">
-            {/* Preview — large off-white tile */}
+            {/* Preview — Printful images fill the tile; SVG previews sit inside it */}
             <div className="md:sticky md:top-32 md:self-start">
-              <div className="bg-soft p-10 md:p-16 flex items-center justify-center min-h-[60vh]">
+              <div className="bg-soft min-h-[60vh] flex items-center justify-center overflow-hidden">
                 {design.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={design.image_url}
                     alt={design.name}
-                    className="max-w-full max-h-[70vh] object-contain"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-[80%] max-w-[420px]">
+                  <div className="w-[70%] max-w-[420px] py-12">
                     <WallFrame>
                       <PrintPreview type={design.type} values={design.values} />
                     </WallFrame>

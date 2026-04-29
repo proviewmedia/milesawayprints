@@ -47,22 +47,25 @@ export default function DesignCard({ design }: Props) {
 
   return (
     <Link href={`/shop/${design.slug}`} className="group block">
-      {/* Off-white tile housing the frame/image */}
-      <div className="relative bg-soft aspect-[4/5] flex items-center justify-center p-8 md:p-10 overflow-hidden">
+      {/* Image tile — Printful images already have lifestyle context, so no inner padding.
+          For SVG previews (custom designs), use the WallFrame inside an off-white tile. */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-soft">
         {design.image_url ? (
           <Image
             src={design.image_url}
             alt={`${design.name} — ${design.location}`}
-            width={600}
-            height={800}
-            className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+            width={800}
+            height={1000}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             unoptimized
           />
         ) : (
-          <div className="w-full transition-transform duration-500 group-hover:scale-[1.02]">
-            <WallFrame compact>
-              <PrintPreview type={design.type} values={design.values} />
-            </WallFrame>
+          <div className="absolute inset-0 flex items-center justify-center p-8 md:p-10">
+            <div className="w-full transition-transform duration-500 group-hover:scale-[1.02]">
+              <WallFrame compact>
+                <PrintPreview type={design.type} values={design.values} />
+              </WallFrame>
+            </div>
           </div>
         )}
       </div>
