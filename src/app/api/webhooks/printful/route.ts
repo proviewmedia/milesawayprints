@@ -20,7 +20,8 @@ import { verifyWebhookSecret } from '@/lib/printful';
  * Configure in Printful:
  *   Printful dashboard → Settings → Stores → MilesAwayPrints → Webhooks
  *   URL: https://milesawayprints.com/api/webhooks/printful?secret=<your-random-secret>
- *   Events: all (or at minimum package_shipped, order_failed, order_canceled)
+ *   Events: all (or at minimum package_shipped, order_failed, order_canceled,
+ *           product_synced, product_updated, product_deleted)
  *
  * Add PRINTFUL_WEBHOOK_SECRET to .env.local / Vercel env.
  */
@@ -40,6 +41,26 @@ export async function POST(req: Request) {
   }
 
   const type: string = event?.type ?? '';
+
+  // Catalog events — re-run the product sync so the site catalog matches
+  // Printful within seconds of any add / change / remove.
+  if (
+    type === 'product_synced' ||
+    type === 'product_updated' ||
+    type === 'product_deleted'
+  ) {
+    try {
+      const res = await fetch(`${url.origin}/api/printful/sync`, { method: 'POST' });
+      const data = await res.json();
+      return NextResponse.json({ ok: true, triggered: 'sync', event: type, sync: data });
+    } catch (err) {
+      return NextResponse.json(
+        { ok: false, event: type, error: err instanceof Error ? err.message : String(err) },
+        { status: 500 },
+      );
+    }
+  }
+
   const pfOrder = event?.data?.order ?? event?.data?.shipment?.order ?? event?.data ?? {};
   const externalId: string | undefined = pfOrder?.external_id;
   const pfOrderId: string | number | undefined = pfOrder?.id;
