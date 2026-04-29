@@ -229,10 +229,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Gift Section — lavender pastel block */}
+      {/* Gift Section */}
       <section id="gift" className="py-20 md:py-28 scroll-mt-40">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="bg-lavender-light p-10 md:p-20 grid md:grid-cols-2 gap-10 items-center">
+          <div className="bg-soft p-10 md:p-20 grid md:grid-cols-2 gap-10 items-center">
             <div>
               <h2 className="text-3xl md:text-5xl font-medium text-ink tracking-tight leading-[1.05] mb-5">
                 Make it<br />meaningful.

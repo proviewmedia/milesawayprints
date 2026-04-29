@@ -14,9 +14,9 @@ export default function AboutPage() {
     <>
       <Navbar />
 
-      {/* Hero — lavender pastel block, GoodMood style */}
+      {/* Hero */}
       <section className="pt-28 md:pt-32">
-        <div className="bg-lavender-light">
+        <div className="bg-soft">
           <div className="max-w-[1400px] mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div>
               <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-ink leading-[1.02] mb-6">
