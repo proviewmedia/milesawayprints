@@ -95,13 +95,13 @@ export default function CheckoutPage() {
             Checkout
           </h1>
 
-          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start md:h-[calc(100vh-220px)]">
-            {/* Left — order summary, header sticky, body scrolls */}
-            <div className="md:h-full md:flex md:flex-col">
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border md:flex-shrink-0">
+          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start">
+            {/* Left — order summary */}
+            <div>
+              <h2 className="sticky top-28 md:top-32 z-10 bg-paper text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
                 Order
               </h2>
-              <div className="md:flex-1 md:overflow-y-auto md:pr-4 pt-1">
+              <div className="pt-1">
                 {items.map((it) => (
                   <div key={it.id} className="flex gap-5 py-5 border-b border-border">
                     <div className="w-20 h-24 flex-shrink-0 bg-soft overflow-hidden flex items-center justify-center">
@@ -159,12 +159,12 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Right — embedded payment, header sticky, body scrolls */}
-            <aside className="md:h-full md:flex md:flex-col">
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border md:flex-shrink-0">
+            {/* Right — embedded payment */}
+            <aside>
+              <h2 className="sticky top-28 md:top-32 z-10 bg-paper text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
                 Payment
               </h2>
-              <div className="md:flex-1 md:overflow-y-auto md:pr-1 pt-6">
+              <div className="pt-6">
                 {error && (
                   <p className="text-sm text-accent mb-4">{error}</p>
                 )}
