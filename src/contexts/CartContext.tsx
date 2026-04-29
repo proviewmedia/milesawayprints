@@ -35,7 +35,7 @@ interface CartContextValue extends CartState {
   count: number;
 }
 
-const STORAGE_KEY = 'map-cart-v1';
+const STORAGE_KEY = 'map-cart-v2';
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
