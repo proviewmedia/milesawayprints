@@ -10,7 +10,6 @@ import {
   EmbeddedCheckout,
 } from '@stripe/react-stripe-js';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
 const SHIPPING_FLAT_CENTS = 500;
@@ -29,8 +28,6 @@ export default function CheckoutPage() {
   const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
   const totalCents = subtotalCents + shippingCents;
 
-  // Snapshot the cart on mount so subsequent edits don't keep refetching.
-  // The cart drawer is the place to edit items; this page just pays.
   const itemsRef = useRef(items);
   useEffect(() => {
     if (itemsRef.current.length === 0) return;
@@ -81,7 +78,6 @@ export default function CheckoutPage() {
             </Link>
           </div>
         </section>
-        <Footer />
       </>
     );
   }
@@ -89,19 +85,19 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <section className="pt-28 md:pt-32 pb-20 min-h-screen">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-10">
+      <section className="pt-28 pb-10 md:pt-0 md:pb-0 md:mt-[96px] md:h-[calc(100vh-96px)] md:overflow-hidden">
+        <div className="h-full max-w-[1200px] mx-auto px-6 flex flex-col">
+          <h1 className="flex-shrink-0 text-3xl md:text-4xl font-medium tracking-tight text-ink leading-[1.05] py-6 md:py-7">
             Checkout
           </h1>
 
-          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start">
+          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 md:flex-1 md:min-h-0 md:pb-6">
             {/* Left — order summary */}
-            <div>
-              <h2 className="sticky top-28 md:top-32 z-10 bg-paper text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
+            <div className="md:flex md:flex-col md:h-full md:min-h-0">
+              <h2 className="md:flex-shrink-0 text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
                 Order
               </h2>
-              <div className="pt-1">
+              <div className="md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-4 pt-1">
                 {items.map((it) => (
                   <div key={it.id} className="flex gap-5 py-5 border-b border-border">
                     <div className="w-20 h-24 flex-shrink-0 bg-soft overflow-hidden flex items-center justify-center">
@@ -153,18 +149,18 @@ export default function CheckoutPage() {
                 >
                   ← Continue shopping
                 </Link>
-                <p className="text-[12px] text-mid mt-3">
+                <p className="text-[12px] text-mid mt-3 mb-2">
                   Need to change your order? Open the cart from the navbar to edit items.
                 </p>
               </div>
             </div>
 
             {/* Right — embedded payment */}
-            <aside>
-              <h2 className="sticky top-28 md:top-32 z-10 bg-paper text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
+            <aside className="md:flex md:flex-col md:h-full md:min-h-0">
+              <h2 className="md:flex-shrink-0 text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
                 Payment
               </h2>
-              <div className="pt-6">
+              <div className="md:flex-1 md:min-h-0 md:overflow-y-auto pt-6 md:pr-1">
                 {error && (
                   <p className="text-sm text-accent mb-4">{error}</p>
                 )}
@@ -181,7 +177,7 @@ export default function CheckoutPage() {
                     >
                       <EmbeddedCheckout />
                     </EmbeddedCheckoutProvider>
-                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5 mt-4">
+                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5 mt-4 mb-2">
                       <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
                     </p>
                   </>
@@ -191,7 +187,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </section>
-      <Footer />
     </>
   );
 }
