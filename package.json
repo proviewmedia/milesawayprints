@@ -10,7 +10,7 @@
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/stripe/webhook"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^6.3.0",
+    "@stripe/react-stripe-js": "^2.8.1",
     "@stripe/stripe-js": "^4.0.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.45.0",
