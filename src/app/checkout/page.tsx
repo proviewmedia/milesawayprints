@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Lock } from 'lucide-react';
+import { Lock, Trash2, X } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
@@ -20,7 +20,7 @@ const stripePromise = loadStripe(
 );
 
 export default function CheckoutPage() {
-  const { items, subtotalCents, clear } = useCart();
+  const { items, subtotalCents, removeItem } = useCart();
   const [step, setStep] = useState<'review' | 'paying'>('review');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +43,6 @@ export default function CheckoutPage() {
       if (!res.ok || !data.clientSecret) throw new Error(data.detail || data.error || 'Checkout failed');
       setClientSecret(data.clientSecret);
       setStep('paying');
-      clear();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -51,39 +50,17 @@ export default function CheckoutPage() {
     }
   };
 
+  const dismissPayment = () => {
+    setStep('review');
+    setClientSecret(null);
+    setError(null);
+  };
+
   const fetchClientSecret = useCallback(() => {
     return Promise.resolve(clientSecret ?? '');
   }, [clientSecret]);
 
-  if (step === 'paying' && clientSecret) {
-    return (
-      <>
-        <Navbar />
-        <section className="pt-28 md:pt-32 pb-20 min-h-screen">
-          <div className="max-w-[900px] mx-auto px-6">
-            <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-2">
-              Payment
-            </h1>
-            <p className="text-mid mb-8 flex items-center gap-1.5">
-              <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
-            </p>
-
-            <div id="checkout">
-              <EmbeddedCheckoutProvider
-                stripe={stripePromise}
-                options={{ fetchClientSecret }}
-              >
-                <EmbeddedCheckout />
-              </EmbeddedCheckoutProvider>
-            </div>
-          </div>
-        </section>
-        <Footer />
-      </>
-    );
-  }
-
-  if (items.length === 0) {
+  if (items.length === 0 && step === 'review') {
     return (
       <>
         <Navbar />
@@ -107,15 +84,18 @@ export default function CheckoutPage() {
     <>
       <Navbar />
       <section className="pt-28 md:pt-32 pb-20 min-h-screen">
-        <div className="max-w-[960px] mx-auto px-6">
+        <div className="max-w-[1200px] mx-auto px-6">
           <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-2">
             Review your order
           </h1>
-          <p className="text-mid mb-10">
-            Confirm the items below, then continue to secure payment.
-          </p>
+          <div className="flex items-center gap-2 text-sm mb-10">
+            <span className={step === 'review' ? 'text-ink' : 'text-mid'}>1. Review</span>
+            <span className="text-mid">·</span>
+            <span className={step === 'paying' ? 'text-ink' : 'text-mid'}>2. Pay</span>
+          </div>
 
-          <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-10">
+          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start">
+            {/* Left — cart + summary, always visible */}
             <div>
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
                 Items
@@ -142,6 +122,14 @@ export default function CheckoutPage() {
                         {it.isGift && ' · Gift'}
                         {it.isCustom && ' · Custom'}
                       </div>
+                      {step === 'review' && (
+                        <button
+                          onClick={() => removeItem(it.id)}
+                          className="text-[12px] text-mid hover:text-ink underline underline-offset-2 mt-2 inline-flex items-center gap-1"
+                        >
+                          <Trash2 size={11} strokeWidth={1.75} /> Remove
+                        </button>
+                      )}
                     </div>
                     <div className="text-sm text-ink whitespace-nowrap">
                       ${(it.priceCents / 100).toFixed(2)}
@@ -149,13 +137,8 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-            </div>
 
-            <aside className="md:sticky md:top-32 md:self-start">
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
-                Summary
-              </h2>
-              <div className="border-t border-border py-5 space-y-2.5 text-sm">
+              <div className="mt-8 space-y-2.5 text-sm">
                 <div className="flex justify-between text-mid">
                   <span>Subtotal</span>
                   <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
@@ -172,32 +155,71 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {error && (
-                <p className="text-sm text-accent mb-3">{error}</p>
+              <Link
+                href="/shop"
+                className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-8"
+              >
+                ← Continue shopping
+              </Link>
+            </div>
+
+            {/* Right — review CTA OR embedded payment */}
+            <aside className="md:sticky md:top-32 md:self-start">
+              {step === 'review' && (
+                <>
+                  <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
+                    Payment
+                  </h2>
+                  <div className="border-t border-border pt-6">
+                    {error && (
+                      <p className="text-sm text-accent mb-3">{error}</p>
+                    )}
+                    <button
+                      onClick={handleCheckout}
+                      disabled={submitting || items.length === 0}
+                      className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mb-3"
+                    >
+                      {submitting ? 'Loading payment…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
+                    </button>
+                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
+                      <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
+                    </p>
+                    <p className="text-[12px] text-mid text-center mt-3">
+                      Email and shipping address are collected on the next step.
+                    </p>
+                  </div>
+                </>
               )}
 
-              <button
-                onClick={handleCheckout}
-                disabled={submitting}
-                className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mb-3"
-              >
-                {submitting ? 'Loading payment…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
-              </button>
-              <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
-                <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
-              </p>
-              <p className="text-[12px] text-mid text-center mt-3">
-                Email and shipping address are collected on the next step.
-              </p>
+              {step === 'paying' && clientSecret && (
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider">
+                      Payment
+                    </h2>
+                    <button
+                      onClick={dismissPayment}
+                      aria-label="Close payment form"
+                      className="w-8 h-8 -mr-1 rounded-full hover:bg-soft flex items-center justify-center text-mid hover:text-ink transition-colors"
+                    >
+                      <X size={16} strokeWidth={1.75} />
+                    </button>
+                  </div>
+                  <div className="border-t border-border pt-2">
+                    <EmbeddedCheckoutProvider
+                      stripe={stripePromise}
+                      options={{ fetchClientSecret }}
+                    >
+                      <EmbeddedCheckout />
+                    </EmbeddedCheckoutProvider>
+                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5 mt-4">
+                      <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
+                    </p>
+                  </div>
+                </div>
+              )}
             </aside>
           </div>
-
-          <Link
-            href="/shop"
-            className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-12"
-          >
-            ← Continue shopping
-          </Link>
         </div>
       </section>
       <Footer />

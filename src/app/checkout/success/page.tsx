@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { createAdminClient } from '@/lib/supabase';
 import AccountCallToAction from './AccountCallToAction';
+import ClearCartOnMount from './ClearCartOnMount';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,7 @@ export default async function CheckoutSuccessPage({
 
   return (
     <>
+      <ClearCartOnMount />
       <Navbar />
       <section className="pt-32 md:pt-40 pb-24 min-h-[70vh]">
         <div className="max-w-[520px] mx-auto px-6 text-center">
