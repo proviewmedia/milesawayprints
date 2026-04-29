@@ -1,37 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Lock } from 'lucide-react';
+import Image from 'next/image';
+import { Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
+
+const SHIPPING_FLAT_CENTS = 500;
 
 export default function CheckoutPage() {
   const { items, subtotalCents, clear } = useCart();
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [canceled, setCanceled] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('canceled') === '1') setCanceled(true);
+  }, []);
+
+  const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
+  const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
+  const totalCents = subtotalCents + shippingCents;
+
+  const handleCheckout = async () => {
     setSubmitting(true);
     setError(null);
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items,
-          customer: { email, name },
-        }),
+        body: JSON.stringify({ items }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Checkout failed');
+      if (!res.ok || !data.url) throw new Error(data.error || 'Checkout failed');
       clear();
-      router.push(data.url);
+      if (typeof window !== 'undefined') window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       setSubmitting(false);
@@ -42,15 +49,18 @@ export default function CheckoutPage() {
     return (
       <>
         <Navbar />
-        <section className="pt-32 pb-20 min-h-[60vh]">
-          <div className="max-w-lg mx-auto px-6 text-center">
-            <h1 className="text-2xl font-extrabold text-ink mb-2">Your cart is empty</h1>
-            <p className="text-mid mb-6">Add a print before checking out.</p>
+        <section className="pt-32 md:pt-40 pb-20 min-h-[60vh]">
+          <div className="max-w-md mx-auto px-6 text-center">
+            <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink mb-3">
+              Your cart is empty
+            </h1>
+            <p className="text-mid mb-7">Add a print before checking out.</p>
             <Link href="/shop" className="btn-primary">
-              Browse the Shop <ArrowRight size={14} />
+              Browse the shop
             </Link>
           </div>
         </section>
+        <Footer />
       </>
     );
   }
@@ -58,120 +68,109 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <section className="pt-28 pb-20 bg-soft min-h-screen">
-        <div className="max-w-5xl mx-auto px-6">
-          <Link
-            href="/shop"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-mid hover:text-ink mb-6"
-          >
-            <ArrowLeft size={12} /> Continue shopping
-          </Link>
-
-          <h1 className="text-3xl md:text-4xl font-extrabold text-ink tracking-tight mb-8">
-            Checkout
+      <section className="pt-28 md:pt-32 pb-20 min-h-screen">
+        <div className="max-w-[960px] mx-auto px-6">
+          <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-2">
+            Review your order
           </h1>
+          <p className="text-mid mb-10">
+            Confirm the items below, then continue to secure payment.
+          </p>
 
-          <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-8">
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-8 border border-border space-y-5">
-              <div>
-                <div className="text-xs font-bold tracking-wider uppercase text-primary mb-3">
-                  1. Your Info
-                </div>
-                <label className="block mb-3">
-                  <span className="block text-xs font-semibold text-ink mb-1.5">Email</span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="input-field"
-                  />
-                </label>
-                <label className="block">
-                  <span className="block text-xs font-semibold text-ink mb-1.5">Full name</span>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Jane Doe"
-                    className="input-field"
-                  />
-                </label>
-              </div>
+          {canceled && (
+            <div className="border border-border bg-soft p-4 mb-8 text-sm text-ink">
+              Checkout was cancelled. Your cart has been kept — try again any time.
+            </div>
+          )}
 
-              <div className="pt-5 border-t border-border">
-                <div className="text-xs font-bold tracking-wider uppercase text-primary mb-3">
-                  2. Payment
-                </div>
-                <div className="p-4 rounded-xl bg-soft border border-border text-center">
-                  <Lock size={16} className="text-mid mx-auto mb-2" />
-                  <p className="text-xs text-mid leading-relaxed">
-                    Stripe checkout integration pending.
-                    <br />
-                    <span className="font-semibold text-ink">
-                      Clicking below will save your order as pending
-                    </span>{' '}
-                    — you&apos;ll be contacted to complete payment until Stripe is live.
-                  </p>
-                </div>
-              </div>
-
-              {error && (
-                <div className="text-sm text-coral bg-coral-light p-3 rounded-lg">{error}</div>
-              )}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="btn-primary w-full justify-center disabled:opacity-60"
-              >
-                {submitting ? 'Placing order…' : (
-                  <>
-                    Place Order · ${(subtotalCents / 100).toFixed(2)} <ArrowRight size={14} />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Summary */}
-            <aside className="bg-white rounded-2xl p-6 border border-border h-fit md:sticky md:top-24">
-              <div className="font-bold text-ink mb-4">Order Summary</div>
-              <div className="space-y-3 mb-5 pb-5 border-b border-border">
+          <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-10">
+            {/* Items */}
+            <div>
+              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
+                Items
+              </h2>
+              <div className="border-t border-border">
                 {items.map((it) => (
-                  <div key={it.id} className="flex justify-between text-sm">
-                    <div className="min-w-0 pr-3">
-                      <div className="font-semibold text-ink truncate">{it.name}</div>
-                      <div className="text-xs text-mid">
-                        {it.format} · {it.size}
+                  <div key={it.id} className="flex gap-5 py-5 border-b border-border">
+                    <div className="w-20 h-24 flex-shrink-0 bg-soft overflow-hidden flex items-center justify-center">
+                      {it.imageUrl ? (
+                        <Image
+                          src={it.imageUrl}
+                          alt={it.name}
+                          width={160}
+                          height={200}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      ) : null}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-ink">{it.name}</div>
+                      <div className="text-[12px] text-mid mt-0.5">
+                        {it.format === 'digital' ? 'Digital' : it.size}
+                        {it.isGift && ' · Gift'}
+                        {it.isCustom && ' · Custom'}
                       </div>
                     </div>
-                    <div className="font-semibold text-ink">
+                    <div className="text-sm text-ink whitespace-nowrap">
                       ${(it.priceCents / 100).toFixed(2)}
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between text-sm text-mid mb-2">
-                <span>Subtotal</span>
-                <span>${(subtotalCents / 100).toFixed(2)}</span>
+            </div>
+
+            {/* Summary */}
+            <aside className="md:sticky md:top-32 md:self-start">
+              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
+                Summary
+              </h2>
+              <div className="border-t border-border py-5 space-y-2.5 text-sm">
+                <div className="flex justify-between text-mid">
+                  <span>Subtotal</span>
+                  <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-mid">
+                  <span>Shipping</span>
+                  <span className="text-ink">
+                    {hasPhysical ? `$${(shippingCents / 100).toFixed(2)}` : 'Free (digital)'}
+                  </span>
+                </div>
+                <div className="flex justify-between pt-3 mt-2 border-t border-border">
+                  <span className="text-ink">Total</span>
+                  <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm text-mid mb-3">
-                <span>Shipping</span>
-                <span>Calculated after checkout</span>
-              </div>
-              <div className="flex justify-between pt-3 border-t border-border">
-                <span className="font-bold text-ink">Total</span>
-                <span className="font-extrabold text-ink text-lg">
-                  ${(subtotalCents / 100).toFixed(2)}
-                </span>
-              </div>
+
+              {error && (
+                <p className="text-sm text-accent mb-3">{error}</p>
+              )}
+
+              <button
+                onClick={handleCheckout}
+                disabled={submitting}
+                className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mb-3"
+              >
+                {submitting ? 'Redirecting…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
+              </button>
+              <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
+                <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
+              </p>
+              <p className="text-[12px] text-mid text-center mt-3">
+                Email and shipping address are collected on the next step.
+              </p>
             </aside>
           </div>
+
+          <Link
+            href="/shop"
+            className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-12"
+          >
+            ← Continue shopping
+          </Link>
         </div>
       </section>
+      <Footer />
     </>
   );
 }
