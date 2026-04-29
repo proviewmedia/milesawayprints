@@ -12,7 +12,6 @@ import { PRINT_CONFIGS } from '@/data/prints';
 import { useCart } from '@/contexts/CartContext';
 
 type Format = 'digital' | 'physical';
-type Frame = 'unframed' | 'natural' | 'black' | 'white';
 
 interface Props {
   design: DesignSummary;
@@ -23,7 +22,6 @@ export default function DesignDetail({ design, related }: Props) {
   const physicalSizes = useMemo(() => getPhysicalSizes(design), [design]);
   const [format, setFormat] = useState<Format>('physical');
   const [size, setSize] = useState(physicalSizes[0] ?? '');
-  const [frame, setFrame] = useState<Frame>('unframed');
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
   const [quickShopDesign, setQuickShopDesign] = useState<DesignSummary | null>(null);
@@ -166,39 +164,6 @@ export default function DesignDetail({ design, related }: Props) {
                 </div>
               )}
 
-              {/* Frame */}
-              {format === 'physical' && (
-                <div className="mb-7">
-                  <div className="text-[13px] font-medium text-ink mb-2.5">
-                    Frame: <span className="font-normal text-mid capitalize">{frame}</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(['unframed', 'natural', 'black', 'white'] as Frame[]).map((f) => (
-                      <button
-                        key={f}
-                        onClick={() => setFrame(f)}
-                        className={`relative py-2 rounded-lg border text-xs transition-colors aspect-square flex flex-col items-center justify-end pb-2 ${
-                          frame === f ? 'border-ink' : 'border-border'
-                        }`}
-                      >
-                        <div
-                          className={`absolute inset-2 rounded-sm ${
-                            f === 'unframed'
-                              ? 'bg-soft'
-                              : f === 'natural'
-                              ? 'bg-warm-light border border-warm/40'
-                              : f === 'black'
-                              ? 'bg-ink'
-                              : 'bg-paper border border-border'
-                          }`}
-                        />
-                        <span className="relative text-[11px] text-mid capitalize">{f}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Gift toggle */}
               <label className="flex items-start gap-3 mb-7 cursor-pointer">
                 <input
@@ -271,15 +236,6 @@ export default function DesignDetail({ design, related }: Props) {
                   }
                 >
                   Made to order. Physical prints ship within 3–5 business days, with tracked delivery worldwide. Free returns within 30 days. Digital files are available for download immediately after purchase.
-                </ExpandSection>
-                <ExpandSection
-                  title="Frames and hanging"
-                  open={openSection === 'frames'}
-                  onToggle={() =>
-                    setOpenSection(openSection === 'frames' ? null : 'frames')
-                  }
-                >
-                  Optional frames are handcrafted from sustainably-sourced wood, with UV-blocking glazing and acid-free matting. Every framed print arrives ready to hang.
                 </ExpandSection>
               </div>
             </div>

@@ -60,7 +60,7 @@ export default function ShopClient({ designs, collections }: Props) {
             Shop
           </h1>
           <p className="text-mid text-base md:text-lg">
-            {designs.length} prints, ready to ship. Pick digital or physical, choose your size, done.
+            Ready-to-ship designs, or start a custom print of any place — stadium, airport, marathon, golf course, city, or skyline.
           </p>
         </div>
       </section>
