@@ -94,9 +94,9 @@ export default function CheckoutPage() {
             <span className={step === 'paying' ? 'text-ink' : 'text-mid'}>2. Pay</span>
           </div>
 
-          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start">
-            {/* Left — cart + summary, always visible */}
-            <div>
+          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start md:h-[calc(100vh-220px)]">
+            {/* Left — cart + summary, scrolls independently */}
+            <div className="md:h-full md:overflow-y-auto md:pr-4">
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
                 Items
               </h2>
@@ -163,8 +163,8 @@ export default function CheckoutPage() {
               </Link>
             </div>
 
-            {/* Right — review CTA OR embedded payment */}
-            <aside className="md:sticky md:top-32 md:self-start">
+            {/* Right — review CTA OR embedded payment, scrolls independently */}
+            <aside className="md:h-full md:overflow-y-auto md:pr-1">
               {step === 'review' && (
                 <>
                   <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
