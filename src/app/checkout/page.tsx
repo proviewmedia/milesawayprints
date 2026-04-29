@@ -28,6 +28,29 @@ export default function CheckoutPage() {
   const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
   const totalCents = subtotalCents + shippingCents;
 
+  // Lock the body scroll while on /checkout so only the columns scroll.
+  useEffect(() => {
+    const mql = typeof window !== 'undefined'
+      ? window.matchMedia('(min-width: 768px)')
+      : null;
+    const apply = () => {
+      if (mql && mql.matches) {
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
+    };
+    apply();
+    mql?.addEventListener('change', apply);
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      mql?.removeEventListener('change', apply);
+    };
+  }, []);
+
   const itemsRef = useRef(items);
   useEffect(() => {
     if (itemsRef.current.length === 0) return;
@@ -85,7 +108,7 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <section className="pt-28 pb-10 md:pt-0 md:pb-0 md:mt-[96px] md:h-[calc(100vh-96px)] md:overflow-hidden">
+      <section className="pt-28 pb-10 md:pt-0 md:pb-0 md:fixed md:inset-x-0 md:top-[96px] md:bottom-0 md:overflow-hidden">
         <div className="h-full max-w-[1200px] mx-auto px-6 flex flex-col">
           <h1 className="flex-shrink-0 text-3xl md:text-4xl font-medium tracking-tight text-ink leading-[1.05] py-6 md:py-7">
             Checkout
