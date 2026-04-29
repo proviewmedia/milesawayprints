@@ -9,7 +9,7 @@ import { PRINT_CONFIGS, PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
 
-const CATEGORY_ORDER: PrintType[] = ['skyline', 'f1', 'golf', 'stadium', 'airport', 'marathon', 'city'];
+const CATEGORY_ORDER: PrintType[] = ['golf', 'stadium', 'airport', 'marathon', 'city'];
 
 export const dynamic = 'force-dynamic';
 
