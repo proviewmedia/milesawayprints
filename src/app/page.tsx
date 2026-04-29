@@ -21,8 +21,10 @@ async function getReviews() {
   return data ?? [];
 }
 
+export const dynamic = 'force-dynamic';
+
 async function getFeaturedDesigns(): Promise<DesignSummary[]> {
-  const { data } = await supabase
+  const { data: featured } = await supabase
     .from('gallery_items')
     .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('active', true)
@@ -30,21 +32,20 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
     .order('sort_order', { ascending: true })
     .limit(4);
 
-  if (data && data.length > 0) {
-    return data.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
+  if (featured && featured.length > 0) {
+    return featured.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
   }
 
-  // Fallback: first design from each type
-  return CATEGORY_ORDER.slice(0, 4).map((type) => {
-    const it = DEFAULT_GALLERY[type][0];
-    return {
-      slug: it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
-      name: it.name,
-      location: it.location,
-      type,
-      values: it.values,
-    };
-  });
+  // Fall back to any active design (no flagged-featured items yet)
+  const { data } = await supabase
+    .from('gallery_items')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
+    .eq('active', true)
+    .order('sort_order', { ascending: true })
+    .limit(4);
+
+  if (!data) return [];
+  return data.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
 }
 
 export default async function HomePage() {
