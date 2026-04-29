@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,11 +12,15 @@ const SHIPPING_FLAT_CENTS = 500;
 
 export default function CheckoutPage() {
   const { items, subtotalCents, clear } = useCart();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const canceled = searchParams.get('canceled') === '1';
+  const [canceled, setCanceled] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('canceled') === '1') setCanceled(true);
+  }, []);
 
   const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
   const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
@@ -35,7 +38,7 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error || 'Checkout failed');
       clear();
-      window.location.href = data.url;
+      if (typeof window !== 'undefined') window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
       setSubmitting(false);
