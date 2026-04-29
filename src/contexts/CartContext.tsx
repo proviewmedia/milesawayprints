@@ -12,6 +12,8 @@ export interface CartItem {
   format: 'digital' | 'physical';
   size: string;
   priceCents: number;
+  /** Real product image (Printful sync). Falls back to SVG preview if absent. */
+  imageUrl?: string;
   isCustom?: boolean;
   customization?: Record<string, string>;
   isGift?: boolean;

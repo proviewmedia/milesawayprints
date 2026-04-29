@@ -56,6 +56,7 @@ export default function QuickShopModal({ design, onClose }: Props) {
       format,
       size,
       priceCents,
+      imageUrl: design.image_url,
     });
     onClose();
   };

@@ -42,6 +42,7 @@ export default function DesignDetail({ design, related }: Props) {
       format,
       size,
       priceCents,
+      imageUrl: design.image_url,
       isGift,
       giftMessage: isGift ? giftMessage : undefined,
     });
