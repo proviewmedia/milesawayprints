@@ -57,8 +57,8 @@ export default async function HomePage() {
       {/* Hero — split-screen, restrained type, lifestyle placeholder */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-            <div>
+          <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-10 md:gap-12 items-stretch">
+            <div className="flex flex-col justify-center py-4">
               <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.02] mb-5">
                 The places<br />you love.<br />Printed.
               </h1>
@@ -83,17 +83,22 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right — lifestyle placeholder. Replace src/object once Melvin shares photos. */}
-            <div className="relative bg-soft aspect-[5/4] md:aspect-[4/5] md:max-h-[480px] flex items-center justify-center overflow-hidden">
-              <div className="grid grid-cols-2 gap-5 w-[80%] max-w-[380px]">
-                <div className="pt-8">
+            {/* Right — lifestyle placeholder, landscape, fills the column. Replace once photos arrive. */}
+            <div className="relative bg-soft aspect-[5/4] md:aspect-auto md:min-h-[460px] flex items-center justify-center overflow-hidden">
+              <div className="grid grid-cols-3 gap-4 md:gap-6 w-[88%] py-8">
+                <div className="pt-6">
                   <WallFrame compact>
                     <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
                   </WallFrame>
                 </div>
-                <div className="pb-8">
+                <div className="pt-12">
                   <WallFrame compact>
                     <PrintPreview type="golf" values={DEFAULT_GALLERY.golf[0].values} />
+                  </WallFrame>
+                </div>
+                <div className="pt-6">
+                  <WallFrame compact>
+                    <PrintPreview type="airport" values={DEFAULT_GALLERY.airport[0].values} />
                   </WallFrame>
                 </div>
               </div>
