@@ -96,12 +96,12 @@ export default function CheckoutPage() {
           </h1>
 
           <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 items-start md:h-[calc(100vh-220px)]">
-            {/* Left — order summary, scrolls independently */}
-            <div className="md:h-full md:overflow-y-auto md:pr-4">
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
+            {/* Left — order summary, header sticky, body scrolls */}
+            <div className="md:h-full md:flex md:flex-col">
+              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border md:flex-shrink-0">
                 Order
               </h2>
-              <div className="border-t border-border">
+              <div className="md:flex-1 md:overflow-y-auto md:pr-4 pt-1">
                 {items.map((it) => (
                   <div key={it.id} className="flex gap-5 py-5 border-b border-border">
                     <div className="w-20 h-24 flex-shrink-0 bg-soft overflow-hidden flex items-center justify-center">
@@ -129,42 +129,42 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 ))}
-              </div>
 
-              <div className="mt-8 space-y-2.5 text-sm">
-                <div className="flex justify-between text-mid">
-                  <span>Subtotal</span>
-                  <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
+                <div className="mt-8 space-y-2.5 text-sm">
+                  <div className="flex justify-between text-mid">
+                    <span>Subtotal</span>
+                    <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-mid">
+                    <span>Shipping</span>
+                    <span className="text-ink">
+                      {hasPhysical ? `$${(shippingCents / 100).toFixed(2)}` : 'Free (digital)'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-3 mt-2 border-t border-border">
+                    <span className="text-ink">Total</span>
+                    <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-mid">
-                  <span>Shipping</span>
-                  <span className="text-ink">
-                    {hasPhysical ? `$${(shippingCents / 100).toFixed(2)}` : 'Free (digital)'}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-3 mt-2 border-t border-border">
-                  <span className="text-ink">Total</span>
-                  <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
-                </div>
-              </div>
 
-              <Link
-                href="/shop"
-                className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-8"
-              >
-                ← Continue shopping
-              </Link>
-              <p className="text-[12px] text-mid mt-3">
-                Need to change your order? Open the cart from the navbar to edit items.
-              </p>
+                <Link
+                  href="/shop"
+                  className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-8"
+                >
+                  ← Continue shopping
+                </Link>
+                <p className="text-[12px] text-mid mt-3">
+                  Need to change your order? Open the cart from the navbar to edit items.
+                </p>
+              </div>
             </div>
 
-            {/* Right — embedded payment, scrolls independently */}
-            <aside className="md:h-full md:overflow-y-auto md:pr-1">
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
+            {/* Right — embedded payment, header sticky, body scrolls */}
+            <aside className="md:h-full md:flex md:flex-col">
+              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border md:flex-shrink-0">
                 Payment
               </h2>
-              <div className="border-t border-border pt-6">
+              <div className="md:flex-1 md:overflow-y-auto md:pr-1 pt-6">
                 {error && (
                   <p className="text-sm text-accent mb-4">{error}</p>
                 )}
