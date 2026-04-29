@@ -55,14 +55,14 @@ export default async function HomePage() {
       <Navbar />
 
       {/* Hero — split-screen, restrained type, lifestyle placeholder */}
-      <section className="pt-32 md:pt-36">
+      <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center min-h-[calc(100vh-200px)]">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
             <div>
-              <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-ink leading-[1.02] mb-6">
+              <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.02] mb-5">
                 The places<br />you love.<br />Printed.
               </h1>
-              <p className="text-base md:text-lg text-mid mb-8 max-w-md leading-relaxed">
+              <p className="text-base md:text-lg text-mid mb-7 max-w-md leading-relaxed">
                 Custom map and skyline prints, made to last. Stadiums, airports, marathons, golf courses, and city streets — printed on archival paper.
               </p>
               <div className="flex flex-wrap items-center gap-5">
@@ -73,7 +73,7 @@ export default async function HomePage() {
                   Create custom
                 </Link>
               </div>
-              <div className="flex items-center gap-2 mt-10">
+              <div className="flex items-center gap-2 mt-7">
                 <div className="flex gap-0.5 text-ink">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
@@ -84,20 +84,20 @@ export default async function HomePage() {
             </div>
 
             {/* Right — lifestyle placeholder. Replace src/object once Melvin shares photos. */}
-            <div className="relative bg-soft aspect-[4/5] md:aspect-auto md:h-[80vh] flex items-center justify-center overflow-hidden">
-              <div className="grid grid-cols-2 gap-5 w-[80%] max-w-[420px]">
-                <div className="pt-10">
+            <div className="relative bg-soft aspect-[5/4] md:aspect-[4/5] md:max-h-[480px] flex items-center justify-center overflow-hidden">
+              <div className="grid grid-cols-2 gap-5 w-[80%] max-w-[380px]">
+                <div className="pt-8">
                   <WallFrame compact>
                     <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
                   </WallFrame>
                 </div>
-                <div className="pb-10">
+                <div className="pb-8">
                   <WallFrame compact>
                     <PrintPreview type="golf" values={DEFAULT_GALLERY.golf[0].values} />
                   </WallFrame>
                 </div>
               </div>
-              <span className="absolute bottom-4 right-4 text-[10px] uppercase tracking-wider text-mid">
+              <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-wider text-mid">
                 Lifestyle photo placeholder
               </span>
             </div>
