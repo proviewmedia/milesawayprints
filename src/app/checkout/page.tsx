@@ -1,26 +1,30 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Lock } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout,
+} from '@stripe/react-stripe-js';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
 const SHIPPING_FLAT_CENTS = 500;
 
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
+
 export default function CheckoutPage() {
   const { items, subtotalCents, clear } = useCart();
-  const [canceled, setCanceled] = useState(false);
+  const [step, setStep] = useState<'review' | 'paying'>('review');
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('canceled') === '1') setCanceled(true);
-  }, []);
 
   const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
   const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
@@ -36,14 +40,48 @@ export default function CheckoutPage() {
         body: JSON.stringify({ items }),
       });
       const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error || 'Checkout failed');
+      if (!res.ok || !data.clientSecret) throw new Error(data.detail || data.error || 'Checkout failed');
+      setClientSecret(data.clientSecret);
+      setStep('paying');
       clear();
-      if (typeof window !== 'undefined') window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
       setSubmitting(false);
     }
   };
+
+  const fetchClientSecret = useCallback(() => {
+    return Promise.resolve(clientSecret ?? '');
+  }, [clientSecret]);
+
+  if (step === 'paying' && clientSecret) {
+    return (
+      <>
+        <Navbar />
+        <section className="pt-28 md:pt-32 pb-20 min-h-screen">
+          <div className="max-w-[900px] mx-auto px-6">
+            <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-2">
+              Payment
+            </h1>
+            <p className="text-mid mb-8 flex items-center gap-1.5">
+              <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
+            </p>
+
+            <div id="checkout">
+              <EmbeddedCheckoutProvider
+                stripe={stripePromise}
+                options={{ fetchClientSecret }}
+              >
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -77,14 +115,7 @@ export default function CheckoutPage() {
             Confirm the items below, then continue to secure payment.
           </p>
 
-          {canceled && (
-            <div className="border border-border bg-soft p-4 mb-8 text-sm text-ink">
-              Checkout was cancelled. Your cart has been kept — try again any time.
-            </div>
-          )}
-
           <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-10">
-            {/* Items */}
             <div>
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
                 Items
@@ -120,7 +151,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Summary */}
             <aside className="md:sticky md:top-32 md:self-start">
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
                 Summary
@@ -151,7 +181,7 @@ export default function CheckoutPage() {
                 disabled={submitting}
                 className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mb-3"
               >
-                {submitting ? 'Redirecting…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
+                {submitting ? 'Loading payment…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
               </button>
               <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
                 <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
