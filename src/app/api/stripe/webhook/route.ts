@@ -75,6 +75,19 @@ export async function POST(req: Request) {
         status: 'paid',
       };
 
+      // If a Supabase auth user already exists for this email, link the order
+      // to it now so /account immediately shows it. (If the customer creates
+      // their account later via magic link, the link_orders_to_profile trigger
+      // will back-fill instead.)
+      const { data: existingProfile } = await admin
+        .from('profiles')
+        .select('id')
+        .eq('email', customerEmail)
+        .maybeSingle();
+      if (existingProfile?.id) {
+        update.user_id = existingProfile.id;
+      }
+
       if (shipping?.address) {
         update.shipping_name = shipping.name ?? customerName;
         update.shipping_address_line1 = shipping.address.line1 ?? null;
