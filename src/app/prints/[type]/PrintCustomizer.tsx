@@ -34,7 +34,7 @@ export default function PrintCustomizer({ config, gallery }: Props) {
   return (
     <>
       {/* Category pill nav */}
-      <section className="pt-24 pb-6 bg-white border-b border-border">
+      <section className="pt-32 md:pt-36 pb-6 bg-paper border-b border-border">
         <div className="max-w-[1280px] mx-auto px-6 overflow-x-auto">
           <div className="flex gap-2 whitespace-nowrap">
             {OTHER_CATEGORIES.map((t) => {
@@ -63,7 +63,7 @@ export default function PrintCustomizer({ config, gallery }: Props) {
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-12">
             {/* Preview — sticky on desktop */}
-            <div className="md:sticky md:top-24 md:self-start">
+            <div className="md:sticky md:top-32 md:self-start">
               <div
                 className="rounded-2xl p-[8%] shadow-[0_20px_60px_rgba(26,26,46,0.12)]"
                 style={{ background: 'linear-gradient(180deg, #faf8f3 0%, #f4efe4 100%)' }}

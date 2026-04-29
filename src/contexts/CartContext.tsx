@@ -12,6 +12,8 @@ export interface CartItem {
   format: 'digital' | 'physical';
   size: string;
   priceCents: number;
+  /** Real product image (Printful sync). Falls back to SVG preview if absent. */
+  imageUrl?: string;
   isCustom?: boolean;
   customization?: Record<string, string>;
   isGift?: boolean;
@@ -33,7 +35,7 @@ interface CartContextValue extends CartState {
   count: number;
 }
 
-const STORAGE_KEY = 'map-cart-v1';
+const STORAGE_KEY = 'map-cart-v2';
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {

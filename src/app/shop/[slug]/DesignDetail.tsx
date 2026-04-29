@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ArrowLeft, Download, Truck, Gift, MapPin, Tag } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Star, Truck, ShieldCheck, Globe } from 'lucide-react';
 import WallFrame from '@/components/WallFrame';
 import PrintPreview from '@/components/PrintPreview';
 import DesignCard from '@/components/DesignCard';
@@ -20,12 +20,13 @@ interface Props {
 
 export default function DesignDetail({ design, related }: Props) {
   const physicalSizes = useMemo(() => getPhysicalSizes(design), [design]);
-  const [format, setFormat] = useState<Format>('digital');
+  const [format, setFormat] = useState<Format>('physical');
   const [size, setSize] = useState(physicalSizes[0] ?? '');
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
   const [quickShopDesign, setQuickShopDesign] = useState<DesignSummary | null>(null);
   const [added, setAdded] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>('about');
 
   const { addItem } = useCart();
 
@@ -41,6 +42,7 @@ export default function DesignDetail({ design, related }: Props) {
       format,
       size,
       priceCents,
+      imageUrl: design.image_url,
       isGift,
       giftMessage: isGift ? giftMessage : undefined,
     });
@@ -53,136 +55,127 @@ export default function DesignDetail({ design, related }: Props) {
   return (
     <>
       {/* Breadcrumb */}
-      <section className="pt-24 pb-4 bg-white border-b border-border">
-        <div className="max-w-[1280px] mx-auto px-6">
+      <section className="pt-28 md:pt-32 pb-2">
+        <div className="max-w-[1400px] mx-auto px-6">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-mid hover:text-ink"
+            className="inline-flex items-center gap-1.5 text-[13px] text-mid hover:text-ink"
           >
-            <ArrowLeft size={12} /> Back to shop
+            <ArrowLeft size={14} strokeWidth={1.75} /> Back to shop
           </Link>
         </div>
       </section>
 
       {/* Main product */}
-      <section className="py-10 md:py-16">
-        <div className="max-w-[1280px] mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
-            {/* Preview */}
-            <div className="md:sticky md:top-28 md:self-start">
-              <WallFrame>
+      <section className="pb-16 md:pb-24">
+        <div className="max-w-[1400px] mx-auto px-6">
+          <div className="grid md:grid-cols-[1.2fr_1fr] gap-10 lg:gap-16">
+            {/* Preview — Printful images fill the tile; SVG previews sit inside it */}
+            <div className="md:sticky md:top-32 md:self-start">
+              <div className="bg-soft min-h-[60vh] flex items-center justify-center overflow-hidden">
                 {design.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={design.image_url}
                     alt={design.name}
-                    className="w-full aspect-[3/4] bg-white rounded-sm object-contain shadow-xl"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <PrintPreview type={design.type} values={design.values} />
+                  <div className="w-[70%] max-w-[420px] py-12">
+                    <WallFrame>
+                      <PrintPreview type={design.type} values={design.values} />
+                    </WallFrame>
+                  </div>
                 )}
-              </WallFrame>
-              <p className="text-center text-xs text-light-mid mt-4 italic">
-                Shown framed on wall — frame not included with physical order.
-              </p>
+              </div>
             </div>
 
             {/* Details */}
             <div>
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase mb-4"
-                style={{ background: cfg.badgeColor.bg, color: cfg.badgeColor.text }}
+              <div className="flex items-baseline justify-between gap-3 mb-1">
+                <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink">
+                  {design.name}
+                </h1>
+                <div className="text-2xl md:text-3xl font-medium text-ink whitespace-nowrap">
+                  ${price}
+                </div>
+              </div>
+              <Link
+                href={`/prints/${design.type}`}
+                className="text-sm text-mid underline underline-offset-2 hover:text-ink"
               >
                 {cfg.detailsLabel}
-              </div>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-ink leading-tight mb-2">
-                {design.name}
-              </h1>
-              <p className="inline-flex items-center gap-1.5 text-mid mb-5">
-                <MapPin size={14} /> {design.location}
-              </p>
-
-              {design.description && (
-                <p className="text-mid leading-relaxed mb-6">{design.description}</p>
-              )}
-
-              {design.tags && design.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-8">
-                  {design.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="inline-flex items-center gap-1 bg-soft text-mid text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider"
-                    >
-                      <Tag size={10} /> {t}
-                    </span>
+              </Link>
+              <div className="flex items-center gap-2 mt-3 mb-8">
+                <div className="flex gap-0.5 text-ink">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={12} fill="currentColor" strokeWidth={0} />
                   ))}
                 </div>
-              )}
+                <span className="text-[13px] text-mid">4.9 / 5</span>
+              </div>
 
-              {/* Format */}
-              <div className="mb-6">
-                <div className="text-xs font-semibold text-ink mb-2">Format</div>
-                <div className="grid grid-cols-2 gap-2">
-                  <FormatOption
-                    active={format === 'digital'}
-                    onClick={() => setFormat('digital')}
-                    icon={<Download size={14} />}
-                    title="Digital"
-                    sub="Download instantly. Print anywhere."
-                  />
-                  <FormatOption
-                    active={format === 'physical'}
+              {/* Material */}
+              <div className="mb-7">
+                <div className="text-[13px] font-medium text-ink mb-2.5">Material</div>
+                <div className="flex gap-2">
+                  <button
                     onClick={() => setFormat('physical')}
-                    icon={<Truck size={14} />}
-                    title="Physical"
-                    sub="Museum-quality print, shipped."
-                  />
+                    className={`px-5 py-3 rounded-lg border text-sm transition-colors ${
+                      format === 'physical' ? 'border-ink text-ink' : 'border-border text-mid hover:text-ink'
+                    }`}
+                  >
+                    Art print
+                  </button>
+                  <button
+                    onClick={() => setFormat('digital')}
+                    className={`px-5 py-3 rounded-lg border text-sm transition-colors ${
+                      format === 'digital' ? 'border-ink text-ink' : 'border-border text-mid hover:text-ink'
+                    }`}
+                  >
+                    Digital
+                  </button>
                 </div>
               </div>
 
               {/* Size */}
               {format === 'physical' && physicalSizes.length > 0 && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-semibold text-ink">Size</div>
+                <div className="mb-7">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="text-[13px] font-medium text-ink">
+                      Size: <span className="font-normal text-mid">{formatSize(size)}</span>
+                    </div>
+                    <button className="text-[13px] text-ink underline underline-offset-2 hover:opacity-70">
+                      Size guide
+                    </button>
                   </div>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
-                    {physicalSizes.map((s) => {
-                      const cents = design.printful_prices?.[s];
-                      return (
-                        <button
-                          key={s}
-                          onClick={() => setSize(s)}
-                          className={`py-2.5 rounded-lg text-xs font-semibold border-[1.5px] transition-all flex flex-col items-center gap-0.5 ${
-                            size === s
-                              ? 'border-primary bg-primary-light text-primary'
-                              : 'border-border bg-white text-ink hover:border-primary/50'
-                          }`}
-                        >
-                          <span>{formatSize(s)}</span>
-                          {cents !== undefined && (
-                            <span className="text-[10px] opacity-70">${(cents / 100).toFixed(2)}</span>
-                          )}
-                        </button>
-                      );
-                    })}
+                  <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
+                    {physicalSizes.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setSize(s)}
+                        className={`py-3 rounded-lg border text-sm transition-colors ${
+                          size === s ? 'border-ink text-ink' : 'border-border text-mid hover:text-ink'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
 
               {/* Gift toggle */}
-              <label className="flex items-start gap-3 p-4 bg-soft rounded-xl cursor-pointer mb-6">
+              <label className="flex items-start gap-3 mb-7 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isGift}
                   onChange={(e) => setIsGift(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-primary"
+                  className="mt-0.5 w-4 h-4 accent-ink"
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-                    <Gift size={14} className="text-coral" /> This is a gift
-                  </div>
-                  <p className="text-xs text-mid mt-1">
+                  <div className="text-sm text-ink">This is a gift</div>
+                  <p className="text-[13px] text-mid mt-0.5">
                     Add a personal message. We&apos;ll hide the price on the recipient&apos;s copy.
                   </p>
                   {isGift && (
@@ -196,64 +189,71 @@ export default function DesignDetail({ design, related }: Props) {
                 </div>
               </label>
 
-              {/* Price + CTA */}
-              <div className="flex items-center justify-between p-5 bg-ink text-white rounded-2xl">
-                <div>
-                  <div className="text-[10px] tracking-widest uppercase text-white/60">Total</div>
-                  <div className="text-3xl font-extrabold">${price}</div>
-                  <div className="text-[11px] text-white/50 mt-0.5">
-                    {format === 'digital' ? 'Instant download after purchase' : 'Ships in 3–5 business days'}
-                  </div>
+              {/* Add to cart — full-width black pill */}
+              <button
+                onClick={handleAdd}
+                className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors mb-3"
+              >
+                {added ? 'Added ✓' : `Add to cart · $${price}`}
+              </button>
+              <p className="text-center text-[13px] text-mid mb-8">
+                {format === 'digital'
+                  ? 'Instant download after purchase'
+                  : 'Made-to-order · Ships in 3–5 business days'}
+              </p>
+
+              {/* Trust row */}
+              <div className="grid grid-cols-3 gap-3 bg-soft -mx-2 p-5 mb-2 text-center">
+                <div className="flex flex-col items-center gap-1.5">
+                  <Truck size={16} strokeWidth={1.5} className="text-ink" />
+                  <span className="text-[11px] text-ink">30 day returns</span>
                 </div>
-                <button
-                  onClick={handleAdd}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all ${
-                    added
-                      ? 'bg-mint text-white'
-                      : 'bg-white text-ink hover:bg-primary hover:text-white'
-                  }`}
-                >
-                  {added ? 'Added ✓' : (
-                    <>
-                      Add to Cart <ArrowRight size={14} />
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col items-center gap-1.5">
+                  <ShieldCheck size={16} strokeWidth={1.5} className="text-ink" />
+                  <span className="text-[11px] text-ink">Museum quality</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <Globe size={16} strokeWidth={1.5} className="text-ink" />
+                  <span className="text-[11px] text-ink">Worldwide shipping</span>
+                </div>
               </div>
 
-              {/* Custom CTA */}
-              <div className="mt-8 p-5 border border-border rounded-2xl">
-                <div className="text-xs font-bold uppercase tracking-wider text-primary mb-1">
-                  Want something different?
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm text-mid">
-                    Create a custom {design.type} print with your own location and details.
-                  </p>
-                  <Link
-                    href={`/prints/${design.type}`}
-                    className="text-xs font-semibold text-primary whitespace-nowrap hover:underline inline-flex items-center gap-1"
-                  >
-                    Create Custom <ArrowRight size={12} />
-                  </Link>
-                </div>
+              {/* Expandable info sections */}
+              <div className="mt-6 border-t border-border">
+                <ExpandSection
+                  title="About the piece"
+                  open={openSection === 'about'}
+                  onToggle={() =>
+                    setOpenSection(openSection === 'about' ? null : 'about')
+                  }
+                >
+                  {design.description ?? `A custom ${cfg.detailsLabel.toLowerCase()} print of ${design.name}. Each piece is printed on archival fine-art paper for a gallery-quality finish.`}
+                </ExpandSection>
+                <ExpandSection
+                  title="Delivery and returns"
+                  open={openSection === 'shipping'}
+                  onToggle={() =>
+                    setOpenSection(openSection === 'shipping' ? null : 'shipping')
+                  }
+                >
+                  Made to order. Physical prints ship within 3–5 business days, with tracked delivery worldwide. Free returns within 30 days. Digital files are available for download immediately after purchase.
+                </ExpandSection>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Related designs */}
+      {/* Related */}
       {related.length > 0 && (
-        <section className="py-16 bg-soft border-t border-border">
-          <div className="max-w-[1280px] mx-auto px-6">
+        <section className="py-16 md:py-24 border-t border-border">
+          <div className="max-w-[1400px] mx-auto px-6">
             <div className="mb-8">
-              <div className="section-label">Keep browsing</div>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-ink">
+              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
                 You might also like
               </h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
               {related.map((d) => (
                 <DesignCard key={d.slug} design={d} onQuickShop={setQuickShopDesign} />
               ))}
@@ -267,31 +267,33 @@ export default function DesignDetail({ design, related }: Props) {
   );
 }
 
-function FormatOption({
-  active,
-  onClick,
-  icon,
+function ExpandSection({
   title,
-  sub,
+  open,
+  onToggle,
+  children,
 }: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
   title: string;
-  sub: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className={`p-4 rounded-xl border-[1.5px] text-left transition-all ${
-        active ? 'border-primary bg-primary-light' : 'border-border bg-white hover:border-primary/50'
-      }`}
-    >
-      <div className={`flex items-center gap-2 ${active ? 'text-primary' : 'text-ink'}`}>
-        {icon}
-        <span className="font-bold text-sm">{title}</span>
-      </div>
-      <div className="text-xs text-mid mt-1">{sub}</div>
-    </button>
+    <div className="border-b border-border">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between py-4 text-left text-sm text-ink hover:opacity-70"
+      >
+        {title}
+        <ChevronDown
+          size={16}
+          strokeWidth={1.5}
+          className={`transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+        <div className="pb-4 text-[13px] text-mid leading-relaxed">{children}</div>
+      )}
+    </div>
   );
 }

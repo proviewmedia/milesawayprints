@@ -3,14 +3,16 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ShopClient from './ShopClient';
 import { supabase } from '@/lib/supabase';
-import { DEFAULT_GALLERY, PrintType } from '@/data/prints';
+import { PrintType } from '@/data/prints';
 import { DesignSummary, Collection, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 
 export const metadata: Metadata = {
   title: 'Shop All Prints',
   description:
-    'Browse every design in the Miles Away Prints collection. Golf courses, stadiums, airports, marathons, and cities — ready to ship.',
+    'Browse every design in the Miles Away Prints collection. Skylines, F1 circuits, golf courses, stadiums, airports, marathons, and cities — ready to ship.',
 };
+
+export const dynamic = 'force-dynamic';
 
 async function getAllDesigns(): Promise<DesignSummary[]> {
   const { data } = await supabase
@@ -19,23 +21,7 @@ async function getAllDesigns(): Promise<DesignSummary[]> {
     .eq('active', true)
     .order('sort_order', { ascending: true });
 
-  if (!data || data.length === 0) {
-    // Fallback to seed data (with synthetic slugs) if the table has no rows yet
-    const all: DesignSummary[] = [];
-    (Object.keys(DEFAULT_GALLERY) as PrintType[]).forEach((type) => {
-      DEFAULT_GALLERY[type].forEach((item) => {
-        all.push({
-          slug: item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
-          name: item.name,
-          location: item.location,
-          type,
-          values: item.values,
-        });
-      });
-    });
-    return all;
-  }
-
+  if (!data) return [];
   return data.map((row: GalleryItemWithMeta) =>
     toDesignSummary(row, row.print_type_slug as PrintType),
   );

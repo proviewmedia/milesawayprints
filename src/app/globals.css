@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,39 +10,45 @@
   }
 
   body {
-    @apply font-sans text-ink antialiased;
+    @apply font-sans text-ink antialiased bg-paper;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
   ::selection {
-    @apply bg-primary-light text-primary;
+    @apply bg-ink text-paper;
   }
 }
 
 @layer components {
+  /* Primary CTA — black pill, white text, no shadow halo */
   .btn-primary {
-    @apply inline-flex items-center gap-2 bg-primary text-white px-8 py-4 rounded-full font-semibold text-sm
-           transition-all duration-200 hover:bg-primary-dark hover:-translate-y-0.5
-           hover:shadow-[0_8px_24px_rgba(79,109,245,0.3)];
+    @apply inline-flex items-center justify-center gap-2 bg-ink text-paper px-7 py-3.5 rounded-full font-medium text-sm
+           transition-colors duration-200 hover:bg-black;
   }
 
+  /* Secondary — white pill with thin border */
   .btn-secondary {
-    @apply inline-flex items-center gap-2 bg-soft text-ink px-8 py-4 rounded-full font-semibold text-sm
-           border-[1.5px] border-border transition-all duration-200
-           hover:border-primary hover:text-primary;
+    @apply inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm
+           border border-ink transition-colors duration-200 hover:bg-soft;
+  }
+
+  /* Ghost / nav links */
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:opacity-70 transition-opacity;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border-[1.5px] border-border rounded-xl font-sans text-sm font-medium text-ink
-           outline-none transition-colors duration-200 placeholder:text-light-mid placeholder:font-normal
-           focus:border-primary focus:ring-2 focus:ring-primary-light;
+    @apply w-full px-4 py-3 border border-border rounded-lg font-sans text-sm font-normal text-ink
+           outline-none transition-colors duration-200 placeholder:text-light-mid
+           focus:border-ink;
   }
 
   .section-label {
-    @apply text-xs font-bold tracking-widest uppercase text-primary mb-2.5;
+    @apply text-xs font-medium tracking-wide uppercase text-mid mb-3;
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-extrabold tracking-tight text-ink leading-tight mb-3;
+    @apply text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-3;
   }
 }
 

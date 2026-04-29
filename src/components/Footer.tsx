@@ -2,52 +2,55 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-soft">
-      <div className="max-w-[1280px] mx-auto px-6 pt-14 pb-10">
-        <div className="flex flex-col md:flex-row justify-between gap-10">
+    <footer className="border-t border-border bg-paper">
+      <div className="max-w-[1400px] mx-auto px-6 pt-16 pb-10">
+        <div className="grid md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
           <div>
-            <Link href="/" className="text-[17px] font-extrabold text-ink no-underline">
-              Miles Away <span className="text-primary">Prints</span>
+            <Link href="/" className="text-[18px] font-medium tracking-tight text-ink no-underline">
+              Miles Away <span className="font-normal text-mid">Prints</span>
             </Link>
-            <p className="text-[13px] text-mid mt-2 max-w-[260px] leading-relaxed">
-              Custom location art prints designed in Las Vegas. Your favorite places, beautifully printed.
+            <p className="text-sm text-mid mt-4 max-w-[280px] leading-relaxed">
+              Custom location art prints. Stadiums, airports, marathons, golf courses, city streets — printed on archival paper, delivered worldwide.
             </p>
           </div>
 
-          <div className="flex gap-12 flex-wrap">
-            <div>
-              <h4 className="text-xs font-bold tracking-wider uppercase text-ink mb-3.5">Prints</h4>
-              <div className="space-y-2.5">
-                <Link href="/prints/stadium" className="block text-[13px] text-mid hover:text-primary transition-colors">Stadiums</Link>
-                <Link href="/prints/airport" className="block text-[13px] text-mid hover:text-primary transition-colors">Airports</Link>
-                <Link href="/prints/marathon" className="block text-[13px] text-mid hover:text-primary transition-colors">Marathons</Link>
-                <Link href="/prints/city" className="block text-[13px] text-mid hover:text-primary transition-colors">City Streets</Link>
-                <Link href="/prints/golf" className="block text-[13px] text-mid hover:text-primary transition-colors">Golf Courses</Link>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold tracking-wider uppercase text-ink mb-3.5">Help</h4>
-              <div className="space-y-2.5">
-                <Link href="/faq" className="block text-[13px] text-mid hover:text-primary transition-colors">FAQ</Link>
-                <Link href="/shipping" className="block text-[13px] text-mid hover:text-primary transition-colors">Shipping</Link>
-                <Link href="/returns" className="block text-[13px] text-mid hover:text-primary transition-colors">Returns</Link>
-                <Link href="/contact" className="block text-[13px] text-mid hover:text-primary transition-colors">Contact</Link>
-              </div>
-            </div>
-            <div>
-              <h4 className="text-xs font-bold tracking-wider uppercase text-ink mb-3.5">Follow</h4>
-              <div className="space-y-2.5">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-mid hover:text-primary transition-colors">Instagram</a>
-                <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-mid hover:text-primary transition-colors">Pinterest</a>
-                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-mid hover:text-primary transition-colors">TikTok</a>
-                <a href="https://www.etsy.com/shop/MilesAwayPrints" target="_blank" rel="noopener noreferrer" className="block text-[13px] text-mid hover:text-primary transition-colors">Etsy Shop</a>
-              </div>
-            </div>
+          <div>
+            <h4 className="text-[13px] font-medium text-ink mb-4">Shop</h4>
+            <ul className="space-y-3">
+              <li><Link href="/shop" className="text-sm text-mid hover:text-ink transition-colors">All Prints</Link></li>
+              <li><Link href="/prints/stadium" className="text-sm text-mid hover:text-ink transition-colors">Stadiums</Link></li>
+              <li><Link href="/prints/airport" className="text-sm text-mid hover:text-ink transition-colors">Airports</Link></li>
+              <li><Link href="/prints/marathon" className="text-sm text-mid hover:text-ink transition-colors">Marathons</Link></li>
+              <li><Link href="/prints/golf" className="text-sm text-mid hover:text-ink transition-colors">Golf Courses</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-[13px] font-medium text-ink mb-4">Help</h4>
+            <ul className="space-y-3">
+              <li><Link href="/faq" className="text-sm text-mid hover:text-ink transition-colors">FAQ</Link></li>
+              <li><Link href="/shipping" className="text-sm text-mid hover:text-ink transition-colors">Shipping</Link></li>
+              <li><Link href="/returns" className="text-sm text-mid hover:text-ink transition-colors">Returns</Link></li>
+              <li><Link href="/contact" className="text-sm text-mid hover:text-ink transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-[13px] font-medium text-ink mb-4">Follow</h4>
+            <ul className="space-y-3">
+              <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-sm text-mid hover:text-ink transition-colors">Instagram</a></li>
+              <li><a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="text-sm text-mid hover:text-ink transition-colors">Pinterest</a></li>
+              <li><a href="https://www.etsy.com/shop/MilesAwayPrints" target="_blank" rel="noopener noreferrer" className="text-sm text-mid hover:text-ink transition-colors">Etsy Shop</a></li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border text-center text-xs text-light-mid">
-          &copy; {new Date().getFullYear()} Miles Away Prints. All rights reserved.
+        <div className="mt-14 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-mid">
+          <p>&copy; {new Date().getFullYear()} Miles Away Prints. All rights reserved.</p>
+          <div className="flex gap-5">
+            <Link href="/privacy" className="hover:text-ink transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-ink transition-colors">Terms</Link>
+          </div>
         </div>
       </div>
     </footer>
