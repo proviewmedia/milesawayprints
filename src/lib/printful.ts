@@ -115,12 +115,29 @@ export async function cancelOrder(orderId: number | string) {
   return (await res.json()) as PrintfulOrderResponse;
 }
 
-/** List store products (useful once from a script to grab variant ids) */
+/** List store products. Paginates through all pages — Printful caps each
+ *  page at 100 (default 20), so for stores with >100 products we'd need
+ *  multiple round-trips. Returns the standard {code, result, ...} envelope
+ *  with the merged result array. */
 export async function listStoreProducts() {
-  const res = await fetch(`${BASE}/store/products`, {
-    headers: authHeaders(),
-  });
-  return await res.json();
+  const all: unknown[] = [];
+  const limit = 100;
+  let offset = 0;
+  let lastCode = 200;
+  for (;;) {
+    const res = await fetch(`${BASE}/store/products?limit=${limit}&offset=${offset}`, {
+      headers: authHeaders(),
+    });
+    const data = (await res.json()) as { code: number; result?: unknown[]; paging?: { total?: number } };
+    lastCode = data.code;
+    if (data.code >= 400 || !Array.isArray(data.result)) {
+      return data;
+    }
+    all.push(...data.result);
+    if (data.result.length < limit) break;
+    offset += limit;
+  }
+  return { code: lastCode, result: all };
 }
 
 /** Get a single store product with its variants */
