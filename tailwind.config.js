@@ -8,46 +8,56 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // Core ink (near-black, slightly warm)
         ink: {
-          DEFAULT: '#1a1a2e',
-          light: '#3d3d56',
+          DEFAULT: '#0e0e0e',
+          light: '#3a3a3a',
         },
         paper: '#ffffff',
+        // Warm off-white card / section surfaces (replaces cool blue-gray)
         soft: {
-          DEFAULT: '#f7f8fc',
-          2: '#f0f2f8',
+          DEFAULT: '#f5f3ef',
+          2: '#efece6',
         },
+        // Primary CTA = black (was bright purple)
         primary: {
-          DEFAULT: '#4f6df5',
-          light: '#e8ecfe',
-          dark: '#3a54d4',
+          DEFAULT: '#0e0e0e',
+          light: '#f5f3ef',
+          dark: '#000000',
         },
+        // Sale / urgency accent (use sparingly — only when there's an actual sale)
+        accent: {
+          DEFAULT: '#d92f2f',
+          light: '#fdecec',
+        },
+        // Soft pastel section washes (kept for variety; muted)
         mint: {
-          DEFAULT: '#34d399',
-          light: '#d1fae5',
+          DEFAULT: '#7a9b7c',
+          light: '#e7ede5',
         },
         coral: {
-          DEFAULT: '#f87171',
-          light: '#fee2e2',
+          DEFAULT: '#c4685c',
+          light: '#f3e2dc',
         },
         warm: {
-          DEFAULT: '#fbbf24',
-          light: '#fef3c7',
+          DEFAULT: '#b08a4a',
+          light: '#f3e9d8',
         },
         lavender: {
           DEFAULT: '#a78bfa',
-          light: '#ede9fe',
+          light: '#ece5f8',
         },
-        mid: '#7c7e96',
-        'light-mid': '#a9abbc',
-        border: '#e8eaf0',
+        // Text / borders
+        mid: '#6b6b6b',
+        'light-mid': '#9c9c9c',
+        border: '#e8e6e0',
       },
       borderRadius: {
-        xl: '20px',
-        '2xl': '28px',
+        xl: '16px',
+        '2xl': '20px',
       },
     },
   },
