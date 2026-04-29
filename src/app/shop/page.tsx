@@ -19,7 +19,9 @@ async function getAllDesigns(): Promise<DesignSummary[]> {
     .from('gallery_items')
     .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, sort_order, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('active', true)
-    .order('sort_order', { ascending: true });
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true })
+    .limit(500);
 
   if (!data) return [];
   return data.map((row: GalleryItemWithMeta) =>
