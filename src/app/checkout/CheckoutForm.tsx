@@ -232,20 +232,6 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
       confirmParams: {
         return_url: `${window.location.origin}/checkout/success?token=${orderToken}`,
         receipt_email: address.email,
-        payment_method_data: {
-          billing_details: {
-            name: address.name,
-            email: address.email,
-            address: {
-              line1: address.line1 || undefined,
-              line2: address.line2 || undefined,
-              city: address.city || undefined,
-              state: address.state || undefined,
-              postal_code: address.postalCode || undefined,
-              country: address.country || undefined,
-            },
-          },
-        },
       },
     });
     if (error) {
@@ -417,10 +403,7 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
             Payment
           </h2>
           <PaymentElement
-            options={{
-              layout: 'tabs',
-              fields: { billingDetails: 'never' },
-            }}
+            options={{ layout: 'tabs' }}
             onChange={(e) => setPaymentReady(e.complete)}
           />
 
