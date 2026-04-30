@@ -150,6 +150,7 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
   const updateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
@@ -420,6 +421,7 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
               layout: 'tabs',
               fields: { billingDetails: 'never' },
             }}
+            onChange={(e) => setPaymentReady(e.complete)}
           />
 
           {submitError && <p className="text-sm text-accent">{submitError}</p>}
@@ -430,7 +432,8 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
               !stripe ||
               submitting ||
               !addressReady ||
-              (hasPhysical && shippingCents == null)
+              (hasPhysical && shippingCents == null) ||
+              !paymentReady
             }
             className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60"
           >
@@ -440,8 +443,13 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
               ? 'Enter your details to continue'
               : hasPhysical && shippingCents == null
               ? 'Calculating shipping…'
-              : `Pay · $${(totalCents / 100).toFixed(2)}`}
+              : !paymentReady
+              ? 'Add payment to continue'
+              : `Place order · $${(totalCents / 100).toFixed(2)}`}
           </button>
+          <p className="text-[12px] text-mid text-center">
+            Sales tax (if applicable) is calculated and added when you place the order.
+          </p>
           <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
             <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
           </p>
