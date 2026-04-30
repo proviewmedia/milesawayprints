@@ -128,14 +128,16 @@ export async function POST() {
       const parsed = parseName(sp.name);
       const slug = slugify(parsed.name);
 
-      // Build the size → variant_id + price maps
+      // Build size → sync_variant_id, size → catalog variant_id, size → price
       const variantMap: Record<string, number> = {};
+      const catalogVariantMap: Record<string, number> = {};
       const priceMap: Record<string, number> = {};
       const sizesFound: string[] = [];
       for (const v of svs) {
         const sz = canonicalSize(v.name, v.size);
         if (sz && !variantMap[sz]) {
-          variantMap[sz] = v.id; // sync_variant_id (preferred)
+          variantMap[sz] = v.id; // sync_variant_id — used for placing orders
+          catalogVariantMap[sz] = v.variant_id; // catalog variant_id — used for shipping rates and tax calculations
           const priceStr = v.retail_price;
           if (priceStr) {
             const cents = Math.round(parseFloat(priceStr) * 100);
@@ -166,6 +168,7 @@ export async function POST() {
             values: {},
             printful_product_id: String(sp.id),
             printful_variants: variantMap,
+            printful_catalog_variants: catalogVariantMap,
             printful_prices: priceMap,
             active: true,
             featured: false,

@@ -109,15 +109,17 @@ export async function POST(req: Request) {
       const slugs = Array.from(new Set(physical.map((it) => it.slug)));
       const { data: designs } = await admin
         .from('gallery_items')
-        .select('slug, printful_variants')
+        .select('slug, printful_catalog_variants, printful_variants')
         .in('slug', slugs);
+      // Use catalog variant_id for shipping rates (Printful requirement);
+      // fall back to sync_variant_id if catalog hasn't been backfilled yet.
       const variantMap = new Map<string, Record<string, number>>(
-        (designs ?? []).map((d) => [d.slug as string, (d.printful_variants ?? {}) as Record<string, number>]),
+        (designs ?? []).map((d) => [d.slug as string, (d.printful_catalog_variants ?? d.printful_variants ?? {}) as Record<string, number>]),
       );
-      const printfulItems: Array<{ sync_variant_id: number; quantity: number }> = [];
+      const printfulItems: Array<{ variant_id: number; quantity: number }> = [];
       for (const it of physical) {
         const v = variantMap.get(it.slug)?.[it.size];
-        if (v) printfulItems.push({ sync_variant_id: v, quantity: 1 });
+        if (v) printfulItems.push({ variant_id: v, quantity: 1 });
       }
 
       if (printfulItems.length > 0 && body.shipping?.country) {
