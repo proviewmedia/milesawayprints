@@ -119,8 +119,11 @@ export default function CheckoutClient({
               </Link>
             </div>
 
-            {/* Stripe Embedded Checkout — right column */}
-            <div>
+            {/* Stripe Embedded Checkout — right column. On md+ the
+                column is sticky to the top of the viewport with its
+                own internal scroll, so the form stays put while the
+                left cart column scrolls past on long pages. */}
+            <div className="md:sticky md:top-28 md:self-start md:max-h-[calc(100vh-7rem)] md:overflow-y-auto md:pr-1">
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border mb-6">
                 Shipping & payment
               </h2>
