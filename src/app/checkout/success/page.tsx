@@ -32,6 +32,16 @@ export default async function CheckoutSuccessPage({
     token = token ?? order?.token ?? null;
     customerEmail = order?.customer_email ?? null;
     customerName = order?.customer_name ?? null;
+  } else if (token) {
+    // New Stripe Elements flow — order looked up by token directly
+    const admin = createAdminClient();
+    const { data: order } = await admin
+      .from('orders')
+      .select('customer_email, customer_name')
+      .eq('token', token)
+      .maybeSingle();
+    customerEmail = order?.customer_email ?? null;
+    customerName = order?.customer_name ?? null;
   }
 
   return (

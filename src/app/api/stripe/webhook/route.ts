@@ -202,6 +202,134 @@ export async function POST(req: Request) {
         .from('orders')
         .update({ status: 'cancelled' })
         .eq('stripe_checkout_session_id', session.id);
+    } else if (event.type === 'payment_intent.succeeded') {
+      // New Stripe Elements flow — order created via /api/payment-intent
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const orderId = pi.metadata?.order_id;
+      if (!orderId) {
+        return NextResponse.json({ received: true, note: 'No order_id metadata' });
+      }
+
+      const { data: order } = await admin
+        .from('orders')
+        .select('id, token, cart_snapshot, status')
+        .eq('id', orderId)
+        .single();
+      if (!order) {
+        return NextResponse.json({ received: true, note: 'Order not found' });
+      }
+      if (order.status === 'paid' || order.status === 'in_production' || order.status === 'shipped' || order.status === 'approved') {
+        return NextResponse.json({ received: true, note: 'already processed' });
+      }
+
+      // Customer info — Stripe Elements stores it on the charge
+      const charge = pi.latest_charge && typeof pi.latest_charge !== 'string'
+        ? pi.latest_charge
+        : null;
+      const customerEmail =
+        pi.receipt_email ??
+        charge?.billing_details?.email ??
+        'unknown@placeholder.local';
+      const customerName = pi.shipping?.name ?? charge?.billing_details?.name ?? 'Customer';
+      const shipping = pi.shipping ?? null;
+
+      const update: Record<string, unknown> = {
+        customer_email: customerEmail,
+        customer_name: customerName,
+        stripe_payment_intent_id: pi.id,
+        status: 'paid',
+      };
+
+      const { data: existingProfile } = await admin
+        .from('profiles')
+        .select('id')
+        .eq('email', customerEmail)
+        .maybeSingle();
+      if (existingProfile?.id) update.user_id = existingProfile.id;
+
+      if (shipping?.address) {
+        update.shipping_name = shipping.name ?? customerName;
+        update.shipping_address_line1 = shipping.address.line1 ?? null;
+        update.shipping_address_line2 = shipping.address.line2 ?? null;
+        update.shipping_city = shipping.address.city ?? null;
+        update.shipping_state = shipping.address.state ?? null;
+        update.shipping_zip = shipping.address.postal_code ?? null;
+        update.shipping_country = shipping.address.country ?? 'US';
+      }
+
+      const cart = (order.cart_snapshot as CartSnapshotItem[] | null) ?? [];
+      const physicalItems = cart.filter((it) => it.format === 'physical');
+      const digitalItems = cart.filter((it) => it.format === 'digital');
+
+      // Digital fulfillment — same as the checkout.session.completed branch
+      if (digitalItems.length > 0) {
+        const { randomBytes } = await import('crypto');
+        const { sendDigitalDeliveryEmail } = await import('@/lib/email');
+        const token = randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        update.digital_download_token = token;
+        update.digital_download_expires_at = expiresAt.toISOString();
+        update.digital_download_max = 5;
+        update.digital_download_count = 0;
+        update.status = 'approved';
+        try {
+          const origin = new URL(req.url).origin;
+          const lead = digitalItems[0];
+          await sendDigitalDeliveryEmail({
+            to: customerEmail,
+            customerName: customerName || 'there',
+            productName: lead.name,
+            downloadUrl: `${origin}/download/${token}`,
+            expiresAt,
+            maxDownloads: 5,
+          });
+        } catch (err) {
+          console.error('[stripe webhook] digital email failed', err);
+        }
+      }
+
+      // Physical fulfillment — submit to Printful with confirm:true
+      if (physicalItems.length > 0 && shipping?.address) {
+        const slugs = Array.from(new Set(physicalItems.map((it) => it.slug)));
+        const { data: designs } = await admin
+          .from('gallery_items')
+          .select('slug, printful_variants')
+          .in('slug', slugs);
+        const variantMap = new Map<string, Record<string, number>>(
+          (designs ?? []).map((d) => [d.slug as string, (d.printful_variants ?? {}) as Record<string, number>]),
+        );
+        const printfulItems: PrintfulOrderItem[] = [];
+        for (const it of physicalItems) {
+          const v = variantMap.get(it.slug)?.[it.size];
+          if (!v) continue;
+          printfulItems.push({ sync_variant_id: v, quantity: 1, name: `${it.name} ${it.size}` });
+        }
+        if (printfulItems.length > 0) {
+          const printfulRes = await createPrintfulOrder({
+            external_id: order.token,
+            recipient: {
+              name: shipping.name ?? customerName,
+              address1: shipping.address.line1 ?? '',
+              address2: shipping.address.line2 ?? null,
+              city: shipping.address.city ?? '',
+              state_code: shipping.address.state ?? '',
+              country_code: shipping.address.country ?? 'US',
+              zip: shipping.address.postal_code ?? '',
+              email: customerEmail,
+            },
+            items: printfulItems,
+            confirm: true,
+          });
+          if (printfulRes.result?.id) {
+            update.printful_order_id = String(printfulRes.result.id);
+            update.status = 'in_production';
+          } else {
+            update.printful_error = printfulRes.error?.message ?? 'unknown printful error';
+          }
+        }
+      }
+
+      await admin.from('orders').update(update).eq('id', order.id);
     }
 
     return NextResponse.json({ received: true });
