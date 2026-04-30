@@ -231,9 +231,9 @@ export default function CheckoutPage() {
                     <span className="text-ink">Total</span>
                     <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
                   </div>
-                  {hasPhysical && shippingLabel && shippingCents != null && (
+                  {hasPhysical && shippingCents != null && (
                     <p className="text-[11px] text-mid">
-                      {shippingLabel} — quoted by Printful for your destination.
+                      Shipping calculated for your destination. Tax (if applicable) added at payment.
                     </p>
                   )}
                 </div>
