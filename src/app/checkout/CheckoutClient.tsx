@@ -26,7 +26,7 @@ export default function CheckoutClient({
   initialCountry = 'US',
   navbarCountry,
 }: CheckoutClientProps) {
-  const { items, subtotalCents } = useCart();
+  const { items } = useCart();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fetched = useRef(false);
@@ -77,10 +77,12 @@ export default function CheckoutClient({
           </div>
         ) : (
           <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14">
-            {/* Order summary — left column */}
+            {/* Cart preview — left column. Stripe's panel on the right
+                shows the full totals breakdown, so we deliberately do
+                not repeat subtotal/shipping/tax/total here. */}
             <div>
               <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border mb-1">
-                Order
+                Your order
               </h2>
               {items.map((it) => (
                 <div key={it.id} className="flex gap-5 py-5 border-b border-border">
@@ -108,26 +110,6 @@ export default function CheckoutClient({
                   </div>
                 </div>
               ))}
-
-              <div className="mt-8 space-y-2.5 text-sm">
-                <div className="flex justify-between text-mid">
-                  <span>Subtotal</span>
-                  <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-mid">
-                  <span>Shipping</span>
-                  <span className="text-ink">Calculated at checkout</span>
-                </div>
-                <div className="flex justify-between text-mid">
-                  <span>Tax</span>
-                  <span className="text-ink">Calculated at checkout</span>
-                </div>
-              </div>
-
-              <p className="text-[12px] text-mid mt-6 leading-relaxed">
-                Final shipping and tax appear in the secure payment panel
-                once you enter your address.
-              </p>
 
               <Link
                 href="/shop"
