@@ -2,16 +2,30 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { getStripe } from '@/lib/stripe';
 import { CartItem } from '@/contexts/CartContext';
+import { getShippingRates } from '@/lib/printful';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://milesawayprints.com';
-const SHIPPING_FLAT_CENTS = 500;
+// Stripe accepts ISO 3166-1 alpha-2 codes. This list intentionally
+// covers Printful's main delivery markets; expand as needed.
+const STRIPE_ALLOWED_COUNTRIES = [
+  'US','CA','GB','IE','FR','DE','IT','ES','PT','NL','BE','LU','AT','CH','SE','NO','DK','FI','IS','PL','CZ','SK','HU','RO','BG','GR','HR','SI','EE','LV','LT','MT','CY','AU','NZ','JP','SG','HK','MX','BR','AR','CL','CO','PE',
+] as const;
+
+interface CheckoutBody {
+  items: CartItem[];
+  shipping?: {
+    country: string;
+    state?: string;
+    zip?: string;
+  };
+}
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as CheckoutBody;
     const items: CartItem[] = body.items ?? [];
 
     if (items.length === 0) {
@@ -54,14 +68,21 @@ export async function POST(req: Request) {
 
     const hasPhysical = items.some((it) => it.format === 'physical');
 
+    // Stripe Tax codes:
+    //   txcd_99999999 — General Tangible Personal Property (physical goods)
+    //   txcd_10000000 — Electronically Supplied Services (digital downloads)
     const line_items = items.map((it) => ({
       quantity: 1,
       price_data: {
         currency: 'usd',
         unit_amount: it.priceCents,
+        // tax_behavior 'unspecified' uses the Stripe Dashboard default
+        // (Automatic: exclusive in USD/CAD, inclusive in EU/UK currencies).
+        tax_behavior: 'unspecified' as const,
         product_data: {
           name: `${it.name} — ${it.format === 'digital' ? 'Digital' : it.size}`,
           description: it.location || undefined,
+          tax_code: it.format === 'digital' ? 'txcd_10000000' : 'txcd_99999999',
           metadata: {
             slug: it.slug,
             type: it.type,
@@ -76,6 +97,62 @@ export async function POST(req: Request) {
     const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
     const first = items[0];
 
+    // Compute live shipping cost from Printful for physical orders.
+    // Falls back to a flat $5 USD if the rate call fails (so checkout
+    // still proceeds — we'd rather charge a guess than block the sale).
+    let shippingCents = 0;
+    let shippingDeliveryEstimate: { min: number; max: number } | null = null;
+    let shippingMethodName = 'Standard shipping';
+
+    if (hasPhysical) {
+      const physical = items.filter((it) => it.format === 'physical');
+      const slugs = Array.from(new Set(physical.map((it) => it.slug)));
+      const { data: designs } = await admin
+        .from('gallery_items')
+        .select('slug, printful_variants')
+        .in('slug', slugs);
+      const variantMap = new Map<string, Record<string, number>>(
+        (designs ?? []).map((d) => [d.slug as string, (d.printful_variants ?? {}) as Record<string, number>]),
+      );
+      const printfulItems: Array<{ sync_variant_id: number; quantity: number }> = [];
+      for (const it of physical) {
+        const v = variantMap.get(it.slug)?.[it.size];
+        if (v) printfulItems.push({ sync_variant_id: v, quantity: 1 });
+      }
+
+      if (printfulItems.length > 0 && body.shipping?.country) {
+        try {
+          const rates = await getShippingRates({
+            recipient: {
+              country_code: body.shipping.country.toUpperCase(),
+              state_code: body.shipping.state?.toUpperCase(),
+              zip: body.shipping.zip,
+            },
+            items: printfulItems,
+          });
+          if (rates.length > 0) {
+            const cheapest = rates
+              .map((r) => ({ ...r, n: parseFloat(r.rate) }))
+              .sort((a, b) => a.n - b.n)[0];
+            shippingCents = Math.round(cheapest.n * 100);
+            shippingMethodName = cheapest.name || 'Standard shipping';
+            if (cheapest.minDeliveryDays && cheapest.maxDeliveryDays) {
+              shippingDeliveryEstimate = {
+                min: cheapest.minDeliveryDays,
+                max: cheapest.maxDeliveryDays,
+              };
+            }
+          } else {
+            shippingCents = 500;
+          }
+        } catch {
+          shippingCents = 500;
+        }
+      } else {
+        shippingCents = 500;
+      }
+    }
+
     const { data: order, error: orderErr } = await admin
       .from('orders')
       .insert({
@@ -87,7 +164,7 @@ export async function POST(req: Request) {
         customization: first.customization ?? { name: first.name, location: first.location },
         is_gift: first.isGift ?? false,
         gift_message: first.giftMessage ?? null,
-        price_cents: totalCents + (hasPhysical ? SHIPPING_FLAT_CENTS : 0),
+        price_cents: totalCents + shippingCents,
         status: 'new',
       })
       .select('id, token')
@@ -117,20 +194,37 @@ export async function POST(req: Request) {
       ui_mode: 'embedded',
       mode: 'payment',
       line_items,
+      // Stripe Tax: automatically calculates VAT (EU/UK), GST (CA/AU/NZ),
+      // and US state sales tax based on the customer's billing/shipping
+      // address. Make sure Tax is enabled in Stripe Dashboard → Tax with
+      // Wyoming as head office and a physical-goods preset product
+      // category, otherwise this will fail.
+      automatic_tax: { enabled: true },
       return_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       ...(hasPhysical
         ? {
-            shipping_address_collection: { allowed_countries: ['US'] },
+            shipping_address_collection: {
+              allowed_countries: STRIPE_ALLOWED_COUNTRIES as unknown as string[] as never,
+            },
             shipping_options: [
               {
                 shipping_rate_data: {
                   type: 'fixed_amount',
-                  fixed_amount: { amount: SHIPPING_FLAT_CENTS, currency: 'usd' },
-                  display_name: 'Standard shipping',
-                  delivery_estimate: {
-                    minimum: { unit: 'business_day', value: 5 },
-                    maximum: { unit: 'business_day', value: 10 },
-                  },
+                  fixed_amount: { amount: shippingCents, currency: 'usd' },
+                  display_name: shippingMethodName,
+                  // Let Stripe decide based on dashboard default (Determine
+                  // automatically) — shipping is taxable in most US states +
+                  // EU when goods are taxable.
+                  tax_behavior: 'unspecified' as const,
+                  delivery_estimate: shippingDeliveryEstimate
+                    ? {
+                        minimum: { unit: 'business_day', value: shippingDeliveryEstimate.min },
+                        maximum: { unit: 'business_day', value: shippingDeliveryEstimate.max },
+                      }
+                    : {
+                        minimum: { unit: 'business_day', value: 5 },
+                        maximum: { unit: 'business_day', value: 14 },
+                      },
                 },
               },
             ],

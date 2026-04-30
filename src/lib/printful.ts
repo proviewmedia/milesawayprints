@@ -106,6 +106,64 @@ export async function getOrder(orderId: number | string) {
   return (await res.json()) as PrintfulOrderResponse;
 }
 
+/**
+ * Get live shipping rates from Printful for a recipient + cart.
+ * POST https://api.printful.com/shipping/rates
+ *
+ * Returns the cheapest standard rate plus optional faster options.
+ * For our checkout we use the cheapest by default and surface the
+ * delivery estimate to the customer.
+ */
+export interface PrintfulShippingRate {
+  id: string;       // e.g. "STANDARD"
+  name: string;     // human label shown in Stripe Checkout
+  rate: string;     // price as string, USD
+  currency: string; // "USD"
+  minDeliveryDays?: number;
+  maxDeliveryDays?: number;
+}
+
+export interface PrintfulRateRecipient {
+  country_code: string;
+  state_code?: string;
+  zip?: string;
+  city?: string;
+  address1?: string;
+}
+
+export async function getShippingRates(payload: {
+  recipient: PrintfulRateRecipient;
+  items: Array<{ sync_variant_id?: number; variant_id?: number; quantity: number }>;
+  currency?: string;
+}): Promise<PrintfulShippingRate[]> {
+  const body = {
+    recipient: payload.recipient,
+    items: payload.items,
+    currency: payload.currency ?? 'USD',
+  };
+  const res = await fetch(`${BASE}/shipping/rates`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(body),
+  });
+  const data = (await res.json()) as {
+    code: number;
+    result?: Array<{
+      id: string;
+      name: string;
+      rate: string;
+      currency: string;
+      minDeliveryDays?: number;
+      maxDeliveryDays?: number;
+    }>;
+    error?: { reason: string; message: string };
+  };
+  if (data.code >= 400 || !data.result) {
+    throw new Error(data.error?.message ?? `Printful shipping/rates failed (${data.code})`);
+  }
+  return data.result;
+}
+
 /** Cancel an order */
 export async function cancelOrder(orderId: number | string) {
   const res = await fetch(`${BASE}/orders/${orderId}`, {

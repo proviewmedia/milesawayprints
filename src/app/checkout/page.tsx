@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Lock } from 'lucide-react';
@@ -13,56 +13,138 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
-const SHIPPING_FLAT_CENTS = 500;
-
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
 );
 
+const COUNTRIES: Array<{ code: string; name: string; needsState?: boolean }> = [
+  { code: 'US', name: 'United States', needsState: true },
+  { code: 'CA', name: 'Canada', needsState: true },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'CZ', name: 'Czechia' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'HK', name: 'Hong Kong' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'BR', name: 'Brazil' },
+];
+
 export default function CheckoutPage() {
   const { items, subtotalCents } = useCart();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
-  const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
-  const totalCents = subtotalCents + shippingCents;
+  // Address fields (only shown / required for physical carts)
+  const [country, setCountry] = useState('US');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
 
-  const itemsRef = useRef(items);
+  // Live-fetched shipping rate
+  const [shippingCents, setShippingCents] = useState<number | null>(null);
+  const [shippingLabel, setShippingLabel] = useState<string>('Standard shipping');
+  const [shippingError, setShippingError] = useState<string | null>(null);
+  const [rateLoading, setRateLoading] = useState(false);
+
+  const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
+  const totalCents = subtotalCents + (hasPhysical ? (shippingCents ?? 0) : 0);
+
+  const countryEntry = COUNTRIES.find((c) => c.code === country);
+  const needsState = !!countryEntry?.needsState;
+
+  // Recalculate shipping when address changes (debounced)
   useEffect(() => {
-    if (itemsRef.current.length === 0) return;
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: itemsRef.current }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (cancelled) return;
-        if (!data.clientSecret) {
-          throw new Error(data.detail || data.error || 'Could not start checkout');
-        }
-        setClientSecret(data.clientSecret);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Something went wrong');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    if (!hasPhysical) {
+      setShippingCents(0);
+      return;
+    }
+    if (!country || !zip || (needsState && !state)) {
+      setShippingCents(null);
+      setShippingError(null);
+      return;
+    }
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      setRateLoading(true);
+      setShippingError(null);
+      try {
+        const res = await fetch('/api/shipping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items, country, state, zip }),
+          signal: ctrl.signal,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not get shipping rate');
+        setShippingCents(data.rateCents ?? 0);
+        setShippingLabel(data.name || 'Standard shipping');
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        setShippingCents(null);
+        setShippingError(err instanceof Error ? err.message : 'Could not get shipping rate');
+      } finally {
+        setRateLoading(false);
+      }
+    }, 500);
     return () => {
-      cancelled = true;
+      clearTimeout(t);
+      ctrl.abort();
     };
-  }, []);
+  }, [hasPhysical, items, country, state, zip, needsState]);
+
+  const canContinue = !hasPhysical || (shippingCents != null && !rateLoading && !shippingError);
+
+  const handleContinue = async () => {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items,
+          shipping: hasPhysical ? { country, state, zip } : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.clientSecret) throw new Error(data.detail || data.error || 'Could not start checkout');
+      setClientSecret(data.clientSecret);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const fetchClientSecret = useCallback(() => {
     return Promise.resolve(clientSecret ?? '');
   }, [clientSecret]);
+
+  // Digital-only carts skip the address step and load Stripe immediately
+  useEffect(() => {
+    if (items.length === 0) return;
+    if (hasPhysical) return;
+    if (clientSecret || submitting) return;
+    handleContinue();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length, hasPhysical]);
 
   if (items.length === 0) {
     return (
@@ -136,13 +218,24 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-mid">
                     <span>Shipping</span>
                     <span className="text-ink">
-                      {hasPhysical ? `$${(shippingCents / 100).toFixed(2)}` : 'Free (digital)'}
+                      {!hasPhysical
+                        ? 'Free (digital)'
+                        : shippingCents == null
+                        ? rateLoading
+                          ? 'Calculating…'
+                          : '—'
+                        : `$${(shippingCents / 100).toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between pt-3 mt-2 border-t border-border">
                     <span className="text-ink">Total</span>
                     <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
                   </div>
+                  {hasPhysical && shippingLabel && shippingCents != null && (
+                    <p className="text-[11px] text-mid">
+                      {shippingLabel} — quoted by Printful for your destination.
+                    </p>
+                  )}
                 </div>
 
                 <Link
@@ -157,20 +250,87 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Right — embedded payment */}
+            {/* Right — address form OR embedded payment */}
             <aside className="md:flex md:flex-col md:h-full md:min-h-0">
               <h2 className="md:flex-shrink-0 text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
-                Payment
+                {clientSecret ? 'Payment' : hasPhysical ? 'Where to?' : 'Payment'}
               </h2>
               <div className="md:flex-1 md:min-h-0 md:overflow-y-auto pt-6 md:pr-1">
-                {error && (
-                  <p className="text-sm text-accent mb-4">{error}</p>
-                )}
-                {loading && !clientSecret && (
-                  <div className="py-16 text-center text-sm text-mid">
-                    Loading secure payment…
+                {error && <p className="text-sm text-accent mb-4">{error}</p>}
+
+                {/* Address step (physical, before Stripe loads) */}
+                {hasPhysical && !clientSecret && (
+                  <div className="space-y-4">
+                    <p className="text-[13px] text-mid">
+                      We&apos;ll calculate exact shipping for your destination before you pay.
+                    </p>
+                    <div>
+                      <label className="block text-[13px] font-medium text-ink mb-2">Country</label>
+                      <select
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="input-field"
+                      >
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {needsState && (
+                        <div>
+                          <label className="block text-[13px] font-medium text-ink mb-2">State</label>
+                          <input
+                            value={state}
+                            onChange={(e) => setState(e.target.value)}
+                            placeholder={country === 'US' ? 'e.g. NV' : 'e.g. ON'}
+                            maxLength={2}
+                            className="input-field uppercase"
+                          />
+                        </div>
+                      )}
+                      <div className={needsState ? '' : 'col-span-2'}>
+                        <label className="block text-[13px] font-medium text-ink mb-2">
+                          {country === 'GB' ? 'Postcode' : 'ZIP / Postal code'}
+                        </label>
+                        <input
+                          value={zip}
+                          onChange={(e) => setZip(e.target.value)}
+                          placeholder={country === 'US' ? '90210' : 'SW1A 1AA'}
+                          className="input-field"
+                        />
+                      </div>
+                    </div>
+
+                    {shippingError && (
+                      <p className="text-sm text-accent">{shippingError}</p>
+                    )}
+
+                    <button
+                      onClick={handleContinue}
+                      disabled={!canContinue || submitting}
+                      className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mt-4"
+                    >
+                      {submitting
+                        ? 'Loading payment…'
+                        : rateLoading
+                        ? 'Calculating shipping…'
+                        : shippingCents == null
+                        ? 'Enter address to continue'
+                        : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
+                    </button>
+                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
+                      <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
+                    </p>
                   </div>
                 )}
+
+                {/* Loading state for digital-only flow */}
+                {!hasPhysical && !clientSecret && (
+                  <div className="py-16 text-center text-sm text-mid">Loading secure payment…</div>
+                )}
+
+                {/* Embedded Stripe payment */}
                 {clientSecret && (
                   <>
                     <EmbeddedCheckoutProvider
