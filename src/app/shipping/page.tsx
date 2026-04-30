@@ -116,15 +116,20 @@ export default function ShippingPage() {
 
           <PolicySection title="Shipping cost">
             <p>
-              One flat rate per region — same price whether you order an 8×10 or
-              a 24×36, no surprises at checkout:
+              Rates depend on where the order ships and how many prints are in
+              the box. The first print covers most of the cost; each additional
+              print adds a small per-item bump. Same rate whether you order an
+              8×10 or a 24×36 — no size surcharges.
             </p>
             <ul className="mt-3 space-y-1.5 text-sm text-ink">
-              <li>· United States — <strong>$7</strong></li>
-              <li>· Canada — <strong>$10</strong></li>
-              <li>· United Kingdom & EU — <strong>$12</strong></li>
-              <li>· Rest of world — <strong>$15</strong></li>
+              <li>· United States — <strong>$7</strong> first print, <strong>+$3</strong> each additional</li>
+              <li>· Canada — <strong>$11</strong> first print, <strong>+$3</strong> each additional</li>
+              <li>· United Kingdom & EU — <strong>$14</strong> first print, <strong>+$3</strong> each additional</li>
+              <li>· Rest of world — <strong>$20</strong> first print, <strong>+$4</strong> each additional</li>
             </ul>
+            <p className="mt-3 text-sm text-mid">
+              Digital downloads ship instantly and have no shipping fee.
+            </p>
           </PolicySection>
         </div>
       </section>

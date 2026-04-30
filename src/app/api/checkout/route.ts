@@ -92,12 +92,15 @@ export async function POST(req: Request) {
     const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
     const first = items[0];
 
-    // Tiered regional shipping. Each tier roughly tracks Printful's
-    // actual cost (US ~$5, Canada ~$8, UK/EU ~$10, RoW ~$13) plus a
-    // small buffer to cover variance and protect margin. The customer
-    // sees one flat rate per region rather than a per-ZIP quote.
-    const shippingCents = hasPhysical
-      ? shippingForRegion(body.shipping?.country)
+    // Per-item regional shipping. Base covers the first print at
+    // Printful's quoted regional rate, then each additional print
+    // adds the per-item bump. Rates are deliberately set above
+    // Printful's actual cost to absorb destination variance —
+    // especially important internationally where rates swing
+    // widely between, e.g., Germany and Brazil.
+    const physicalCount = items.filter((it) => it.format === 'physical').length;
+    const shippingCents = physicalCount > 0
+      ? shippingForRegion(body.shipping?.country, physicalCount)
       : 0;
     const shippingMethodName = 'Standard shipping';
     const shippingDeliveryEstimate: { min: number; max: number } | null =
@@ -214,10 +217,20 @@ const EU_AND_UK = new Set([
   'HR', 'SI', 'EE', 'LV', 'LT', 'MT', 'CY',
 ]);
 
-function shippingForRegion(country: string | undefined): number {
+function shippingForRegion(country: string | undefined, count: number): number {
   const c = (country ?? 'US').toUpperCase();
-  if (c === 'US') return 700; // $7
-  if (c === 'CA') return 1000; // $10
-  if (EU_AND_UK.has(c)) return 1200; // $12
-  return 1500; // Rest of world: $15
+  // [base for first print, per-additional-print bump], in cents.
+  // Buffered above Printful's actual cost to protect margin against
+  // rate variance within each region.
+  const tiers: Record<string, [number, number]> = {
+    US: [700, 300],
+    CA: [1100, 300],
+    EU: [1400, 300],
+    ROW: [2000, 400],
+  };
+  const tier = c === 'US' ? tiers.US
+    : c === 'CA' ? tiers.CA
+    : EU_AND_UK.has(c) ? tiers.EU
+    : tiers.ROW;
+  return tier[0] + Math.max(0, count - 1) * tier[1];
 }
