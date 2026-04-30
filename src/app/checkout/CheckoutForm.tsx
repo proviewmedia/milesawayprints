@@ -3,16 +3,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Elements,
-  AddressElement,
   PaymentElement,
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
-import { loadStripe, Stripe, StripeAddressElementChangeEvent } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Lock } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { COUNTRIES } from '@/data/countries';
 
 interface Props {
   initialCountry?: string;
@@ -120,13 +120,33 @@ interface InnerFormProps {
   initialCountry: string;
 }
 
+interface AddressFields {
+  name: string;
+  email: string;
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
 function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const { items, subtotalCents } = useCart();
 
+  const [address, setAddress] = useState<AddressFields>({
+    name: '',
+    email: '',
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: initialCountry,
+  });
   const [shippingCents, setShippingCents] = useState<number | null>(null);
-  const [shippingMethodName, setShippingMethodName] = useState<string>('Shipping');
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -135,11 +155,14 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
   const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
   const totalCents = subtotalCents + (shippingCents ?? 0);
 
-  const handleAddressChange = (event: StripeAddressElementChangeEvent) => {
-    const a = event.value.address;
-    // Fire as soon as we have enough to quote shipping — country + postal_code
-    // is enough for Printful in most regions. Don't wait for full completion.
-    if (!a?.country || !a.postal_code) return;
+  // Re-quote shipping whenever country + postal_code (and state for US/CA) change
+  useEffect(() => {
+    if (!hasPhysical) {
+      setShippingCents(0);
+      return;
+    }
+    if (!address.country || !address.postalCode) return;
+    if ((address.country === 'US' || address.country === 'CA') && !address.state) return;
 
     if (updateTimer.current) clearTimeout(updateTimer.current);
     updateTimer.current = setTimeout(async () => {
@@ -151,25 +174,52 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
           body: JSON.stringify({
             paymentIntentId,
             address: {
-              country: a.country,
-              state: a.state,
-              postalCode: a.postal_code,
-              line1: a.line1,
-              line2: a.line2,
-              city: a.city,
-              name: event.value.name,
+              country: address.country,
+              state: address.state,
+              postalCode: address.postalCode,
+              line1: address.line1,
+              line2: address.line2,
+              city: address.city,
+              name: address.name,
             },
           }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not update shipping');
         setShippingCents(data.shippingCents ?? 0);
-        setShippingMethodName(data.shippingMethodName ?? 'Shipping');
       } catch (err) {
         setUpdateError(err instanceof Error ? err.message : 'Could not update shipping');
       }
     }, 500);
-  };
+    return () => {
+      if (updateTimer.current) clearTimeout(updateTimer.current);
+    };
+  }, [
+    hasPhysical,
+    paymentIntentId,
+    address.country,
+    address.postalCode,
+    address.state,
+    address.line1,
+    address.line2,
+    address.city,
+    address.name,
+  ]);
+
+  const setField = (k: keyof AddressFields, v: string) =>
+    setAddress((prev) => ({ ...prev, [k]: v }));
+
+  const addressReady = hasPhysical
+    ? Boolean(
+        address.name &&
+          address.email &&
+          address.line1 &&
+          address.city &&
+          address.postalCode &&
+          address.country &&
+          ((address.country !== 'US' && address.country !== 'CA') || address.state),
+      )
+    : Boolean(address.email);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,6 +230,34 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/checkout/success?token=${orderToken}`,
+        receipt_email: address.email,
+        shipping: hasPhysical
+          ? {
+              name: address.name,
+              address: {
+                line1: address.line1,
+                line2: address.line2 || undefined,
+                city: address.city,
+                state: address.state || undefined,
+                postal_code: address.postalCode,
+                country: address.country,
+              },
+            }
+          : undefined,
+        payment_method_data: {
+          billing_details: {
+            name: address.name,
+            email: address.email,
+            address: {
+              line1: address.line1 || undefined,
+              line2: address.line2 || undefined,
+              city: address.city || undefined,
+              state: address.state || undefined,
+              postal_code: address.postalCode || undefined,
+              country: address.country || undefined,
+            },
+          },
+        },
       },
     });
     if (error) {
@@ -187,6 +265,9 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
       setSubmitting(false);
     }
   };
+
+  const needsState = address.country === 'US' || address.country === 'CA';
+  const stateLabel = address.country === 'CA' ? 'Province' : 'State';
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 pt-28 md:pt-32 pb-16">
@@ -251,44 +332,122 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
           </Link>
         </div>
 
-        {/* Stripe Elements */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
-            Shipping & payment
+            Contact
           </h2>
+          <input
+            type="email"
+            required
+            placeholder="Email"
+            autoComplete="email"
+            value={address.email}
+            onChange={(e) => setField('email', e.target.value)}
+            className="input-field"
+          />
 
           {hasPhysical && (
-            <div>
-              <AddressElement
-                options={{
-                  mode: 'shipping',
-                  allowedCountries: undefined,
-                  defaultValues: { address: { country: initialCountry } },
-                  fields: { phone: 'auto' },
-                }}
-                onChange={handleAddressChange}
+            <>
+              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border pt-2">
+                Shipping address
+              </h2>
+              <input
+                type="text"
+                required
+                placeholder="Full name"
+                autoComplete="name"
+                value={address.name}
+                onChange={(e) => setField('name', e.target.value)}
+                className="input-field"
               />
-              {updateError && (
-                <p className="text-sm text-accent mt-2">{updateError}</p>
-              )}
-            </div>
+              <select
+                value={address.country}
+                onChange={(e) => setField('country', e.target.value)}
+                className="input-field"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                required
+                placeholder="Address"
+                autoComplete="address-line1"
+                value={address.line1}
+                onChange={(e) => setField('line1', e.target.value)}
+                className="input-field"
+              />
+              <input
+                type="text"
+                placeholder="Apt, suite, etc. (optional)"
+                autoComplete="address-line2"
+                value={address.line2}
+                onChange={(e) => setField('line2', e.target.value)}
+                className="input-field"
+              />
+              <div className={`grid gap-3 ${needsState ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                <input
+                  type="text"
+                  required
+                  placeholder="City"
+                  autoComplete="address-level2"
+                  value={address.city}
+                  onChange={(e) => setField('city', e.target.value)}
+                  className="input-field"
+                />
+                {needsState && (
+                  <input
+                    type="text"
+                    required
+                    placeholder={stateLabel}
+                    autoComplete="address-level1"
+                    value={address.state}
+                    onChange={(e) => setField('state', e.target.value.toUpperCase())}
+                    maxLength={2}
+                    className="input-field uppercase"
+                  />
+                )}
+                <input
+                  type="text"
+                  required
+                  placeholder={address.country === 'US' ? 'ZIP' : 'Postal code'}
+                  autoComplete="postal-code"
+                  value={address.postalCode}
+                  onChange={(e) => setField('postalCode', e.target.value)}
+                  className="input-field"
+                />
+              </div>
+              {updateError && <p className="text-sm text-accent">{updateError}</p>}
+            </>
           )}
 
+          <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border pt-2">
+            Payment
+          </h2>
           <PaymentElement options={{ layout: 'tabs' }} />
 
-          {submitError && (
-            <p className="text-sm text-accent">{submitError}</p>
-          )}
+          {submitError && <p className="text-sm text-accent">{submitError}</p>}
 
           <button
             type="submit"
-            disabled={!stripe || submitting || (hasPhysical && shippingCents == null)}
+            disabled={
+              !stripe ||
+              submitting ||
+              !addressReady ||
+              (hasPhysical && shippingCents == null)
+            }
             className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60"
           >
             {submitting
               ? 'Processing…'
+              : !addressReady
+              ? 'Enter your details to continue'
               : hasPhysical && shippingCents == null
-              ? 'Enter address to continue'
+              ? 'Calculating shipping…'
               : `Pay · $${(totalCents / 100).toFixed(2)}`}
           </button>
           <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
