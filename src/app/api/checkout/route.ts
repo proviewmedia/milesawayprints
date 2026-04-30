@@ -68,14 +68,21 @@ export async function POST(req: Request) {
 
     const hasPhysical = items.some((it) => it.format === 'physical');
 
+    // Stripe Tax codes:
+    //   txcd_99999999 — General Tangible Personal Property (physical goods)
+    //   txcd_10000000 — Electronically Supplied Services (digital downloads)
     const line_items = items.map((it) => ({
       quantity: 1,
       price_data: {
         currency: 'usd',
         unit_amount: it.priceCents,
+        // tax_behavior 'unspecified' uses the Stripe Dashboard default
+        // (Automatic: exclusive in USD/CAD, inclusive in EU/UK currencies).
+        tax_behavior: 'unspecified' as const,
         product_data: {
           name: `${it.name} — ${it.format === 'digital' ? 'Digital' : it.size}`,
           description: it.location || undefined,
+          tax_code: it.format === 'digital' ? 'txcd_10000000' : 'txcd_99999999',
           metadata: {
             slug: it.slug,
             type: it.type,
@@ -187,6 +194,12 @@ export async function POST(req: Request) {
       ui_mode: 'embedded',
       mode: 'payment',
       line_items,
+      // Stripe Tax: automatically calculates VAT (EU/UK), GST (CA/AU/NZ),
+      // and US state sales tax based on the customer's billing/shipping
+      // address. Make sure Tax is enabled in Stripe Dashboard → Tax with
+      // Wyoming as head office and a physical-goods preset product
+      // category, otherwise this will fail.
+      automatic_tax: { enabled: true },
       return_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       ...(hasPhysical
         ? {
@@ -199,6 +212,10 @@ export async function POST(req: Request) {
                   type: 'fixed_amount',
                   fixed_amount: { amount: shippingCents, currency: 'usd' },
                   display_name: shippingMethodName,
+                  // Let Stripe decide based on dashboard default (Determine
+                  // automatically) — shipping is taxable in most US states +
+                  // EU when goods are taxable.
+                  tax_behavior: 'unspecified' as const,
                   delivery_estimate: shippingDeliveryEstimate
                     ? {
                         minimum: { unit: 'business_day', value: shippingDeliveryEstimate.min },

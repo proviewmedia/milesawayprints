@@ -161,9 +161,9 @@ export default function TermsPage() {
 
           <PolicySection title="Governing law & disputes">
             <p>
-              These Terms are governed by the laws of the State of Nevada, USA.
+              These Terms are governed by the laws of the State of Wyoming, USA.
               Any dispute arising out of these Terms or your use of the site
-              will be resolved in the courts of Clark County, Nevada — unless
+              will be resolved in the courts of Laramie County, Wyoming — unless
               we mutually agree to a different process.
             </p>
           </PolicySection>
