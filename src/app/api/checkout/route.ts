@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { getStripe } from '@/lib/stripe';
 import { CartItem } from '@/contexts/CartContext';
-import { getShippingRates } from '@/lib/printful';
 import { STRIPE_ALLOWED_COUNTRIES } from '@/data/countries';
 
 export const runtime = 'nodejs';
@@ -93,63 +92,13 @@ export async function POST(req: Request) {
     const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
     const first = items[0];
 
-    // Compute live shipping cost from Printful for physical orders.
-    // Falls back to a flat $5 USD if the rate call fails (so checkout
-    // still proceeds — we'd rather charge a guess than block the sale).
-    let shippingCents = 0;
-    let shippingDeliveryEstimate: { min: number; max: number } | null = null;
-    let shippingMethodName = 'Standard shipping';
-
-    if (hasPhysical) {
-      const physical = items.filter((it) => it.format === 'physical');
-      const slugs = Array.from(new Set(physical.map((it) => it.slug)));
-      const { data: designs } = await admin
-        .from('gallery_items')
-        .select('slug, printful_catalog_variants, printful_variants')
-        .in('slug', slugs);
-      // Use catalog variant_id for shipping rates (Printful requirement);
-      // fall back to sync_variant_id if catalog hasn't been backfilled yet.
-      const variantMap = new Map<string, Record<string, number>>(
-        (designs ?? []).map((d) => [d.slug as string, (d.printful_catalog_variants ?? d.printful_variants ?? {}) as Record<string, number>]),
-      );
-      const printfulItems: Array<{ variant_id: number; quantity: number }> = [];
-      for (const it of physical) {
-        const v = variantMap.get(it.slug)?.[it.size];
-        if (v) printfulItems.push({ variant_id: v, quantity: 1 });
-      }
-
-      if (printfulItems.length > 0 && body.shipping?.country) {
-        try {
-          const rates = await getShippingRates({
-            recipient: {
-              country_code: body.shipping.country.toUpperCase(),
-              state_code: body.shipping.state?.toUpperCase(),
-              zip: body.shipping.zip,
-            },
-            items: printfulItems,
-          });
-          if (rates.length > 0) {
-            const cheapest = rates
-              .map((r) => ({ ...r, n: parseFloat(r.rate) }))
-              .sort((a, b) => a.n - b.n)[0];
-            shippingCents = Math.round(cheapest.n * 100);
-            shippingMethodName = cheapest.name || 'Standard shipping';
-            if (cheapest.minDeliveryDays && cheapest.maxDeliveryDays) {
-              shippingDeliveryEstimate = {
-                min: cheapest.minDeliveryDays,
-                max: cheapest.maxDeliveryDays,
-              };
-            }
-          } else {
-            shippingCents = 500;
-          }
-        } catch {
-          shippingCents = 500;
-        }
-      } else {
-        shippingCents = 500;
-      }
-    }
+    // Flat $7 shipping for physical orders, anywhere we ship.
+    // Printful's actual rate is roughly $5 US / $8–10 international; the
+    // flat fee absorbs both for predictable customer-facing pricing.
+    const shippingCents = hasPhysical ? 700 : 0;
+    const shippingMethodName = 'Standard shipping';
+    const shippingDeliveryEstimate: { min: number; max: number } | null =
+      hasPhysical ? { min: 5, max: 14 } : null;
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
@@ -192,12 +141,13 @@ export async function POST(req: Request) {
       ui_mode: 'embedded',
       mode: 'payment',
       line_items,
-      // Stripe Tax: automatically calculates VAT (EU/UK), GST (CA/AU/NZ),
-      // and US state sales tax based on the customer's billing/shipping
-      // address. Make sure Tax is enabled in Stripe Dashboard → Tax with
-      // Wyoming as head office and a physical-goods preset product
-      // category, otherwise this will fail.
-      automatic_tax: { enabled: true },
+      // Stripe Tax disabled — we're below nexus thresholds in every
+      // state and not registered anywhere yet, so tax would show as
+      // $0 to the customer (confusing). Re-enable this AND add the
+      // relevant state registration in Stripe Dashboard → Tax →
+      // Registrations once we cross a threshold (typically $100K /
+      // 200 transactions per state).
+      automatic_tax: { enabled: false },
       return_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       ...(hasPhysical
         ? {

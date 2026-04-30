@@ -116,10 +116,9 @@ export default function ShippingPage() {
 
           <PolicySection title="Shipping cost">
             <p>
-              Free U.S. shipping on orders over <strong className="text-ink">$75</strong>;
-              flat <strong className="text-ink">$5</strong> below that. International
-              shipping is calculated at checkout based on size and destination — no
-              surprises after.
+              Flat <strong className="text-ink">$7</strong> shipping on every order,
+              anywhere we ship — U.S. or international. No size-based surcharges,
+              no tiers, no surprises at checkout.
             </p>
           </PolicySection>
         </div>

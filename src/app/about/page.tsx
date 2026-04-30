@@ -82,7 +82,7 @@ export default function AboutPage() {
             },
             {
               title: 'Shipped worldwide',
-              desc: 'Tracked, insured, and packed flat. Free U.S. shipping over $75. International orders ship through our printing partners.',
+              desc: 'Tracked, insured, and packed flat. Flat $7 shipping anywhere we deliver, with international orders fulfilled through our regional printing partners.',
             },
           ].map((v) => (
             <div key={v.title}>
