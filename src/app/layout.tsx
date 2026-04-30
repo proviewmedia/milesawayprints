@@ -4,6 +4,8 @@ import { CartProvider } from '@/contexts/CartContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import CartDrawer from '@/components/CartDrawer';
 import SearchOverlay from '@/components/SearchOverlay';
+import CookieBanner from '@/components/CookieBanner';
+import Analytics from '@/lib/analytics';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://milesawayprints.com'),
@@ -55,6 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <CartDrawer />
             <SearchOverlay />
+            <CookieBanner />
+            <Analytics />
           </SearchProvider>
         </CartProvider>
       </body>
