@@ -11,6 +11,7 @@ function getResend(): Resend | null {
 
 const FROM = 'Miles Away Prints <orders@milesawayprints.com>';
 const REPLY_TO = 'milesawayprintsllc@gmail.com';
+const SUPPORT_INBOX = 'milesawayprintsllc@gmail.com';
 
 interface DigitalDeliveryArgs {
   to: string;
@@ -67,6 +68,37 @@ export async function sendDigitalDeliveryEmail(args: DigitalDeliveryArgs) {
     to: args.to,
     reply_to: REPLY_TO,
     subject: `Your ${args.productName} print is ready`,
+    html,
+  });
+}
+
+interface ContactArgs {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export async function sendContactEmail(args: ContactArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY missing; skipping contact send');
+    return { skipped: true };
+  }
+  const html = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0e0e0e;background:#fff;">
+<h2 style="font-size:18px;margin:0 0 16px;">New contact form message</h2>
+<p style="font-size:14px;color:#6b6b6b;margin:0 0 4px;"><strong style="color:#0e0e0e;">From:</strong> ${escapeHtml(args.name)} &lt;${escapeHtml(args.email)}&gt;</p>
+<p style="font-size:14px;color:#6b6b6b;margin:0 0 16px;"><strong style="color:#0e0e0e;">Subject:</strong> ${escapeHtml(args.subject)}</p>
+<hr style="border:none;border-top:1px solid #e8e6e0;margin:16px 0;" />
+<pre style="font-family:-apple-system,sans-serif;font-size:14px;color:#0e0e0e;line-height:1.5;white-space:pre-wrap;margin:0;">${escapeHtml(args.message)}</pre>
+</body></html>`.trim();
+  return resend.emails.send({
+    from: FROM,
+    to: SUPPORT_INBOX,
+    reply_to: args.email,
+    subject: `[Contact] ${args.subject}`,
     html,
   });
 }
