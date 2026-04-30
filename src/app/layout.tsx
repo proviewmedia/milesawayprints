@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { CartProvider } from '@/contexts/CartContext';
+import { SearchProvider } from '@/contexts/SearchContext';
 import CartDrawer from '@/components/CartDrawer';
+import SearchOverlay from '@/components/SearchOverlay';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://milesawayprints.com'),
   title: {
     default: 'Miles Away Prints | Custom Location Art Prints',
     template: '%s | Miles Away Prints',
@@ -17,6 +20,8 @@ export const metadata: Metadata = {
     'marathon print',
     'golf course print',
     'city map print',
+    'skyline print',
+    'F1 circuit print',
     'personalized art',
     'custom wall art',
   ],
@@ -46,8 +51,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-white min-h-screen">
         <CartProvider>
-          {children}
-          <CartDrawer />
+          <SearchProvider>
+            {children}
+            <CartDrawer />
+            <SearchOverlay />
+          </SearchProvider>
         </CartProvider>
       </body>
     </html>

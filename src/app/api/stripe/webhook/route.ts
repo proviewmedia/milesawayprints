@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase';
 import { createOrder as createPrintfulOrder, PrintfulOrderItem } from '@/lib/printful';
+import { sendDigitalDeliveryEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+const DIGITAL_DOWNLOAD_EXPIRES_DAYS = 30;
+const DIGITAL_DOWNLOAD_MAX = 5;
 
 interface CartSnapshotItem {
   slug: string;
@@ -100,6 +105,43 @@ export async function POST(req: Request) {
 
       const cart = (order.cart_snapshot as CartSnapshotItem[] | null) ?? [];
       const physicalItems = cart.filter((it) => it.format === 'physical');
+      const digitalItems = cart.filter((it) => it.format === 'digital');
+
+      // Digital delivery — generate per-customer access token, set expiry,
+      // mark the order approved (which gates the download UI), and email
+      // the customer their link via Resend.
+      if (digitalItems.length > 0) {
+        const token = randomBytes(32).toString('hex');
+        const expiresAt = new Date(
+          Date.now() + DIGITAL_DOWNLOAD_EXPIRES_DAYS * 24 * 60 * 60 * 1000,
+        );
+        update.digital_download_token = token;
+        update.digital_download_expires_at = expiresAt.toISOString();
+        update.digital_download_max = DIGITAL_DOWNLOAD_MAX;
+        update.digital_download_count = 0;
+        // 'approved' is the existing enum value the order page uses to
+        // reveal the download button.
+        update.status = 'approved';
+
+        try {
+          const origin = new URL(req.url).origin;
+          // Use the first digital item for the email title; multi-item
+          // digital orders are rare for this catalog.
+          const lead = digitalItems[0];
+          await sendDigitalDeliveryEmail({
+            to: customerEmail,
+            customerName: customerName || 'there',
+            productName: lead.name,
+            downloadUrl: `${origin}/download/${token}`,
+            expiresAt,
+            maxDownloads: DIGITAL_DOWNLOAD_MAX,
+          });
+        } catch (err) {
+          console.error('[stripe webhook] sendDigitalDeliveryEmail failed', err);
+          // Don't fail the webhook — the customer can still grab the link
+          // from /order/[token].
+        }
+      }
 
       let printfulOrderId: string | null = null;
 

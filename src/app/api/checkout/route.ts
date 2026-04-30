@@ -18,6 +18,38 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Empty cart' }, { status: 400 });
     }
 
+    const admin = createAdminClient();
+
+    // Block digital purchase for items that don't have a digital file uploaded
+    // yet, and for custom-design items (no source file exists at order time).
+    const digitalItems = items.filter((it) => it.format === 'digital');
+    if (digitalItems.length > 0) {
+      const customDigital = digitalItems.find((it) => it.isCustom);
+      if (customDigital) {
+        return NextResponse.json(
+          { error: 'Digital format is not available for custom prints yet. Please choose Physical for custom designs.' },
+          { status: 400 },
+        );
+      }
+      const slugs = Array.from(new Set(digitalItems.map((it) => it.slug)));
+      const { data: digitalDesigns } = await admin
+        .from('gallery_items')
+        .select('slug, name, digital_file_path')
+        .in('slug', slugs);
+      const missing = digitalItems.filter((it) => {
+        const row = digitalDesigns?.find((d) => d.slug === it.slug);
+        return !row?.digital_file_path;
+      });
+      if (missing.length > 0) {
+        return NextResponse.json(
+          {
+            error: `Digital download isn't ready for ${missing.map((m) => m.name).join(', ')}. Please choose the Physical option, or pick a different print.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const stripe = getStripe();
 
     const hasPhysical = items.some((it) => it.format === 'physical');
@@ -43,8 +75,6 @@ export async function POST(req: Request) {
 
     const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
     const first = items[0];
-
-    const admin = createAdminClient();
 
     const { data: order, error: orderErr } = await admin
       .from('orders')
