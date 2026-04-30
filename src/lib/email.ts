@@ -10,6 +10,7 @@ function getResend(): Resend | null {
 }
 
 const FROM = 'Miles Away Prints <orders@milesawayprints.com>';
+const REPLY_TO = 'milesawayprintsllc@gmail.com';
 
 interface DigitalDeliveryArgs {
   to: string;
@@ -64,6 +65,7 @@ export async function sendDigitalDeliveryEmail(args: DigitalDeliveryArgs) {
   return resend.emails.send({
     from: FROM,
     to: args.to,
+    replyTo: REPLY_TO,
     subject: `Your ${args.productName} print is ready`,
     html,
   });

@@ -31,7 +31,7 @@ export async function GET(_req: Request, { params }: { params: { token: string }
     new Date(order.digital_download_expires_at) < new Date()
   ) {
     return gone(
-      'This download link has expired. If you still need the file, reach out to support@milesawayprints.com and we\'ll help.',
+      'This download link has expired. If you still need the file, reach out to milesawayprintsllc@gmail.com and we\'ll help.',
     );
   }
 
@@ -42,7 +42,7 @@ export async function GET(_req: Request, { params }: { params: { token: string }
     order.digital_download_count >= order.digital_download_max
   ) {
     return gone(
-      'This download link has been used the maximum number of times. Reach out to support@milesawayprints.com if you need help.',
+      'This download link has been used the maximum number of times. Reach out to milesawayprintsllc@gmail.com if you need help.',
     );
   }
 
@@ -59,7 +59,7 @@ export async function GET(_req: Request, { params }: { params: { token: string }
 
   if (!design?.digital_file_path) {
     return gone(
-      'Your digital file isn\'t ready yet. Reach out to support@milesawayprints.com — we\'ll get it sent over.',
+      'Your digital file isn\'t ready yet. Reach out to milesawayprintsllc@gmail.com — we\'ll get it sent over.',
     );
   }
 
