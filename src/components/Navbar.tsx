@@ -23,7 +23,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
         <div className="max-w-[1400px] mx-auto px-6 py-1.5 flex items-center justify-between">
           <span className="hidden md:inline opacity-90">{defaultCountry}</span>
           <span className="font-medium tracking-wide flex-1 text-center md:text-center">
-            Flat $7 shipping worldwide
+            Worldwide shipping from $7
           </span>
           <Link href="/about" className="hidden md:inline opacity-90 hover:opacity-100">
             About

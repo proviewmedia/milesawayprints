@@ -116,10 +116,15 @@ export default function ShippingPage() {
 
           <PolicySection title="Shipping cost">
             <p>
-              Flat <strong className="text-ink">$7</strong> shipping on every order,
-              anywhere we ship — U.S. or international. No size-based surcharges,
-              no tiers, no surprises at checkout.
+              One flat rate per region — same price whether you order an 8×10 or
+              a 24×36, no surprises at checkout:
             </p>
+            <ul className="mt-3 space-y-1.5 text-sm text-ink">
+              <li>· United States — <strong>$7</strong></li>
+              <li>· Canada — <strong>$10</strong></li>
+              <li>· United Kingdom & EU — <strong>$12</strong></li>
+              <li>· Rest of world — <strong>$15</strong></li>
+            </ul>
           </PolicySection>
         </div>
       </section>

@@ -82,7 +82,7 @@ export default function AboutPage() {
             },
             {
               title: 'Shipped worldwide',
-              desc: 'Tracked, insured, and packed flat. Flat $7 shipping anywhere we deliver, with international orders fulfilled through our regional printing partners.',
+              desc: 'Tracked, insured, and packed flat. Flat regional shipping rates — $7 within the U.S., $10–$15 internationally — with orders fulfilled through our regional printing partners.',
             },
           ].map((v) => (
             <div key={v.title}>

@@ -92,10 +92,13 @@ export async function POST(req: Request) {
     const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
     const first = items[0];
 
-    // Flat $7 shipping for physical orders, anywhere we ship.
-    // Printful's actual rate is roughly $5 US / $8–10 international; the
-    // flat fee absorbs both for predictable customer-facing pricing.
-    const shippingCents = hasPhysical ? 700 : 0;
+    // Tiered regional shipping. Each tier roughly tracks Printful's
+    // actual cost (US ~$5, Canada ~$8, UK/EU ~$10, RoW ~$13) plus a
+    // small buffer to cover variance and protect margin. The customer
+    // sees one flat rate per region rather than a per-ZIP quote.
+    const shippingCents = hasPhysical
+      ? shippingForRegion(body.shipping?.country)
+      : 0;
     const shippingMethodName = 'Standard shipping';
     const shippingDeliveryEstimate: { min: number; max: number } | null =
       hasPhysical ? { min: 5, max: 14 } : null;
@@ -203,4 +206,18 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
+}
+
+const EU_AND_UK = new Set([
+  'GB', 'IE', 'FR', 'DE', 'IT', 'ES', 'PT', 'NL', 'BE', 'LU', 'AT', 'CH',
+  'SE', 'NO', 'DK', 'FI', 'IS', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'GR',
+  'HR', 'SI', 'EE', 'LV', 'LT', 'MT', 'CY',
+]);
+
+function shippingForRegion(country: string | undefined): number {
+  const c = (country ?? 'US').toUpperCase();
+  if (c === 'US') return 700; // $7
+  if (c === 'CA') return 1000; // $10
+  if (EU_AND_UK.has(c)) return 1200; // $12
+  return 1500; // Rest of world: $15
 }
