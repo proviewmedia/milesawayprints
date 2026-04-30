@@ -65,7 +65,7 @@ export async function sendDigitalDeliveryEmail(args: DigitalDeliveryArgs) {
   return resend.emails.send({
     from: FROM,
     to: args.to,
-    replyTo: REPLY_TO,
+    reply_to: REPLY_TO,
     subject: `Your ${args.productName} print is ready`,
     html,
   });
