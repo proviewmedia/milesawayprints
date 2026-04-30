@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Star } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import PrintPreview from '@/components/PrintPreview';
 import WallFrame from '@/components/WallFrame';
@@ -65,7 +65,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarShell />
 
       {/* Hero — split-screen, restrained type, lifestyle placeholder */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">

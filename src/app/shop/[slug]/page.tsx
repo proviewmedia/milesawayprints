@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import DesignDetail from './DesignDetail';
 import { supabase } from '@/lib/supabase';
@@ -156,7 +156,7 @@ export default async function DesignPage({ params }: { params: { slug: string } 
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
-      <Navbar />
+      <NavbarShell />
       <DesignDetail design={design} related={related} />
       <Footer />
     </>

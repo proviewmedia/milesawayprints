@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { createAdminClient } from '@/lib/supabase';
 import AccountCallToAction from './AccountCallToAction';
@@ -37,7 +37,7 @@ export default async function CheckoutSuccessPage({
   return (
     <>
       <ClearCartOnMount />
-      <Navbar />
+      <NavbarShell />
       <section className="pt-32 md:pt-40 pb-24 min-h-[70vh]">
         <div className="max-w-[520px] mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-4">

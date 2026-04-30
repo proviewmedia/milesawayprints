@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import PrintCustomizer from './PrintCustomizer';
 import { PRINT_CONFIGS, PrintType, DEFAULT_GALLERY, GalleryItem } from '@/data/prints';
@@ -48,7 +48,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
 
   return (
     <>
-      <Navbar />
+      <NavbarShell />
       <PrintCustomizer config={config} gallery={gallery} />
       <Footer />
     </>

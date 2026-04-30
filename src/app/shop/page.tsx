@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import ShopClient from './ShopClient';
 import { supabase } from '@/lib/supabase';
@@ -63,7 +63,7 @@ export default async function ShopPage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarShell />
       <ShopClient designs={designs} collections={collections} />
       <Footer />
     </>

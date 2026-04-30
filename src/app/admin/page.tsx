@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Package, Clock, CheckCircle2, Mail, ArrowRight } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import OrderActions from './OrderActions';
 import { createAdminClient } from '@/lib/supabase';
@@ -44,7 +44,7 @@ export default async function AdminPage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarShell />
       <section className="pt-28 pb-16 bg-soft min-h-screen">
         <div className="max-w-[1280px] mx-auto px-6">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-6">

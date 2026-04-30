@@ -3,16 +3,12 @@ import { createAdminClient } from '@/lib/supabase';
 import { getStripe } from '@/lib/stripe';
 import { CartItem } from '@/contexts/CartContext';
 import { getShippingRates } from '@/lib/printful';
+import { STRIPE_ALLOWED_COUNTRIES } from '@/data/countries';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://milesawayprints.com';
-// Stripe accepts ISO 3166-1 alpha-2 codes. This list intentionally
-// covers Printful's main delivery markets; expand as needed.
-const STRIPE_ALLOWED_COUNTRIES = [
-  'US','CA','GB','IE','FR','DE','IT','ES','PT','NL','BE','LU','AT','CH','SE','NO','DK','FI','IS','PL','CZ','SK','HU','RO','BG','GR','HR','SI','EE','LV','LT','MT','CY','AU','NZ','JP','SG','HK','MX','BR','AR','CL','CO','PE',
-] as const;
 
 interface CheckoutBody {
   items: CartItem[];

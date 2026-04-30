@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import SignOutButton from './SignOutButton';
@@ -36,7 +36,7 @@ export default async function AccountPage() {
 
   return (
     <>
-      <Navbar />
+      <NavbarShell />
       <section className="pt-32 md:pt-36 pb-20">
         <div className="max-w-[1100px] mx-auto px-6">
           <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
