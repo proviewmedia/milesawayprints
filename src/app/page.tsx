@@ -23,29 +23,41 @@ async function getReviews() {
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * One representative print per major category (golf, stadium, airport,
+ * marathon, city). Tries the DB first; if a category has no synced
+ * products we fall back to the DEFAULT_GALLERY sample for that type
+ * so the homepage still shows all five tiles even before Printful sync
+ * covers every category.
+ */
 async function getFeaturedDesigns(): Promise<DesignSummary[]> {
-  const { data: featured } = await supabase
-    .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
-    .eq('active', true)
-    .eq('featured', true)
-    .order('sort_order', { ascending: true })
-    .limit(4);
-
-  if (featured && featured.length > 0) {
-    return featured.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
-  }
-
-  // Fall back to any active design (no flagged-featured items yet)
   const { data } = await supabase
     .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents, featured, sort_order')
     .eq('active', true)
-    .order('sort_order', { ascending: true })
-    .limit(4);
+    .in('print_type_slug', CATEGORY_ORDER as unknown as string[])
+    .order('featured', { ascending: false })
+    .order('sort_order', { ascending: true });
 
-  if (!data) return [];
-  return data.map((r: GalleryItemWithMeta) => toDesignSummary(r, r.print_type_slug as PrintType));
+  const byType = new Map<PrintType, GalleryItemWithMeta>();
+  for (const row of (data ?? []) as GalleryItemWithMeta[]) {
+    const type = row.print_type_slug as PrintType;
+    if (!byType.has(type)) byType.set(type, row);
+  }
+
+  return CATEGORY_ORDER.map((type) => {
+    const row = byType.get(type);
+    if (row) return toDesignSummary(row, type);
+    // No synced product for this type — render the default sample
+    const sample = DEFAULT_GALLERY[type][0];
+    return {
+      slug: `prints/${type}`, // routes to the custom-design flow
+      name: PRINT_CONFIGS[type].detailsLabel,
+      location: '',
+      type,
+      values: sample.values,
+    } as DesignSummary;
+  });
 }
 
 export default async function HomePage() {
@@ -140,7 +152,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {featured.map((d) => (
               <DesignCardWrapper key={d.slug} design={d} />
             ))}

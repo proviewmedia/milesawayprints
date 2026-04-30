@@ -13,7 +13,7 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50">
       {/* Top utility bar */}
       <div className="bg-ink text-paper text-xs">
-        <div className="max-w-[1400px] mx-auto px-6 py-2.5 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-6 py-1.5 flex items-center justify-between">
           <span className="hidden md:inline opacity-90">United States</span>
           <span className="font-medium tracking-wide flex-1 text-center md:text-center">
             Free U.S. shipping on orders over $75
@@ -26,10 +26,10 @@ export default function Navbar() {
 
       {/* Main nav */}
       <nav className="bg-paper border-b border-border">
-        <div className="max-w-[1400px] mx-auto px-6 py-5 flex items-center justify-between gap-6">
+        <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center justify-between gap-6">
           <Link
             href="/"
-            className="text-[22px] font-medium tracking-tight text-ink no-underline whitespace-nowrap"
+            className="text-[19px] font-medium tracking-tight text-ink no-underline whitespace-nowrap"
           >
             Miles Away <span className="font-normal text-mid">Prints</span>
           </Link>

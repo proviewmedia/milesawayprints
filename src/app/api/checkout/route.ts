@@ -84,10 +84,10 @@ export async function POST(req: Request) {
     }));
 
     const session = await stripe.checkout.sessions.create({
+      ui_mode: 'embedded',
       mode: 'payment',
       line_items,
-      success_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${APP_URL}/checkout?canceled=1`,
+      return_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       ...(hasPhysical
         ? {
             shipping_address_collection: { allowed_countries: ['US'] },
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
       .update({ stripe_checkout_session_id: session.id, cart_snapshot: cartSnapshot })
       .eq('id', order.id);
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ clientSecret: session.client_secret });
   } catch (err) {
     return NextResponse.json(
       { error: 'Checkout failed', detail: err instanceof Error ? err.message : String(err) },

@@ -1,49 +1,68 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Lock } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout,
+} from '@stripe/react-stripe-js';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/contexts/CartContext';
 
 const SHIPPING_FLAT_CENTS = 500;
 
-export default function CheckoutPage() {
-  const { items, subtotalCents, clear } = useCart();
-  const [canceled, setCanceled] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('canceled') === '1') setCanceled(true);
-  }, []);
+export default function CheckoutPage() {
+  const { items, subtotalCents } = useCart();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const hasPhysical = useMemo(() => items.some((i) => i.format === 'physical'), [items]);
   const shippingCents = hasPhysical ? SHIPPING_FLAT_CENTS : 0;
   const totalCents = subtotalCents + shippingCents;
 
-  const handleCheckout = async () => {
-    setSubmitting(true);
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    if (itemsRef.current.length === 0) return;
+    let cancelled = false;
+    setLoading(true);
     setError(null);
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
+    fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: itemsRef.current }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (!data.clientSecret) {
+          throw new Error(data.detail || data.error || 'Could not start checkout');
+        }
+        setClientSecret(data.clientSecret);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Something went wrong');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error || 'Checkout failed');
-      clear();
-      if (typeof window !== 'undefined') window.location.href = data.url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-      setSubmitting(false);
-    }
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const fetchClientSecret = useCallback(() => {
+    return Promise.resolve(clientSecret ?? '');
+  }, [clientSecret]);
 
   if (items.length === 0) {
     return (
@@ -68,28 +87,19 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <section className="pt-28 md:pt-32 pb-20 min-h-screen">
-        <div className="max-w-[960px] mx-auto px-6">
-          <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-2">
-            Review your order
+      <section className="pt-28 pb-10 md:pt-[96px] md:pb-0 md:h-[calc(100vh)] md:overflow-hidden">
+        <div className="h-full max-w-[1200px] mx-auto px-6 flex flex-col">
+          <h1 className="flex-shrink-0 text-3xl md:text-4xl font-medium tracking-tight text-ink leading-[1.05] py-6 md:py-7">
+            Checkout
           </h1>
-          <p className="text-mid mb-10">
-            Confirm the items below, then continue to secure payment.
-          </p>
 
-          {canceled && (
-            <div className="border border-border bg-soft p-4 mb-8 text-sm text-ink">
-              Checkout was cancelled. Your cart has been kept — try again any time.
-            </div>
-          )}
-
-          <div className="grid md:grid-cols-[1.2fr_0.8fr] gap-10">
-            {/* Items */}
-            <div>
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
-                Items
+          <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 lg:gap-14 md:flex-1 md:min-h-0 md:pb-6">
+            {/* Left — order summary */}
+            <div className="md:flex md:flex-col md:h-full md:min-h-0">
+              <h2 className="md:flex-shrink-0 text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
+                Order
               </h2>
-              <div className="border-t border-border">
+              <div className="md:flex-1 md:min-h-0 md:overflow-y-auto md:pr-4 pt-1">
                 {items.map((it) => (
                   <div key={it.id} className="flex gap-5 py-5 border-b border-border">
                     <div className="w-20 h-24 flex-shrink-0 bg-soft overflow-hidden flex items-center justify-center">
@@ -117,57 +127,66 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 ))}
+
+                <div className="mt-8 space-y-2.5 text-sm">
+                  <div className="flex justify-between text-mid">
+                    <span>Subtotal</span>
+                    <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-mid">
+                    <span>Shipping</span>
+                    <span className="text-ink">
+                      {hasPhysical ? `$${(shippingCents / 100).toFixed(2)}` : 'Free (digital)'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pt-3 mt-2 border-t border-border">
+                    <span className="text-ink">Total</span>
+                    <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <Link
+                  href="/shop"
+                  className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-8"
+                >
+                  ← Continue shopping
+                </Link>
+                <p className="text-[12px] text-mid mt-3 mb-2">
+                  Need to change your order? Open the cart from the navbar to edit items.
+                </p>
               </div>
             </div>
 
-            {/* Summary */}
-            <aside className="md:sticky md:top-32 md:self-start">
-              <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider mb-4">
-                Summary
+            {/* Right — embedded payment */}
+            <aside className="md:flex md:flex-col md:h-full md:min-h-0">
+              <h2 className="md:flex-shrink-0 text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border">
+                Payment
               </h2>
-              <div className="border-t border-border py-5 space-y-2.5 text-sm">
-                <div className="flex justify-between text-mid">
-                  <span>Subtotal</span>
-                  <span className="text-ink">${(subtotalCents / 100).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-mid">
-                  <span>Shipping</span>
-                  <span className="text-ink">
-                    {hasPhysical ? `$${(shippingCents / 100).toFixed(2)}` : 'Free (digital)'}
-                  </span>
-                </div>
-                <div className="flex justify-between pt-3 mt-2 border-t border-border">
-                  <span className="text-ink">Total</span>
-                  <span className="text-ink text-lg">${(totalCents / 100).toFixed(2)}</span>
-                </div>
+              <div className="md:flex-1 md:min-h-0 md:overflow-y-auto pt-6 md:pr-1">
+                {error && (
+                  <p className="text-sm text-accent mb-4">{error}</p>
+                )}
+                {loading && !clientSecret && (
+                  <div className="py-16 text-center text-sm text-mid">
+                    Loading secure payment…
+                  </div>
+                )}
+                {clientSecret && (
+                  <>
+                    <EmbeddedCheckoutProvider
+                      stripe={stripePromise}
+                      options={{ fetchClientSecret }}
+                    >
+                      <EmbeddedCheckout />
+                    </EmbeddedCheckoutProvider>
+                    <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5 mt-4 mb-2">
+                      <Lock size={12} strokeWidth={1.75} /> Secure payment powered by Stripe
+                    </p>
+                  </>
+                )}
               </div>
-
-              {error && (
-                <p className="text-sm text-accent mb-3">{error}</p>
-              )}
-
-              <button
-                onClick={handleCheckout}
-                disabled={submitting}
-                className="w-full bg-ink text-paper py-4 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60 mb-3"
-              >
-                {submitting ? 'Redirecting…' : `Continue to payment · $${(totalCents / 100).toFixed(2)}`}
-              </button>
-              <p className="text-[12px] text-mid text-center flex items-center justify-center gap-1.5">
-                <Lock size={12} strokeWidth={1.75} /> Secure checkout via Stripe
-              </p>
-              <p className="text-[12px] text-mid text-center mt-3">
-                Email and shipping address are collected on the next step.
-              </p>
             </aside>
           </div>
-
-          <Link
-            href="/shop"
-            className="inline-block text-sm text-mid hover:text-ink underline underline-offset-2 mt-12"
-          >
-            ← Continue shopping
-          </Link>
         </div>
       </section>
       <Footer />
