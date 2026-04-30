@@ -58,7 +58,7 @@ export default function CheckoutForm({ initialCountry = 'US' }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-md mx-auto px-6 text-center py-20">
+      <div className="max-w-md mx-auto px-6 text-center pt-32 md:pt-40 pb-20">
         <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink mb-3">
           Your cart is empty
         </h1>
@@ -72,7 +72,7 @@ export default function CheckoutForm({ initialCountry = 'US' }: Props) {
 
   if (error) {
     return (
-      <div className="max-w-md mx-auto px-6 text-center py-20">
+      <div className="max-w-md mx-auto px-6 text-center pt-32 md:pt-40 pb-20">
         <p className="text-sm text-accent mb-4">{error}</p>
         <Link href="/shop" className="btn-secondary">
           Back to shop
@@ -83,7 +83,9 @@ export default function CheckoutForm({ initialCountry = 'US' }: Props) {
 
   if (!clientSecret) {
     return (
-      <div className="text-center py-20 text-sm text-mid">Loading secure payment…</div>
+      <div className="text-center pt-32 md:pt-40 pb-20 text-sm text-mid min-h-[60vh]">
+        Loading secure payment…
+      </div>
     );
   }
 
@@ -134,9 +136,10 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
   const totalCents = subtotalCents + (shippingCents ?? 0);
 
   const handleAddressChange = (event: StripeAddressElementChangeEvent) => {
-    if (!event.complete) return;
     const a = event.value.address;
-    if (!a?.country) return;
+    // Fire as soon as we have enough to quote shipping — country + postal_code
+    // is enough for Printful in most regions. Don't wait for full completion.
+    if (!a?.country || !a.postal_code) return;
 
     if (updateTimer.current) clearTimeout(updateTimer.current);
     updateTimer.current = setTimeout(async () => {
