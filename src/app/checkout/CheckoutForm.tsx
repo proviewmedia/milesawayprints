@@ -231,19 +231,6 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
       confirmParams: {
         return_url: `${window.location.origin}/checkout/success?token=${orderToken}`,
         receipt_email: address.email,
-        shipping: hasPhysical
-          ? {
-              name: address.name,
-              address: {
-                line1: address.line1,
-                line2: address.line2 || undefined,
-                city: address.city,
-                state: address.state || undefined,
-                postal_code: address.postalCode,
-                country: address.country,
-              },
-            }
-          : undefined,
         payment_method_data: {
           billing_details: {
             name: address.name,
@@ -428,7 +415,12 @@ function InnerForm({ paymentIntentId, orderToken, initialCountry }: InnerFormPro
           <h2 className="text-[13px] font-medium text-ink uppercase tracking-wider pb-4 border-b border-border pt-2">
             Payment
           </h2>
-          <PaymentElement options={{ layout: 'tabs' }} />
+          <PaymentElement
+            options={{
+              layout: 'tabs',
+              fields: { billingDetails: 'never' },
+            }}
+          />
 
           {submitError && <p className="text-sm text-accent">{submitError}</p>}
 
