@@ -92,15 +92,13 @@ export async function POST(req: Request) {
     const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
     const first = items[0];
 
-    // Per-item regional shipping. Base covers the first print at
-    // Printful's quoted regional rate, then each additional print
-    // adds the per-item bump. Rates are deliberately set above
-    // Printful's actual cost to absorb destination variance —
-    // especially important internationally where rates swing
-    // widely between, e.g., Germany and Brazil.
-    const physicalCount = items.filter((it) => it.format === 'physical').length;
-    const shippingCents = physicalCount > 0
-      ? shippingForRegion(body.shipping?.country, physicalCount)
+    // Per-item regional shipping with size-band surcharges (volumetric).
+    // Each item gets a tube size — small / medium / large — based on its
+    // print size; the largest tube in the cart sets the base rate, and
+    // every additional item adds its own per-band per-item bump.
+    const physicalItems = items.filter((it) => it.format === 'physical');
+    const shippingCents = physicalItems.length > 0
+      ? shippingForCart(body.shipping?.country, physicalItems.map((it) => it.size))
       : 0;
     const shippingMethodName = 'Standard shipping';
     const shippingDeliveryEstimate: { min: number; max: number } | null =
@@ -217,20 +215,49 @@ const EU_AND_UK = new Set([
   'HR', 'SI', 'EE', 'LV', 'LT', 'MT', 'CY',
 ]);
 
-function shippingForRegion(country: string | undefined, count: number): number {
+type ShippingBand = 'small' | 'medium' | 'large';
+type ShippingRegion = 'US' | 'CA' | 'EU' | 'ROW';
+
+// Tube size groupings driven by Printful's poster shipping tiers.
+// 5×7–12×18 share the small tube; 16×20–18×24 the medium tube;
+// 20×30 and 24×36 require the long tube which costs more, especially
+// internationally.
+function bandFor(size: string): ShippingBand {
+  const s = size.toLowerCase();
+  if (s === '20x30' || s === '24x36') return 'large';
+  if (s === '16x20' || s === '18x24') return 'medium';
+  return 'small';
+}
+
+function regionFor(country: string | undefined): ShippingRegion {
   const c = (country ?? 'US').toUpperCase();
-  // [base for first print, per-additional-print bump], in cents.
-  // Buffered above Printful's actual cost to protect margin against
-  // rate variance within each region.
-  const tiers: Record<string, [number, number]> = {
-    US: [700, 300],
-    CA: [1100, 300],
-    EU: [1400, 300],
-    ROW: [2000, 400],
-  };
-  const tier = c === 'US' ? tiers.US
-    : c === 'CA' ? tiers.CA
-    : EU_AND_UK.has(c) ? tiers.EU
-    : tiers.ROW;
-  return tier[0] + Math.max(0, count - 1) * tier[1];
+  if (c === 'US') return 'US';
+  if (c === 'CA') return 'CA';
+  if (EU_AND_UK.has(c)) return 'EU';
+  return 'ROW';
+}
+
+// [base (first item), per-additional-item], in cents, per region per band.
+// Buffered above Printful's actual cost so we never lose money on a sale.
+const SHIPPING_TIERS: Record<ShippingRegion, Record<ShippingBand, [number, number]>> = {
+  US:  { small: [700,  300], medium: [750,  300], large: [900,  400] },
+  CA:  { small: [1100, 300], medium: [1150, 300], large: [1300, 400] },
+  EU:  { small: [1400, 300], medium: [1450, 300], large: [1600, 400] },
+  ROW: { small: [2000, 400], medium: [2100, 400], large: [2400, 500] },
+};
+
+function shippingForCart(country: string | undefined, sizes: string[]): number {
+  if (sizes.length === 0) return 0;
+  const region = SHIPPING_TIERS[regionFor(country)];
+  const bands = sizes.map(bandFor);
+  // The largest tube in the cart drives the base rate (one tube ships
+  // the whole order). The "first item" is consumed by that largest tube.
+  const order: ShippingBand[] = ['large', 'medium', 'small'];
+  const largest = order.find((b) => bands.includes(b))!;
+  const remaining = [...bands];
+  remaining.splice(remaining.indexOf(largest), 1);
+  return (
+    region[largest][0] +
+    remaining.reduce((sum, b) => sum + region[b][1], 0)
+  );
 }

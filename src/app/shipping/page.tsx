@@ -116,19 +116,42 @@ export default function ShippingPage() {
 
           <PolicySection title="Shipping cost">
             <p>
-              Rates depend on where the order ships and how many prints are in
-              the box. The first print covers most of the cost; each additional
-              print adds a small per-item bump. Same rate whether you order an
-              8×10 or a 24×36 — no size surcharges.
+              Rates depend on where the order ships, how many prints are in the
+              box, and the largest size in the order (16×20 and up ship in a
+              bigger tube). The first print covers most of the cost; each
+              additional print adds a small per-item bump.
             </p>
-            <ul className="mt-3 space-y-1.5 text-sm text-ink">
+            <p className="mt-4 text-sm text-ink font-medium">
+              Standard sizes (5×7 through 12×18)
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm text-ink">
               <li>· United States — <strong>$7</strong> first print, <strong>+$3</strong> each additional</li>
               <li>· Canada — <strong>$11</strong> first print, <strong>+$3</strong> each additional</li>
               <li>· United Kingdom & EU — <strong>$14</strong> first print, <strong>+$3</strong> each additional</li>
               <li>· Rest of world — <strong>$20</strong> first print, <strong>+$4</strong> each additional</li>
             </ul>
-            <p className="mt-3 text-sm text-mid">
-              Digital downloads ship instantly and have no shipping fee.
+            <p className="mt-4 text-sm text-ink font-medium">
+              Mid-size (16×20, 18×24)
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm text-ink">
+              <li>· United States — <strong>$7.50</strong> first print, <strong>+$3</strong> each additional</li>
+              <li>· Canada — <strong>$11.50</strong> first print, <strong>+$3</strong> each additional</li>
+              <li>· United Kingdom & EU — <strong>$14.50</strong> first print, <strong>+$3</strong> each additional</li>
+              <li>· Rest of world — <strong>$21</strong> first print, <strong>+$4</strong> each additional</li>
+            </ul>
+            <p className="mt-4 text-sm text-ink font-medium">
+              Large (20×30, 24×36)
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm text-ink">
+              <li>· United States — <strong>$9</strong> first print, <strong>+$4</strong> each additional</li>
+              <li>· Canada — <strong>$13</strong> first print, <strong>+$4</strong> each additional</li>
+              <li>· United Kingdom & EU — <strong>$16</strong> first print, <strong>+$4</strong> each additional</li>
+              <li>· Rest of world — <strong>$24</strong> first print, <strong>+$5</strong> each additional</li>
+            </ul>
+            <p className="mt-4 text-sm text-mid">
+              Mixed-size carts ship at the rate of the largest item, with each
+              additional print added at its own per-item bump. Digital downloads
+              are delivered instantly and have no shipping fee.
             </p>
           </PolicySection>
         </div>
