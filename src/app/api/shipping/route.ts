@@ -33,28 +33,29 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient();
 
-  // Resolve sync_variant_id for each cart item
+  // Resolve catalog variant_id for each cart item — /shipping/rates needs
+  // the catalog variant_id, NOT the sync_variant_id we use on /orders.
   const slugs = Array.from(new Set(items.map((it) => it.slug)));
   const { data: designs } = await admin
     .from('gallery_items')
-    .select('slug, printful_variants')
+    .select('slug, printful_variants, printful_catalog_variants')
     .in('slug', slugs);
 
-  const variantMap = new Map<string, Record<string, number>>(
-    (designs ?? []).map((d) => [d.slug as string, (d.printful_variants ?? {}) as Record<string, number>]),
+  const catalogVariantMap = new Map<string, Record<string, number>>(
+    (designs ?? []).map((d) => [d.slug as string, (d.printful_catalog_variants ?? d.printful_variants ?? {}) as Record<string, number>]),
   );
 
-  const printfulItems: Array<{ sync_variant_id: number; quantity: number }> = [];
+  const printfulItems: Array<{ variant_id: number; quantity: number }> = [];
   for (const it of items) {
-    const variants = variantMap.get(it.slug);
-    const syncVariantId = variants?.[it.size];
-    if (!syncVariantId) {
+    const variants = catalogVariantMap.get(it.slug);
+    const variantId = variants?.[it.size];
+    if (!variantId) {
       return NextResponse.json(
-        { error: `No Printful variant for ${it.name} ${it.size}` },
+        { error: `No Printful catalog variant for ${it.name} ${it.size}. Re-run /api/printful/sync to backfill catalog variant IDs.` },
         { status: 400 },
       );
     }
-    printfulItems.push({ sync_variant_id: syncVariantId, quantity: 1 });
+    printfulItems.push({ variant_id: variantId, quantity: 1 });
   }
 
   try {
