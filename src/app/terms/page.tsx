@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import PolicySection from '@/components/PolicySection';
 import PolicyCTA from '@/components/PolicyCTA';
@@ -16,7 +16,7 @@ const LAST_UPDATED = 'April 29, 2026';
 export default function TermsPage() {
   return (
     <>
-      <Navbar />
+      <NavbarShell />
 
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">

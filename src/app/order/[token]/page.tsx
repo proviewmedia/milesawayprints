@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Clock, CheckCircle2, Package, Truck, Download, Mail } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 
@@ -27,7 +27,7 @@ export default async function OrderPage({ params }: { params: { token: string } 
 
   return (
     <>
-      <Navbar />
+      <NavbarShell />
       <section className="pt-28 pb-20 bg-soft min-h-[70vh]">
         <div className="max-w-3xl mx-auto px-6">
           <div className="bg-white rounded-3xl p-6 md:p-10 border border-border">

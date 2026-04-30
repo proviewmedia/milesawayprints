@@ -6,7 +6,12 @@ import { Menu, X, ShoppingBag, Search, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useSearch } from '@/contexts/SearchContext';
 
-export default function Navbar() {
+interface NavbarProps {
+  /** Visitor's country for the top-left utility-bar label. Defaults to United States. */
+  defaultCountry?: string;
+}
+
+export default function Navbar({ defaultCountry = 'United States' }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { count, open } = useCart();
   const { open: openSearch } = useSearch();
@@ -16,7 +21,7 @@ export default function Navbar() {
       {/* Top utility bar */}
       <div className="bg-ink text-paper text-xs">
         <div className="max-w-[1400px] mx-auto px-6 py-1.5 flex items-center justify-between">
-          <span className="hidden md:inline opacity-90">United States</span>
+          <span className="hidden md:inline opacity-90">{defaultCountry}</span>
           <span className="font-medium tracking-wide flex-1 text-center md:text-center">
             Free U.S. shipping on orders over $75
           </span>
