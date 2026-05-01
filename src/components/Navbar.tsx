@@ -18,13 +18,11 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Top utility bar */}
+      {/* Top utility bar — country + About only */}
       <div className="bg-ink text-paper text-xs">
         <div className="max-w-[1400px] mx-auto px-6 py-1.5 flex items-center justify-between">
           <span className="hidden md:inline opacity-90">{defaultCountry}</span>
-          <span className="font-medium tracking-wide flex-1 text-center md:text-center">
-            Worldwide shipping from $7
-          </span>
+          <span className="md:hidden" />
           <Link href="/about" className="hidden md:inline opacity-90 hover:opacity-100">
             About
           </Link>
