@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
 import { Search, ArrowRight } from 'lucide-react';
 import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
@@ -60,7 +59,7 @@ export default function ShopClient({ designs, collections }: Props) {
             Shop
           </h1>
           <p className="text-mid text-base md:text-lg">
-            Ready-to-ship designs, or start a custom print of any place — stadium, airport, marathon, golf course, city, or skyline.
+            Stadiums, airports, marathons, golf courses, cities, and skylines — printed on archival paper.
           </p>
         </div>
       </section>
@@ -153,11 +152,17 @@ export default function ShopClient({ designs, collections }: Props) {
             <div className="py-20 text-center max-w-md mx-auto">
               <h3 className="text-xl font-medium text-ink mb-2">No designs match those filters</h3>
               <p className="text-sm text-mid mb-6">
-                Try a different category, or create a custom print of your location.
+                Try a different category or clear the filters.
               </p>
-              <Link href="/prints/golf" className="btn-primary">
-                Create custom
-              </Link>
+              <button
+                onClick={() => {
+                  setCategory('all');
+                  setQuery('');
+                }}
+                className="btn-secondary"
+              >
+                Clear filters
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
@@ -166,24 +171,6 @@ export default function ShopClient({ designs, collections }: Props) {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-24 md:py-32 bg-ink text-paper">
-        <div className="max-w-[900px] mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.05] mb-5">
-            Don&apos;t see your place?
-          </h2>
-          <p className="text-paper/70 mb-9 max-w-md mx-auto">
-            Every print is custom. Tell us where and we&apos;ll design it from scratch.
-          </p>
-          <Link
-            href="/prints/golf"
-            className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
-          >
-            Start custom order
-          </Link>
         </div>
       </section>
 

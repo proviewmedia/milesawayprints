@@ -54,7 +54,7 @@ export default function ContactPage() {
               FAQ first?
             </h2>
             <p className="text-mid text-[13px] leading-relaxed">
-              Most questions about sizing, shipping, returns, and custom prints
+              Most questions about sizing, shipping, returns, and digital downloads
               are answered on the{' '}
               <Link href="/faq" className="text-ink underline underline-offset-2">
                 FAQ

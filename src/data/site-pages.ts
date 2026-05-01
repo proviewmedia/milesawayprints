@@ -13,11 +13,11 @@ export interface SitePage {
  */
 export const SITE_PAGES: SitePage[] = [
   { title: 'Shop all prints', href: '/shop', keywords: 'browse catalog all prints', description: 'Browse the full collection.' },
-  { title: 'Custom golf prints', href: '/prints/golf', keywords: 'design custom golf course tee box', description: 'Design a custom golf course print.' },
-  { title: 'Custom stadium prints', href: '/prints/stadium', keywords: 'baseball football arena park', description: 'Design a custom stadium print.' },
-  { title: 'Custom airport prints', href: '/prints/airport', keywords: 'terminal airline iata travel', description: 'Design a custom airport print.' },
-  { title: 'Custom marathon prints', href: '/prints/marathon', keywords: 'running race route course finish line', description: 'Design a custom marathon route print.' },
-  { title: 'Custom city prints', href: '/prints/city', keywords: 'street map town home', description: 'Design a custom city street map print.' },
+  { title: 'Golf course prints', href: '/shop?category=golf', keywords: 'golf course tee box pebble augusta', description: 'Browse golf course prints.' },
+  { title: 'Stadium prints', href: '/shop?category=stadium', keywords: 'baseball football arena park', description: 'Browse stadium prints.' },
+  { title: 'Airport prints', href: '/shop?category=airport', keywords: 'terminal airline iata travel', description: 'Browse airport prints.' },
+  { title: 'Marathon prints', href: '/shop?category=marathon', keywords: 'running race route course finish line', description: 'Browse marathon route prints.' },
+  { title: 'City street prints', href: '/shop?category=city', keywords: 'street map town home', description: 'Browse city street map prints.' },
   { title: 'About', href: '/about', keywords: 'story mission company', description: 'Why we make prints, and how.' },
   { title: 'How it works', href: '/#how', keywords: 'process steps order delivery', description: 'From idea to wall in four steps.' },
   { title: 'Gifts', href: '/#gift', keywords: 'gift wrap message birthday wedding anniversary', description: 'Make a print into a gift.' },

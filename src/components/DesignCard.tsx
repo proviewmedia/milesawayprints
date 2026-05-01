@@ -45,10 +45,11 @@ export default function DesignCard({ design }: Props) {
 
   const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? '';
 
-  // If the slug is a `prints/<type>` placeholder (no real product), link
-  // directly to the custom-design flow instead of /shop/<slug>.
+  // If the slug is a `prints/<type>` placeholder (no real product synced
+  // for this type yet), route to the filtered shop view rather than to
+  // the legacy customizer.
   const href = design.slug.startsWith('prints/')
-    ? `/${design.slug}`
+    ? `/shop?category=${design.type}`
     : `/shop/${design.slug}`;
 
   return (

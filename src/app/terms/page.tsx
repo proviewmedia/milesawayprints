@@ -8,7 +8,7 @@ import PolicyCTA from '@/components/PolicyCTA';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description:
-    'Terms of using Miles Away Prints — purchase license, intellectual property, custom prints, liability, governing law.',
+    'Terms of using Miles Away Prints — purchase license, intellectual property, liability, governing law.',
 };
 
 const LAST_UPDATED = 'April 29, 2026';
@@ -87,20 +87,6 @@ export default function TermsPage() {
               <strong className="text-ink">not</strong> resell, mass-reproduce,
               redistribute the digital file, or use the design commercially
               without our written permission.
-            </p>
-          </PolicySection>
-
-          <PolicySection title="Custom prints — your warranty to us">
-            <p>
-              When you order a custom print of a place, course, stadium,
-              airport, or marathon, you represent that you have the right to
-              use any names, marks, or details you ask us to include.
-            </p>
-            <p>
-              Trademarks (team logos, league marks, brand names) are{' '}
-              <strong className="text-ink">not</strong> reproduced. If we
-              receive a custom request that would require us to copy a
-              protected logo or design, we&apos;ll decline and refund.
             </p>
           </PolicySection>
 

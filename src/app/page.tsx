@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import PrintPreview from '@/components/PrintPreview';
@@ -81,9 +81,6 @@ export default async function HomePage() {
               <div className="flex flex-wrap items-center gap-5">
                 <Link href="/shop" className="btn-primary">
                   Shop all
-                </Link>
-                <Link href="/prints/golf" className="text-sm font-medium text-ink underline underline-offset-4 hover:opacity-70">
-                  Create custom
                 </Link>
               </div>
               <div className="flex items-center gap-2 mt-7">
@@ -176,46 +173,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories — custom create flow */}
-      <section className="py-20 md:py-28">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="text-center mb-12 max-w-xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink mb-4">
-              Don&apos;t see your place?
-            </h2>
-            <p className="text-mid">
-              Start a custom print. Pick a category, add your details, preview live, and we&apos;ll design it from scratch.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-            {CATEGORY_ORDER.map((type) => {
-              const cfg = PRINT_CONFIGS[type];
-              const sample = DEFAULT_GALLERY[type][0];
-              return (
-                <Link
-                  key={type}
-                  href={`/prints/${cfg.slug}`}
-                  className="group block"
-                >
-                  <div className="bg-soft aspect-[4/5] flex items-center justify-center p-6 md:p-8 overflow-hidden">
-                    <div className="w-full transition-transform duration-500 group-hover:scale-[1.02]">
-                      <WallFrame compact>
-                        <PrintPreview type={type} values={sample.values} />
-                      </WallFrame>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-[15px] text-ink">{cfg.detailsLabel}</span>
-                    <ArrowRight size={14} strokeWidth={1.75} className="text-mid group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* How It Works — minimal numbered steps */}
       <section id="how" className="py-20 md:py-28 bg-soft scroll-mt-40">
         <div className="max-w-[1280px] mx-auto px-6">
@@ -304,22 +261,14 @@ export default async function HomePage() {
             Ready to make yours?
           </h2>
           <p className="text-paper/70 mb-9 max-w-md mx-auto">
-            Shop ready-to-ship designs, or start a custom print from scratch.
+            Shop ready-to-ship designs printed on archival paper.
           </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/shop"
-              className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
-            >
-              Shop the collection
-            </Link>
-            <Link
-              href="/prints/golf"
-              className="inline-flex items-center justify-center gap-2 border border-paper/30 text-paper px-7 py-3.5 rounded-full font-medium text-sm hover:bg-paper/10 transition-colors"
-            >
-              Create custom
-            </Link>
-          </div>
+          <Link
+            href="/shop"
+            className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
+          >
+            Shop the collection
+          </Link>
         </div>
       </section>
 

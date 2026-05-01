@@ -8,22 +8,14 @@ export default function PolicyCTA() {
           Make your place.
         </h2>
         <p className="text-paper/70 mb-9 max-w-md mx-auto">
-          Browse the collection or start a custom print of any place in the world.
+          Browse the collection.
         </p>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Link
-            href="/shop"
-            className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
-          >
-            Shop the collection
-          </Link>
-          <Link
-            href="/prints/golf"
-            className="inline-flex items-center justify-center gap-2 border border-paper/30 text-paper px-7 py-3.5 rounded-full font-medium text-sm hover:bg-paper/10 transition-colors"
-          >
-            Create custom
-          </Link>
-        </div>
+        <Link
+          href="/shop"
+          className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
+        >
+          Shop the collection
+        </Link>
       </div>
     </section>
   );

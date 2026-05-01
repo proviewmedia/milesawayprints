@@ -18,10 +18,10 @@ export default function Footer() {
             <h4 className="text-[13px] font-medium text-ink mb-4">Shop</h4>
             <ul className="space-y-3">
               <li><Link href="/shop" className="text-sm text-mid hover:text-ink transition-colors">All Prints</Link></li>
-              <li><Link href="/prints/stadium" className="text-sm text-mid hover:text-ink transition-colors">Stadiums</Link></li>
-              <li><Link href="/prints/airport" className="text-sm text-mid hover:text-ink transition-colors">Airports</Link></li>
-              <li><Link href="/prints/marathon" className="text-sm text-mid hover:text-ink transition-colors">Marathons</Link></li>
-              <li><Link href="/prints/golf" className="text-sm text-mid hover:text-ink transition-colors">Golf Courses</Link></li>
+              <li><Link href="/shop?category=stadium" className="text-sm text-mid hover:text-ink transition-colors">Stadiums</Link></li>
+              <li><Link href="/shop?category=airport" className="text-sm text-mid hover:text-ink transition-colors">Airports</Link></li>
+              <li><Link href="/shop?category=marathon" className="text-sm text-mid hover:text-ink transition-colors">Marathons</Link></li>
+              <li><Link href="/shop?category=golf" className="text-sm text-mid hover:text-ink transition-colors">Golf Courses</Link></li>
             </ul>
           </div>
 

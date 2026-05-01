@@ -8,7 +8,7 @@ import PolicyCTA from '@/components/PolicyCTA';
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
   description:
-    'Common questions about Miles Away Prints — sizing, custom prints, shipping, returns, digital downloads, and gifts.',
+    'Common questions about Miles Away Prints — sizing, shipping, returns, digital downloads, and gifts.',
 };
 
 interface QA {
@@ -158,33 +158,6 @@ export default function FAQPage() {
                 {
                   q: 'What if it arrives damaged?',
                   a: 'Email us within 14 days of shipping with photos and we\'ll replace it at no cost.',
-                },
-                {
-                  q: 'What if I made a mistake on a custom print?',
-                  a: 'Email within 24 hours of placing the order — we\'ll catch it before production.',
-                },
-              ]}
-            />
-          </PolicySection>
-
-          <PolicySection title="Custom prints">
-            <QAList
-              items={[
-                {
-                  q: 'How do you make custom prints?',
-                  a: 'You enter the details on the print type page (course name, location, stadium, airport code, etc.). We design from scratch in our minimalist style and you receive a finished print sized to your selection.',
-                },
-                {
-                  q: 'Can you do a course / stadium / airport that\'s not in your catalog?',
-                  a: 'Yes — that\'s the point of the custom flow. If we can find publicly-available reference material for your location, we can design it.',
-                },
-                {
-                  q: 'Can I provide reference imagery?',
-                  a: 'For custom golf course layouts and stadium fields, yes. Email it after you place the order and reference your order number.',
-                },
-                {
-                  q: 'How long does the design process take?',
-                  a: 'Custom designs take 3–5 business days before production starts. We\'ll email you when production begins so you can flag any changes within 24 hours.',
                 },
               ]}
             />

@@ -86,15 +86,6 @@ export default function ReturnsPage() {
             </p>
           </PolicySection>
 
-          <PolicySection title="Custom prints">
-            <p>
-              Once a custom design is started, we can&apos;t refund the design
-              work. If you spot a typo or want to change details, email us
-              within <strong className="text-ink">24 hours</strong> of placing
-              the custom order — we&apos;ll catch it before production.
-            </p>
-          </PolicySection>
-
           <PolicySection title="Digital downloads">
             <p>
               Once a digital download link is delivered to your email, the
