@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Clock, CheckCircle2, Package, Truck, Download, Mail } from 'lucide-react';
+import { Clock, CheckCircle2, Package, Truck, Download, Mail, ExternalLink } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { trackingUrlFor } from '@/lib/tracking';
 
 const STATUS_STEPS = [
   { key: 'new', label: 'Received', icon: CheckCircle2 },
@@ -22,8 +24,27 @@ export default async function OrderPage({ params }: { params: { token: string } 
 
   if (!order) notFound();
 
+  // Check if the visitor is signed in so we know whether to surface
+  // the "save this order to your account" CTA.
+  const serverSupabase = createSupabaseServerClient();
+  const {
+    data: { user: viewer },
+  } = await serverSupabase.auth.getUser();
+
+  const showAccountCTA =
+    !viewer &&
+    !order.user_id &&
+    order.customer_email &&
+    order.customer_email !== 'pending@placeholder.local';
+
   const currentIdx = STATUS_STEPS.findIndex((s) => s.key === order.status);
   const isDigital = order.format === 'digital';
+
+  const trackingHref = trackingUrlFor({
+    tracking: order.tracking_number,
+    carrier: order.tracking_carrier,
+    trackingUrl: order.tracking_url,
+  });
 
   return (
     <>
@@ -109,13 +130,45 @@ export default async function OrderPage({ params }: { params: { token: string } 
                 </div>
               )}
               {order.tracking_number && (
-                <div className="md:col-span-2 flex items-center gap-2">
+                <div className="md:col-span-2 flex flex-wrap items-center gap-x-2 gap-y-1">
                   <Truck size={14} className="text-primary" />
-                  <span className="text-sm font-semibold text-ink">Tracking: </span>
-                  <span className="text-sm text-mid">{order.tracking_number}</span>
+                  <span className="text-sm font-semibold text-ink">Tracking:</span>
+                  <span className="text-sm text-mid font-mono">{order.tracking_number}</span>
+                  {trackingHref && (
+                    <a
+                      href={trackingHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-ink underline underline-offset-2 hover:opacity-70"
+                    >
+                      Track package <ExternalLink size={12} strokeWidth={1.75} />
+                    </a>
+                  )}
                 </div>
               )}
             </div>
+
+            {/* Save-to-account CTA — only for guest visitors viewing
+                an unlinked order */}
+            {showAccountCTA && (
+              <div className="mt-6 border border-border p-5 rounded-2xl">
+                <div className="text-sm font-semibold text-ink mb-1">
+                  Save this order to your account
+                </div>
+                <p className="text-[13px] text-mid leading-relaxed mb-4">
+                  Create an account with{' '}
+                  <strong className="text-ink">{order.customer_email}</strong>{' '}
+                  to track this order, save your shipping address, and reorder
+                  faster next time.
+                </p>
+                <Link
+                  href={`/sign-in?email=${encodeURIComponent(order.customer_email)}`}
+                  className="inline-block bg-ink text-paper py-2.5 px-5 rounded-full text-sm font-medium hover:bg-black transition-colors"
+                >
+                  Create account
+                </Link>
+              </div>
+            )}
 
             {/* Digital download */}
             {isDigital && order.digital_download_token && (

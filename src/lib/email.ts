@@ -12,6 +12,297 @@ function getResend(): Resend | null {
 const FROM = 'Miles Away Prints <orders@milesawayprints.com>';
 const REPLY_TO = 'milesawayprintsllc@gmail.com';
 const SUPPORT_INBOX = 'milesawayprintsllc@gmail.com';
+const SITE_URL = 'https://milesawayprints.com';
+
+// ────────────────────────────────────────────────────────────────────────────
+// Shared layout
+// ────────────────────────────────────────────────────────────────────────────
+
+interface WrapArgs {
+  /** Email <title>, also used as the visible H1 unless `heading` is set */
+  preheader: string;
+  /** Visible H1 inside the email body */
+  heading: string;
+  /** Inner HTML — paragraphs / blocks / order-summary tables go here */
+  bodyHtml: string;
+  /** Optional primary CTA (button) */
+  cta?: { label: string; href: string };
+}
+
+/**
+ * Single source of truth for transactional email styling. All templates
+ * (order confirmation, shipping, digital delivery) wrap their inner
+ * content with this so the brand chrome stays consistent.
+ */
+function wrapEmail({ preheader, heading, bodyHtml, cta }: WrapArgs): string {
+  return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${escapeHtml(preheader)}</title>
+  </head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #0e0e0e; background: #ffffff;">
+    <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 24px; letter-spacing: 0.06em; text-transform: uppercase;">
+      Miles Away Prints
+    </p>
+    <h1 style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 16px; line-height: 1.15;">
+      ${escapeHtml(heading)}
+    </h1>
+    ${bodyHtml}
+    ${
+      cta
+        ? `<div style="margin: 32px 0;">
+        <a href="${cta.href}" style="display: inline-block; background: #0e0e0e; color: #ffffff; text-decoration: none; font-weight: 500; font-size: 14px; padding: 14px 28px; border-radius: 999px;">
+          ${escapeHtml(cta.label)}
+        </a>
+      </div>`
+        : ''
+    }
+    <hr style="border: none; border-top: 1px solid #e8e6e0; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 8px;">
+      Miles Away Prints · <a href="${SITE_URL}" style="color: #6b6b6b;">milesawayprints.com</a>
+    </p>
+    <p style="font-size: 12px; color: #9c9c9c; margin: 0;">
+      Questions? Reply to this email or reach <a href="mailto:${REPLY_TO}" style="color: #6b6b6b;">${REPLY_TO}</a>.
+    </p>
+  </body>
+</html>`.trim();
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Order confirmation email — sent at payment for every paid order
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface OrderConfirmationItem {
+  name: string;
+  format: 'physical' | 'digital';
+  size?: string;
+  priceCents: number;
+  isGift?: boolean;
+}
+
+export interface OrderShippingAddress {
+  name: string;
+  line1: string;
+  line2?: string | null;
+  city: string;
+  state?: string | null;
+  postalCode: string;
+  country: string;
+}
+
+interface OrderConfirmationArgs {
+  to: string;
+  customerName: string;
+  orderNumber: string | number;
+  orderToken: string;
+  items: OrderConfirmationItem[];
+  subtotalCents: number;
+  shippingCents: number;
+  totalCents: number;
+  /** Set on physical orders */
+  shipping?: OrderShippingAddress;
+  /** Set on digital orders */
+  digital?: {
+    downloadUrl: string;
+    expiresAt: Date;
+    maxDownloads: number;
+  };
+}
+
+export async function sendOrderConfirmationEmail(args: OrderConfirmationArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY missing; skipping order-confirmation send');
+    return { skipped: true };
+  }
+
+  const firstName = args.customerName.split(' ')[0] || 'there';
+  const hasPhysical = args.items.some((i) => i.format === 'physical');
+  const hasDigital = args.items.some((i) => i.format === 'digital');
+
+  const itemsHtml = args.items
+    .map(
+      (it) => `
+    <tr>
+      <td style="padding: 12px 0; border-bottom: 1px solid #e8e6e0; font-size: 14px; color: #0e0e0e;">
+        ${escapeHtml(it.name)}
+        <div style="font-size: 12px; color: #6b6b6b; margin-top: 2px;">
+          ${it.format === 'digital' ? 'Digital download' : escapeHtml(it.size ?? '')}
+          ${it.isGift ? ' · Gift' : ''}
+        </div>
+      </td>
+      <td style="padding: 12px 0; border-bottom: 1px solid #e8e6e0; font-size: 14px; color: #0e0e0e; text-align: right; white-space: nowrap;">
+        $${(it.priceCents / 100).toFixed(2)}
+      </td>
+    </tr>`,
+    )
+    .join('');
+
+  const shippingBlock = args.shipping
+    ? `
+    <div style="margin: 24px 0;">
+      <p style="font-size: 11px; color: #9c9c9c; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 8px;">
+        Shipping to
+      </p>
+      <p style="font-size: 14px; color: #0e0e0e; margin: 0; line-height: 1.55;">
+        ${escapeHtml(args.shipping.name)}<br />
+        ${escapeHtml(args.shipping.line1)}${args.shipping.line2 ? '<br />' + escapeHtml(args.shipping.line2) : ''}<br />
+        ${escapeHtml(args.shipping.city)}${args.shipping.state ? ', ' + escapeHtml(args.shipping.state) : ''} ${escapeHtml(args.shipping.postalCode)}<br />
+        ${escapeHtml(args.shipping.country)}
+      </p>
+    </div>`
+    : '';
+
+  const digitalBlock = args.digital
+    ? `
+    <div style="margin: 24px 0; padding: 16px; background: #f5f3ef; border-radius: 8px;">
+      <p style="font-size: 13px; color: #0e0e0e; font-weight: 500; margin: 0 0 8px;">
+        Digital download ready
+      </p>
+      <p style="font-size: 13px; color: #6b6b6b; line-height: 1.55; margin: 0 0 12px;">
+        Click below to grab your file. The link works for ${args.digital.maxDownloads} downloads
+        through ${args.digital.expiresAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
+      </p>
+      <a href="${args.digital.downloadUrl}" style="display: inline-block; background: #0e0e0e; color: #ffffff; text-decoration: none; font-weight: 500; font-size: 13px; padding: 10px 20px; border-radius: 999px;">
+        Download your print
+      </a>
+    </div>`
+    : '';
+
+  const tail = hasPhysical
+    ? '<p style="font-size: 13px; color: #6b6b6b; line-height: 1.6; margin: 24px 0 0;">We&rsquo;ll email you again with tracking as soon as your print ships — usually within 3–5 business days.</p>'
+    : hasDigital
+    ? '<p style="font-size: 13px; color: #6b6b6b; line-height: 1.6; margin: 24px 0 0;">If your link expires before you download, just reply to this email and we&rsquo;ll re-issue it.</p>'
+    : '';
+
+  const bodyHtml = `
+    <p style="font-size: 15px; line-height: 1.6; color: #6b6b6b; margin: 0 0 8px;">
+      Thanks, ${escapeHtml(firstName)} — we got your order.
+    </p>
+    <p style="font-size: 13px; color: #9c9c9c; margin: 0 0 24px; letter-spacing: 0.04em;">
+      Order #${escapeHtml(String(args.orderNumber))}
+    </p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 0 0 16px;" role="presentation">
+      ${itemsHtml}
+      <tr>
+        <td style="padding: 12px 0 4px; font-size: 13px; color: #6b6b6b;">Subtotal</td>
+        <td style="padding: 12px 0 4px; font-size: 13px; color: #0e0e0e; text-align: right;">$${(args.subtotalCents / 100).toFixed(2)}</td>
+      </tr>
+      ${
+        hasPhysical
+          ? `<tr>
+        <td style="padding: 4px 0; font-size: 13px; color: #6b6b6b;">Shipping</td>
+        <td style="padding: 4px 0; font-size: 13px; color: #0e0e0e; text-align: right;">$${(args.shippingCents / 100).toFixed(2)}</td>
+      </tr>`
+          : ''
+      }
+      <tr>
+        <td style="padding: 8px 0 4px; font-size: 14px; font-weight: 500; color: #0e0e0e; border-top: 1px solid #e8e6e0;">Total</td>
+        <td style="padding: 8px 0 4px; font-size: 14px; font-weight: 500; color: #0e0e0e; text-align: right; border-top: 1px solid #e8e6e0;">$${(args.totalCents / 100).toFixed(2)}</td>
+      </tr>
+    </table>
+
+    ${digitalBlock}
+    ${shippingBlock}
+    ${tail}
+  `;
+
+  const html = wrapEmail({
+    preheader: `Order #${args.orderNumber} confirmed`,
+    heading: 'Order confirmed',
+    bodyHtml,
+    cta: {
+      label: 'View your order',
+      href: `${SITE_URL}/order/${args.orderToken}`,
+    },
+  });
+
+  return resend.emails.send({
+    from: FROM,
+    to: args.to,
+    reply_to: REPLY_TO,
+    subject: `Order confirmed — #${args.orderNumber}`,
+    html,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Shipping email — sent when Printful's package_shipped fires
+// ────────────────────────────────────────────────────────────────────────────
+
+interface ShippingArgs {
+  to: string;
+  customerName: string;
+  orderNumber: string | number;
+  orderToken: string;
+  trackingNumber: string;
+  trackingUrl?: string | null;
+  carrier?: string | null;
+  /** Short summary of items so the customer recognizes which order */
+  itemSummary: string;
+}
+
+export async function sendShippingEmail(args: ShippingArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY missing; skipping shipping email');
+    return { skipped: true };
+  }
+
+  const firstName = args.customerName.split(' ')[0] || 'there';
+
+  const trackHref = args.trackingUrl ?? `${SITE_URL}/order/${args.orderToken}`;
+
+  const bodyHtml = `
+    <p style="font-size: 15px; line-height: 1.6; color: #6b6b6b; margin: 0 0 8px;">
+      Hi ${escapeHtml(firstName)} — your print is on its way.
+    </p>
+    <p style="font-size: 13px; color: #9c9c9c; margin: 0 0 24px; letter-spacing: 0.04em;">
+      Order #${escapeHtml(String(args.orderNumber))} · ${escapeHtml(args.itemSummary)}
+    </p>
+
+    <div style="margin: 0 0 24px; padding: 16px; background: #f5f3ef; border-radius: 8px;">
+      <p style="font-size: 11px; color: #9c9c9c; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 6px;">
+        Tracking ${args.carrier ? '· ' + escapeHtml(args.carrier) : ''}
+      </p>
+      <p style="font-size: 14px; color: #0e0e0e; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; word-break: break-all;">
+        ${escapeHtml(args.trackingNumber)}
+      </p>
+    </div>
+
+    <p style="font-size: 13px; color: #6b6b6b; line-height: 1.6; margin: 0;">
+      Delivery times vary by destination — typically 3–10 business days from
+      shipment. Tracking can take 24–48 hours to start updating.
+    </p>
+  `;
+
+  const html = wrapEmail({
+    preheader: `Your print has shipped — #${args.orderNumber}`,
+    heading: 'Your print has shipped',
+    bodyHtml,
+    cta: {
+      label: args.trackingUrl ? 'Track your package' : 'View your order',
+      href: trackHref,
+    },
+  });
+
+  return resend.emails.send({
+    from: FROM,
+    to: args.to,
+    reply_to: REPLY_TO,
+    subject: `Your print has shipped — #${args.orderNumber}`,
+    html,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Digital delivery — kept as a fallback caller, but the order
+// confirmation now embeds the download link inline so this is rarely
+// invoked directly. Left here for the legacy webhook path.
+// ────────────────────────────────────────────────────────────────────────────
 
 interface DigitalDeliveryArgs {
   to: string;
@@ -25,7 +316,7 @@ interface DigitalDeliveryArgs {
 export async function sendDigitalDeliveryEmail(args: DigitalDeliveryArgs) {
   const resend = getResend();
   if (!resend) {
-    console.warn('[email] RESEND_API_KEY missing or placeholder; skipping send');
+    console.warn('[email] RESEND_API_KEY missing; skipping send');
     return { skipped: true };
   }
 
@@ -35,33 +326,27 @@ export async function sendDigitalDeliveryEmail(args: DigitalDeliveryArgs) {
     year: 'numeric',
   });
 
-  const html = `
-<!DOCTYPE html>
-<html>
-  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #0e0e0e; background: #ffffff;">
-    <h1 style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 16px;">Your print is ready</h1>
+  const bodyHtml = `
     <p style="font-size: 15px; line-height: 1.5; color: #6b6b6b; margin: 0 0 24px;">
       Hi ${escapeHtml(args.customerName)} — thanks for picking up
       <strong style="color: #0e0e0e;">${escapeHtml(args.productName)}</strong>.
       Your digital print is below.
     </p>
-    <div style="margin: 32px 0;">
-      <a href="${args.downloadUrl}" style="display: inline-block; background: #0e0e0e; color: #ffffff; text-decoration: none; font-weight: 500; font-size: 14px; padding: 14px 28px; border-radius: 999px;">
-        Download your print
-      </a>
-    </div>
     <p style="font-size: 13px; line-height: 1.6; color: #6b6b6b; margin: 0 0 8px;">
-      This link expires <strong style="color: #0e0e0e;">${expiresStr}</strong> and can be used up to ${args.maxDownloads} times.
+      This link expires <strong style="color: #0e0e0e;">${expiresStr}</strong>
+      and can be used up to ${args.maxDownloads} times.
     </p>
-    <p style="font-size: 13px; line-height: 1.6; color: #6b6b6b; margin: 0 0 24px;">
-      If you didn't make this purchase, you can ignore this email.
+    <p style="font-size: 13px; line-height: 1.6; color: #6b6b6b; margin: 0;">
+      If you didn&apos;t make this purchase, you can ignore this email.
     </p>
-    <hr style="border: none; border-top: 1px solid #e8e6e0; margin: 32px 0;" />
-    <p style="font-size: 12px; color: #9c9c9c; margin: 0;">
-      Miles Away Prints · <a href="https://milesawayprints.com" style="color: #6b6b6b;">milesawayprints.com</a>
-    </p>
-  </body>
-</html>`.trim();
+  `;
+
+  const html = wrapEmail({
+    preheader: `Your ${args.productName} print is ready`,
+    heading: 'Your print is ready',
+    bodyHtml,
+    cta: { label: 'Download your print', href: args.downloadUrl },
+  });
 
   return resend.emails.send({
     from: FROM,
@@ -71,6 +356,10 @@ export async function sendDigitalDeliveryEmail(args: DigitalDeliveryArgs) {
     html,
   });
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Contact form — internal-only, plain layout
+// ────────────────────────────────────────────────────────────────────────────
 
 interface ContactArgs {
   name: string;
@@ -102,6 +391,10 @@ export async function sendContactEmail(args: ContactArgs) {
     html,
   });
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ────────────────────────────────────────────────────────────────────────────
 
 function escapeHtml(s: string): string {
   return s

@@ -36,10 +36,10 @@ export default function AccountCallToAction({ email }: Props) {
 
   return (
     <div className="border border-border p-5 text-left">
-      <div className="text-sm text-ink mb-1">Want to track this order?</div>
+      <div className="text-sm text-ink mb-1">Track this order and reorder faster</div>
       <p className="text-[13px] text-mid leading-relaxed mb-4">
-        Create an account with <strong className="text-ink">{email}</strong> to view
-        this order any time, save your shipping address, and order again faster.
+        Create an account with <strong className="text-ink">{email}</strong> to
+        view tracking, save your shipping address, and reorder in one click.
       </p>
       <Link
         href={`/sign-in?email=${encodeURIComponent(email)}`}

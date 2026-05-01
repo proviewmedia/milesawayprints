@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
 import { verifyWebhookSecret } from '@/lib/printful';
+import { sendShippingEmail } from '@/lib/email';
 
 /**
  * POST /api/webhooks/printful?secret=<PRINTFUL_WEBHOOK_SECRET>
@@ -72,7 +73,10 @@ export async function POST(req: Request) {
   const admin = createAdminClient();
 
   // Look up our order
-  const q = admin.from('orders').select('id, status').limit(1);
+  const q = admin
+    .from('orders')
+    .select('id, token, order_number, status, customer_email, customer_name, cart_snapshot, tracking_number')
+    .limit(1);
   const { data: matches } = externalId
     ? await q.eq('token', externalId)
     : await q.eq('printful_order_id', String(pfOrderId));
@@ -90,10 +94,47 @@ export async function POST(req: Request) {
         event?.data?.shipment?.tracking_number ??
         event?.data?.tracking_number ??
         null;
+      const trackingUrl =
+        event?.data?.shipment?.tracking_url ??
+        event?.data?.tracking_url ??
+        null;
+      const carrier =
+        event?.data?.shipment?.carrier ??
+        event?.data?.carrier ??
+        null;
       update.tracking_number = tracking;
       update.printful_status = 'fulfilled';
       update.status = 'fulfilled';
       update.fulfilled_at = new Date().toISOString();
+
+      // Email the customer that their print has shipped. Don't block
+      // the webhook on Resend failures — the order page still shows
+      // tracking and the customer can self-serve from /order/<token>.
+      if (
+        order.customer_email &&
+        order.customer_email !== 'pending@placeholder.local' &&
+        tracking
+      ) {
+        const cart = (order.cart_snapshot ?? []) as Array<{ name: string; size?: string; format?: string }>;
+        const itemSummary = cart
+          .map((it) => (it.format === 'physical' ? `${it.name} (${it.size})` : it.name))
+          .join(', ')
+          .slice(0, 200);
+        try {
+          await sendShippingEmail({
+            to: order.customer_email,
+            customerName: order.customer_name ?? 'there',
+            orderNumber: (order.order_number ?? order.token) as string | number,
+            orderToken: order.token as string,
+            trackingNumber: tracking,
+            trackingUrl,
+            carrier,
+            itemSummary: itemSummary || 'Your order',
+          });
+        } catch (err) {
+          console.error('[printful webhook] sendShippingEmail failed', err);
+        }
+      }
       break;
     }
     case 'package_returned':

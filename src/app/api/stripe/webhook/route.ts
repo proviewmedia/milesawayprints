@@ -4,7 +4,10 @@ import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase';
 import { createOrder as createPrintfulOrder, PrintfulOrderItem } from '@/lib/printful';
-import { sendDigitalDeliveryEmail } from '@/lib/email';
+import {
+  sendOrderConfirmationEmail,
+  type OrderConfirmationItem,
+} from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -54,7 +57,7 @@ export async function POST(req: Request) {
 
       const { data: order } = await admin
         .from('orders')
-        .select('id, token, cart_snapshot, status')
+        .select('id, token, cart_snapshot, status, order_number')
         .eq('stripe_checkout_session_id', session.id)
         .single();
 
@@ -107,40 +110,23 @@ export async function POST(req: Request) {
       const physicalItems = cart.filter((it) => it.format === 'physical');
       const digitalItems = cart.filter((it) => it.format === 'digital');
 
-      // Digital delivery — generate per-customer access token, set expiry,
-      // mark the order approved (which gates the download UI), and email
-      // the customer their link via Resend.
+      // Digital delivery — generate per-customer access token + expiry.
+      // The download link is folded into the unified order-confirmation
+      // email below so the customer gets a single email for the order.
+      let digitalToken: string | null = null;
+      let digitalExpiresAt: Date | null = null;
       if (digitalItems.length > 0) {
-        const token = randomBytes(32).toString('hex');
-        const expiresAt = new Date(
+        digitalToken = randomBytes(32).toString('hex');
+        digitalExpiresAt = new Date(
           Date.now() + DIGITAL_DOWNLOAD_EXPIRES_DAYS * 24 * 60 * 60 * 1000,
         );
-        update.digital_download_token = token;
-        update.digital_download_expires_at = expiresAt.toISOString();
+        update.digital_download_token = digitalToken;
+        update.digital_download_expires_at = digitalExpiresAt.toISOString();
         update.digital_download_max = DIGITAL_DOWNLOAD_MAX;
         update.digital_download_count = 0;
         // 'approved' is the existing enum value the order page uses to
         // reveal the download button.
         update.status = 'approved';
-
-        try {
-          const origin = new URL(req.url).origin;
-          // Use the first digital item for the email title; multi-item
-          // digital orders are rare for this catalog.
-          const lead = digitalItems[0];
-          await sendDigitalDeliveryEmail({
-            to: customerEmail,
-            customerName: customerName || 'there',
-            productName: lead.name,
-            downloadUrl: `${origin}/download/${token}`,
-            expiresAt,
-            maxDownloads: DIGITAL_DOWNLOAD_MAX,
-          });
-        } catch (err) {
-          console.error('[stripe webhook] sendDigitalDeliveryEmail failed', err);
-          // Don't fail the webhook — the customer can still grab the link
-          // from /order/[token].
-        }
       }
 
       let printfulOrderId: string | null = null;
@@ -205,6 +191,58 @@ export async function POST(req: Request) {
       }
 
       await admin.from('orders').update(update).eq('id', order.id);
+
+      // Order confirmation email — single transactional send for every
+      // paid order. For digital orders the download link is included
+      // inline so the customer doesn't get two emails.
+      try {
+        const origin = new URL(req.url).origin;
+        const subtotalCents = cart.reduce((sum, it) => sum + (it.priceCents || 0), 0);
+        const shippingCents = session.shipping_cost?.amount_subtotal ?? 0;
+        const totalCents = session.amount_total ?? subtotalCents + shippingCents;
+
+        const emailItems: OrderConfirmationItem[] = cart.map((it) => ({
+          name: it.name,
+          format: it.format,
+          size: it.format === 'physical' ? it.size : undefined,
+          priceCents: it.priceCents,
+          isGift: it.isGift,
+        }));
+
+        await sendOrderConfirmationEmail({
+          to: customerEmail,
+          customerName: customerName || 'there',
+          orderNumber: (order.order_number ?? order.token) as string | number,
+          orderToken: order.token as string,
+          items: emailItems,
+          subtotalCents,
+          shippingCents,
+          totalCents,
+          shipping: shipping?.address
+            ? {
+                name: shipping.name ?? customerName,
+                line1: shipping.address.line1 ?? '',
+                line2: shipping.address.line2,
+                city: shipping.address.city ?? '',
+                state: shipping.address.state,
+                postalCode: shipping.address.postal_code ?? '',
+                country: shipping.address.country ?? 'US',
+              }
+            : undefined,
+          digital:
+            digitalToken && digitalExpiresAt
+              ? {
+                  downloadUrl: `${origin}/download/${digitalToken}`,
+                  expiresAt: digitalExpiresAt,
+                  maxDownloads: DIGITAL_DOWNLOAD_MAX,
+                }
+              : undefined,
+        });
+      } catch (err) {
+        // Don't fail the webhook — the customer still has /order/<token>
+        // and Stripe's auto-receipt as a backstop.
+        console.error('[stripe webhook] sendOrderConfirmationEmail failed', err);
+      }
     } else if (event.type === 'checkout.session.expired') {
       const session = event.data.object as Stripe.Checkout.Session;
       await admin
