@@ -57,6 +57,21 @@ export interface PrintfulOrderRequest {
     subtotal?: string;
     total?: string;
   };
+  /**
+   * Personal gift note — Printful prints this on a slip in the
+   * package and hides retail prices on the packing slip when set.
+   */
+  gift?: {
+    subject: string;
+    message: string;
+  };
+  /** Optional override for the printed packing-slip text. */
+  packing_slip?: {
+    email?: string;
+    phone?: string;
+    message?: string;
+    logo_url?: string;
+  };
 }
 
 export interface PrintfulOrderResponse {

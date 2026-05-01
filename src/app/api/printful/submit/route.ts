@@ -105,6 +105,12 @@ export async function POST(req: Request) {
         subtotal: (order.price_cents / 100).toFixed(2),
         total: (order.price_cents / 100).toFixed(2),
       },
+      // Forward the personal gift note when present. Printful prints
+      // this on a slip in the package and hides retail price on the
+      // packing slip when a gift block is set.
+      ...(order.is_gift && order.gift_message
+        ? { gift: { subject: 'A note for you', message: order.gift_message } }
+        : {}),
     };
 
     const pf = await createOrder(payload);

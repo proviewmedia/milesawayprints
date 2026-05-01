@@ -169,6 +169,14 @@ export async function POST(req: Request) {
         }
 
         if (printfulItems.length > 0) {
+          // Forward the gift note (if any item in the cart was tagged
+          // as a gift with a message). Printful prints this on a slip
+          // and hides retail prices on the packing slip.
+          const giftItem = physicalItems.find((it) => it.isGift && it.giftMessage);
+          const gift = giftItem?.giftMessage
+            ? { subject: 'A note for you', message: giftItem.giftMessage }
+            : undefined;
+
           const printfulRes = await createPrintfulOrder({
             external_id: order.token,
             recipient: {
@@ -183,6 +191,7 @@ export async function POST(req: Request) {
             },
             items: printfulItems,
             confirm: true,
+            ...(gift && { gift }),
           });
 
           if (printfulRes.result?.id) {
@@ -305,6 +314,12 @@ export async function POST(req: Request) {
           printfulItems.push({ sync_variant_id: v, quantity: 1, name: `${it.name} ${it.size}` });
         }
         if (printfulItems.length > 0) {
+          // Same gift-forward as above.
+          const giftItem = physicalItems.find((it) => it.isGift && it.giftMessage);
+          const gift = giftItem?.giftMessage
+            ? { subject: 'A note for you', message: giftItem.giftMessage }
+            : undefined;
+
           const printfulRes = await createPrintfulOrder({
             external_id: order.token,
             recipient: {
@@ -319,6 +334,7 @@ export async function POST(req: Request) {
             },
             items: printfulItems,
             confirm: true,
+            ...(gift && { gift }),
           });
           if (printfulRes.result?.id) {
             update.printful_order_id = String(printfulRes.result.id);
