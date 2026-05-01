@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronDown, Star, Truck, ShieldCheck, Globe } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Star, Truck, ShieldCheck, Globe, Info } from 'lucide-react';
 import WallFrame from '@/components/WallFrame';
 import PrintPreview from '@/components/PrintPreview';
 import DesignCard from '@/components/DesignCard';
@@ -174,17 +174,32 @@ export default function DesignDetail({ design, related }: Props) {
                   className="mt-0.5 w-4 h-4 accent-ink"
                 />
                 <div className="flex-1">
-                  <div className="text-sm text-ink">This is a gift</div>
+                  <div className="text-sm text-ink flex items-center gap-1.5">
+                    This is a gift
+                    <span
+                      className="text-mid cursor-help"
+                      title="If your order has more than one print, the whole package ships as a gift with a single personal note and one packing slip. Order each print separately if you need different messages or recipients."
+                    >
+                      <Info size={12} strokeWidth={1.75} />
+                    </span>
+                  </div>
                   <p className="text-[13px] text-mid mt-0.5">
                     Add a personal message. We&apos;ll hide the price on the recipient&apos;s copy.
                   </p>
                   {isGift && (
-                    <textarea
-                      className="input-field mt-3 min-h-[72px] resize-none"
-                      placeholder="Your personal message…"
-                      value={giftMessage}
-                      onChange={(e) => setGiftMessage(e.target.value)}
-                    />
+                    <>
+                      <textarea
+                        className="input-field mt-3 min-h-[72px] resize-none"
+                        placeholder="Your personal message…"
+                        value={giftMessage}
+                        onChange={(e) => setGiftMessage(e.target.value)}
+                      />
+                      <p className="text-[12px] text-mid mt-2 leading-relaxed">
+                        Multiple prints in one order ship together as a single
+                        gift with one note and one packing slip. Place separate
+                        orders if you need different messages or recipients.
+                      </p>
+                    </>
                   )}
                 </div>
               </label>
