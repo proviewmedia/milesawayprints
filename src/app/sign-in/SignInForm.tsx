@@ -1,53 +1,84 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
+type Mode = 'signin' | 'signup';
+type Status = 'idle' | 'submitting' | 'confirm-sent' | 'error';
+
 export default function SignInForm() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const searchParams = useSearchParams();
+  // Pre-fill from `?email=` (used by the post-purchase "Create account" CTA)
+  // and start in signup mode if an email was passed in.
+  const presetEmail = searchParams.get('email') ?? '';
+  const [mode, setMode] = useState<Mode>(presetEmail ? 'signup' : 'signin');
+  const [email, setEmail] = useState(presetEmail);
+  const [password, setPassword] = useState('');
+  const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !password) return;
 
-    setStatus('sending');
+    setStatus('submitting');
     setErrorMsg(null);
 
     const supabase = createSupabaseBrowserClient();
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
-      },
-    });
 
-    if (error) {
-      setStatus('error');
-      setErrorMsg(error.message);
+    if (mode === 'signin') {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) {
+        setStatus('error');
+        setErrorMsg(error.message);
+        return;
+      }
+      router.push('/account');
+      router.refresh();
     } else {
-      setStatus('sent');
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+      });
+      if (error) {
+        setStatus('error');
+        setErrorMsg(error.message);
+        return;
+      }
+      // If the project requires email confirmation, session is null and
+      // we show a 'check your email' state. Otherwise sign the user in.
+      if (data.session) {
+        router.push('/account');
+        router.refresh();
+      } else {
+        setStatus('confirm-sent');
+      }
     }
   };
 
-  if (status === 'sent') {
+  if (status === 'confirm-sent') {
     return (
       <div className="border border-border p-6 text-center">
         <h2 className="text-lg text-ink mb-2">Check your email</h2>
         <p className="text-sm text-mid leading-relaxed">
-          We sent a magic link to <strong className="text-ink">{email}</strong>.
-          Click the link in your inbox to sign in. The link is good for an hour.
+          We sent a confirmation link to{' '}
+          <strong className="text-ink">{email}</strong>. Click the link to verify
+          your account, then come back and sign in.
         </p>
         <button
           onClick={() => {
-            setEmail('');
+            setMode('signin');
+            setPassword('');
             setStatus('idle');
           }}
           className="mt-6 text-sm text-ink underline underline-offset-2 hover:opacity-70"
         >
-          Use a different email
+          Back to sign in
         </button>
       </div>
     );
@@ -61,24 +92,76 @@ export default function SignInForm() {
           type="email"
           required
           autoFocus
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
           className="input-field"
         />
       </div>
-      {errorMsg && (
-        <p className="text-sm text-accent">{errorMsg}</p>
-      )}
+
+      <div>
+        <label className="block text-[13px] font-medium text-ink mb-2">Password</label>
+        <input
+          type="password"
+          required
+          autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={mode === 'signin' ? 'Your password' : 'Pick a password (8+ characters)'}
+          minLength={mode === 'signup' ? 8 : undefined}
+          className="input-field"
+        />
+      </div>
+
+      {errorMsg && <p className="text-sm text-accent">{errorMsg}</p>}
+
       <button
         type="submit"
-        disabled={status === 'sending'}
+        disabled={status === 'submitting'}
         className="w-full bg-ink text-paper py-3.5 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-60"
       >
-        {status === 'sending' ? 'Sending…' : 'Send magic link'}
+        {status === 'submitting'
+          ? mode === 'signin'
+            ? 'Signing in…'
+            : 'Creating account…'
+          : mode === 'signin'
+          ? 'Sign in'
+          : 'Create account'}
       </button>
-      <p className="text-[12px] text-mid text-center pt-2">
-        No password needed. We&apos;ll create your account automatically on first sign-in.
+
+      <p className="text-[13px] text-mid text-center pt-2">
+        {mode === 'signin' ? (
+          <>
+            New here?{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signup');
+                setStatus('idle');
+                setErrorMsg(null);
+              }}
+              className="text-ink underline underline-offset-2 hover:opacity-70"
+            >
+              Create an account
+            </button>
+          </>
+        ) : (
+          <>
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={() => {
+                setMode('signin');
+                setStatus('idle');
+                setErrorMsg(null);
+              }}
+              className="text-ink underline underline-offset-2 hover:opacity-70"
+            >
+              Sign in
+            </button>
+          </>
+        )}
       </p>
     </form>
   );
