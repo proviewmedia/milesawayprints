@@ -21,6 +21,26 @@ async function getReviews() {
   return data ?? [];
 }
 
+/**
+ * Up to N most popular prints of a single category for the
+ * homepage scroll rows. Featured items first, then sort_order. Falls
+ * back to whatever's active in the DB; no DEFAULT_GALLERY fallback
+ * here — if no products are synced for the category yet, the row
+ * simply doesn't render.
+ */
+async function getDesignsByType(type: PrintType, limit = 10): Promise<DesignSummary[]> {
+  const { data } = await supabase
+    .from('gallery_items')
+    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents')
+    .eq('active', true)
+    .eq('print_type_slug', type)
+    .order('featured', { ascending: false })
+    .order('sort_order', { ascending: true })
+    .limit(limit);
+
+  return ((data ?? []) as GalleryItemWithMeta[]).map((row) => toDesignSummary(row, type));
+}
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -61,7 +81,12 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
 }
 
 export default async function HomePage() {
-  const [reviews, featured] = await Promise.all([getReviews(), getFeaturedDesigns()]);
+  const [reviews, featured, airports, golf] = await Promise.all([
+    getReviews(),
+    getFeaturedDesigns(),
+    getDesignsByType('airport', 10),
+    getDesignsByType('golf', 10),
+  ]);
 
   return (
     <>
@@ -156,6 +181,20 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Airport prints — horizontal scroll row */}
+      <CategoryRow
+        heading="Airport prints"
+        viewAllHref="/shop?category=airport"
+        designs={airports}
+      />
+
+      {/* Golf course prints — horizontal scroll row */}
+      <CategoryRow
+        heading="Golf course prints"
+        viewAllHref="/shop?category=golf"
+        designs={golf}
+      />
 
       {/* Lifestyle photography section — placeholders for now */}
       <section className="py-16 md:py-24 bg-soft">
@@ -274,5 +313,50 @@ export default async function HomePage() {
 
       <Footer />
     </>
+  );
+}
+
+/**
+ * Heading row + horizontal-scroll strip of DesignCards. Used for the
+ * homepage's per-category sections (airports, golf, etc.). Cards are
+ * 256px wide; the strip side-scrolls past the right edge of the
+ * container. Renders nothing if `designs` is empty.
+ */
+function CategoryRow({
+  heading,
+  viewAllHref,
+  designs,
+}: {
+  heading: string;
+  viewAllHref: string;
+  designs: DesignSummary[];
+}) {
+  if (designs.length === 0) return null;
+
+  return (
+    <section className="py-16 md:py-24">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
+          <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
+            {heading}
+          </h2>
+          <Link href={viewAllHref} className="btn-secondary py-2.5 px-5 text-[13px]">
+            Show all
+          </Link>
+        </div>
+      </div>
+
+      {/* Scroll strip — overflows the container so cards bleed
+          comfortably to the viewport edge. */}
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex gap-6 px-6 max-w-[1400px] mx-auto">
+          {designs.map((d) => (
+            <div key={d.slug} className="flex-shrink-0 w-56 md:w-64">
+              <DesignCardWrapper design={d} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
