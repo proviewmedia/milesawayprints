@@ -44,7 +44,7 @@ function inferType(name: string): PrintType {
   const n = name.toLowerCase();
   if (n.includes('skyline')) return 'skyline';
   if (n.includes('grand prix') || n.includes('f1') || n.includes('circuit')) return 'f1';
-  if (n.includes('golf') || n.includes('course')) return 'golf';
+  if (n.includes('golf') || n.includes('course') || n.includes('tpc') || n.includes('club')) return 'golf';
   if (n.includes('stadium') || n.includes('park') || n.includes('field')) return 'stadium';
   if (n.includes('airport')) return 'airport';
   if (n.includes('marathon')) return 'marathon';

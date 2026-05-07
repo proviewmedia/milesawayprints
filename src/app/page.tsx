@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import PrintPreview from '@/components/PrintPreview';
 import WallFrame from '@/components/WallFrame';
 import DesignCardWrapper from './DesignCardWrapper';
-import { PRINT_CONFIGS, PrintType, DEFAULT_GALLERY } from '@/data/prints';
+import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
 
@@ -44,11 +44,9 @@ async function getDesignsByType(type: PrintType, limit = 10): Promise<DesignSumm
 export const dynamic = 'force-dynamic';
 
 /**
- * One representative print per major category (golf, stadium, airport,
- * marathon, city). Tries the DB first; if a category has no synced
- * products we fall back to the DEFAULT_GALLERY sample for that type
- * so the homepage still shows all five tiles even before Printful sync
- * covers every category.
+ * One representative print per category that has at least one active
+ * synced product. Categories with zero products are skipped — we don't
+ * want fake placeholder tiles linking to the demoted custom-design flow.
  */
 async function getFeaturedDesigns(): Promise<DesignSummary[]> {
   const { data } = await supabase
@@ -65,18 +63,9 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
     if (!byType.has(type)) byType.set(type, row);
   }
 
-  return CATEGORY_ORDER.map((type) => {
+  return CATEGORY_ORDER.flatMap((type) => {
     const row = byType.get(type);
-    if (row) return toDesignSummary(row, type);
-    // No synced product for this type — render the default sample
-    const sample = DEFAULT_GALLERY[type][0];
-    return {
-      slug: `prints/${type}`, // routes to the custom-design flow
-      name: PRINT_CONFIGS[type].detailsLabel,
-      location: '',
-      type,
-      values: sample.values,
-    } as DesignSummary;
+    return row ? [toDesignSummary(row, type)] : [];
   });
 }
 
