@@ -120,39 +120,53 @@ export default async function HomePage() {
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-10 md:gap-12 items-stretch">
-            <div className="flex flex-col justify-center py-4">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-                Custom location art
-              </p>
-              <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-ink leading-[0.98] mb-5">
-                The places<br />you love,<br />printed.
-              </h1>
-              <p className="text-base md:text-lg text-mid mb-7 max-w-md leading-relaxed">
-                Airports, marathons, golf courses, and city skylines — designed
-                in-house, printed on archival paper, shipped worldwide.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link href="/shop" className="btn-primary">
-                  Shop the collection
-                </Link>
-                <Link
-                  href="/marathons/las-vegas"
-                  className="text-sm font-medium text-ink underline underline-offset-4 decoration-1 hover:opacity-70 transition-opacity"
-                >
-                  Or start a custom print →
-                </Link>
+            <div className="flex flex-col justify-between py-6 md:py-2 gap-10">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
+                  Custom location art · Est. 2020
+                </p>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-ink leading-[0.95] mb-6">
+                  The places<br />you love,<br />printed.
+                </h1>
+                <p className="text-base md:text-lg text-mid max-w-md leading-relaxed">
+                  Airports, marathons, golf courses, and city skylines —
+                  designed in-house, printed on archival paper, shipped
+                  worldwide.
+                </p>
               </div>
-              <div className="flex items-center gap-2 mt-8">
-                <div className="flex gap-0.5 text-ink">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
+
+              <div>
+                <ul className="flex flex-wrap gap-x-3 gap-y-2 text-[13px] text-mid mb-7">
+                  {['Airports', 'Marathons', 'Golf courses', 'City skylines', 'F1 circuits'].map((c, i, arr) => (
+                    <li key={c} className="flex items-center gap-3">
+                      <span>{c}</span>
+                      {i < arr.length - 1 && <span className="text-light-mid">·</span>}
+                    </li>
                   ))}
+                </ul>
+                <div className="flex flex-wrap items-center gap-4 mb-7">
+                  <Link href="/shop" className="btn-primary">
+                    Shop the collection
+                  </Link>
+                  <Link
+                    href="/marathons/las-vegas"
+                    className="text-sm font-medium text-ink underline underline-offset-4 decoration-1 hover:opacity-70 transition-opacity"
+                  >
+                    Or start a custom print →
+                  </Link>
                 </div>
-                <span className="text-sm text-mid">4.9 / 5 · 500+ happy customers</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5 text-ink">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
+                    ))}
+                  </div>
+                  <span className="text-sm text-mid">4.9 / 5 · 500+ happy customers</span>
+                </div>
               </div>
             </div>
 
-            <div className="relative bg-soft aspect-[5/4] md:aspect-auto md:min-h-[460px] overflow-hidden">
+            <div className="relative bg-soft aspect-[4/5] overflow-hidden">
               {heroSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
