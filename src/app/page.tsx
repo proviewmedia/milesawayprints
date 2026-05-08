@@ -304,21 +304,21 @@ export default async function HomePage() {
       </section>
 
       {/* Gift Section */}
-      <section id="gift" className="py-12 md:py-16 scroll-mt-40">
+      <section id="gift" className="py-8 md:py-12 scroll-mt-40">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="bg-soft p-10 md:p-20 grid md:grid-cols-2 gap-10 items-center">
+          <div className="bg-soft p-6 md:p-10 grid md:grid-cols-2 gap-6 md:gap-10 items-center">
             <div>
-              <h2 className="text-3xl md:text-5xl font-medium text-ink tracking-tight leading-[1.05] mb-5">
+              <h2 className="text-3xl md:text-4xl font-medium text-ink tracking-tight leading-[1.05] mb-3">
                 Make it<br />meaningful.
               </h2>
-              <p className="text-mid text-base md:text-lg mb-7 leading-relaxed max-w-sm">
+              <p className="text-mid text-sm md:text-base mb-5 leading-relaxed max-w-sm">
                 Every print can be a gift. Add a personal message, ship it straight to the recipient, and we&apos;ll leave the price off. Perfect for birthdays, anniversaries, and weddings.
               </p>
               <Link href="/shop" className="btn-primary">
                 Find a gift
               </Link>
             </div>
-            <div className="bg-paper aspect-[4/5] max-w-[420px] mx-auto w-full flex items-center justify-center p-6 md:p-10">
+            <div className="max-w-[320px] md:max-w-[360px] mx-auto w-full">
               {giftMarathon?.thumbnail_path ? (
                 <Link
                   href={`/marathons/${giftMarathon.slug}`}
@@ -332,11 +332,9 @@ export default async function HomePage() {
                   />
                 </Link>
               ) : (
-                <div className="w-full">
-                  <WallFrame compact>
-                    <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
-                  </WallFrame>
-                </div>
+                <WallFrame compact>
+                  <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
+                </WallFrame>
               )}
             </div>
           </div>
