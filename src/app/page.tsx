@@ -9,6 +9,8 @@ import MarathonCard from '@/components/MarathonCard';
 import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase, createAdminClient } from '@/lib/supabase';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
 
@@ -101,11 +103,20 @@ export default async function HomePage() {
   // Las Vegas marathon poster anchors the Gift section.
   const giftMarathon = marathons.find((m) => m.slug === 'las-vegas') ?? marathons[0] ?? null;
 
+  // Hero image: drop a JPG/PNG at /public/hero.jpg (or .png) and it
+  // appears automatically. Otherwise we render a clean placeholder so
+  // the page doesn't show a broken-image icon.
+  const heroJpg = existsSync(join(process.cwd(), 'public', 'hero.jpg'));
+  const heroPng = !heroJpg && existsSync(join(process.cwd(), 'public', 'hero.png'));
+  const heroSrc = heroJpg ? '/hero.jpg' : heroPng ? '/hero.png' : null;
+
   return (
     <>
       <NavbarShell />
 
-      {/* Hero — split-screen, restrained type, lifestyle placeholder */}
+      {/* Hero — split-screen with a single hero image instead of the
+          symbolic-preview grid. Drop a 1600×1200-ish JPG at
+          /public/hero.jpg to replace the placeholder. */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-10 md:gap-12 items-stretch">
@@ -114,7 +125,7 @@ export default async function HomePage() {
                 The places<br />you love.<br />Printed.
               </h1>
               <p className="text-base md:text-lg text-mid mb-7 max-w-md leading-relaxed">
-                Custom map and skyline prints, made to last. Stadiums, airports, marathons, golf courses, and city streets — printed on archival paper.
+                Custom map and skyline prints, made to last. Airports, marathons, golf courses, and city skylines — printed on archival paper.
               </p>
               <div className="flex flex-wrap items-center gap-5">
                 <Link href="/shop" className="btn-primary">
@@ -131,28 +142,19 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right — lifestyle placeholder, landscape, fills the column. Replace once photos arrive. */}
-            <div className="relative bg-soft aspect-[5/4] md:aspect-auto md:min-h-[460px] flex items-center justify-center overflow-hidden">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-[88%] py-8">
-                <div className="pt-6">
-                  <WallFrame compact>
-                    <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
-                  </WallFrame>
-                </div>
-                <div className="pt-12">
-                  <WallFrame compact>
-                    <PrintPreview type="golf" values={DEFAULT_GALLERY.golf[0].values} />
-                  </WallFrame>
-                </div>
-                <div className="pt-6">
-                  <WallFrame compact>
-                    <PrintPreview type="airport" values={DEFAULT_GALLERY.airport[0].values} />
-                  </WallFrame>
-                </div>
-              </div>
-              <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-wider text-mid">
-                Lifestyle photo placeholder
-              </span>
+            <div className="relative bg-soft aspect-[5/4] md:aspect-auto md:min-h-[460px] overflow-hidden">
+              {heroSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={heroSrc}
+                  alt="Miles Away Prints — custom location art"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-wider text-mid">
+                  Drop /public/hero.jpg to set hero
+                </span>
+              )}
             </div>
           </div>
         </div>
