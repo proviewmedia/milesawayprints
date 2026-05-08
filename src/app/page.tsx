@@ -49,32 +49,6 @@ async function getDesignsByType(type: PrintType, limit = 10): Promise<DesignSumm
 
 export const dynamic = 'force-dynamic';
 
-/**
- * One representative print per category that has at least one active
- * synced product. Categories with zero products are skipped — we don't
- * want fake placeholder tiles linking to the demoted custom-design flow.
- */
-async function getFeaturedDesigns(): Promise<DesignSummary[]> {
-  const { data } = await supabase
-    .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents, featured, sort_order')
-    .eq('active', true)
-    .in('print_type_slug', CATEGORY_ORDER as unknown as string[])
-    .order('featured', { ascending: false })
-    .order('sort_order', { ascending: true });
-
-  const byType = new Map<PrintType, GalleryItemWithMeta>();
-  for (const row of (data ?? []) as GalleryItemWithMeta[]) {
-    const type = row.print_type_slug as PrintType;
-    if (!byType.has(type)) byType.set(type, row);
-  }
-
-  return CATEGORY_ORDER.flatMap((type) => {
-    const row = byType.get(type);
-    return row ? [toDesignSummary(row, type)] : [];
-  });
-}
-
 async function getMarathons() {
   const { data } = await supabase
     .from('marathons')
@@ -91,9 +65,8 @@ async function getMarathons() {
 }
 
 export default async function HomePage() {
-  const [reviews, featured, airports, golf, skylines, marathons] = await Promise.all([
+  const [reviews, airports, golf, skylines, marathons] = await Promise.all([
     getReviews(),
-    getFeaturedDesigns(),
     getDesignsByType('airport', 10),
     getDesignsByType('golf', 10),
     getDesignsByType('skyline', 10),
@@ -203,34 +176,39 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured prints */}
+      {/* Featured categories — one tile per print type, not individual SKUs */}
       <section className="py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
             <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
-              Featured prints
+              Shop by category
             </h2>
             <Link href="/shop" className="btn-secondary py-2.5 px-5 text-[13px]">
               Shop all
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {featured.map((d) => (
-              <DesignCardWrapper key={d.slug} design={d} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf' },
+              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline' },
+              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport' },
+              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/#marathons' },
+            ].map((c) => (
+              <Link key={c.name} href={c.href} className="group block">
+                <div className="relative aspect-[4/5] overflow-hidden bg-soft">
+                  {c.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={c.image}
+                      alt={c.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                  ) : null}
+                </div>
+                <div className="mt-4 text-[15px] text-ink">{c.name}</div>
+              </Link>
             ))}
-            {giftMarathon && (
-              <MarathonCard
-                slug={giftMarathon.slug}
-                city={giftMarathon.city}
-                thumbnailPath={giftMarathon.thumbnail_path}
-                fromCents={
-                  Object.values((giftMarathon.printful_prices ?? {}) as Record<string, number>)
-                    .filter((n) => typeof n === 'number')
-                    .sort((a, b) => a - b)[0]
-                }
-              />
-            )}
           </div>
         </div>
       </section>
