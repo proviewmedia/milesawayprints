@@ -196,13 +196,13 @@ export default async function HomePage() {
               { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/#marathons' },
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
-                <div className="relative aspect-square overflow-hidden bg-white flex items-center justify-center">
+                <div className="relative aspect-square overflow-hidden bg-white">
                   {c.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={c.image}
                       alt={c.name}
-                      className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                      className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   ) : null}
                 </div>
