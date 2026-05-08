@@ -29,31 +29,45 @@ if (!inputPath || !outputPrefix) {
 const svg = readFileSync(inputPath, 'utf8');
 console.log(`Read ${inputPath} (${(statSync(inputPath).size / 1024 / 1024).toFixed(2)} MB)`);
 
-// Find the first embedded PNG data URL in an xlink:href (or href).
-// Pattern is robust against arbitrary whitespace inside the base64 payload.
-const dataUrlRe = /(xlink:href|href)="data:image\/png;base64,([^"]+)"/;
-const m = svg.match(dataUrlRe);
-if (!m) {
+// Find every embedded PNG data URL in an xlink:href (or href). Some SVG
+// templates have a single map image; others (Chicago) embed two — the city
+// map and a secondary illustration/overlay. We extract them all and replace
+// each with an absolute /public path. The first PNG keeps the bare prefix
+// (`<prefix>.png`) so existing `marathons.full_svg_path` rows still resolve;
+// subsequent PNGs get -2, -3, ... suffixes.
+const dataUrlRe = /(xlink:href|href)="data:image\/png;base64,([^"]+)"/g;
+
+const svgOut = `${outputPrefix}.svg`;
+let lightSvg = svg;
+let imageIndex = 0;
+const written = [];
+
+// Walk matches against the *original* svg string so all replacements are
+// computed independently, then apply them.
+const matches = Array.from(svg.matchAll(dataUrlRe));
+if (matches.length === 0) {
   console.error('No embedded PNG data URL found in SVG.');
   process.exit(2);
 }
 
-const [, attr, b64] = m;
-const cleaned = b64.replace(/\s+/g, '');
-const pngBuf = Buffer.from(cleaned, 'base64');
-console.log(`Extracted embedded PNG: ${(pngBuf.length / 1024 / 1024).toFixed(2)} MB`);
+for (const match of matches) {
+  imageIndex += 1;
+  const [whole, attr, b64] = match;
+  const cleaned = b64.replace(/\s+/g, '');
+  const pngBuf = Buffer.from(cleaned, 'base64');
+  const suffix = imageIndex === 1 ? '' : `-${imageIndex}`;
+  const pngOut = `${outputPrefix}${suffix}.png`;
+  const pngBasename = basename(pngOut);
+  writeFileSync(pngOut, pngBuf);
+  const publicHref = `/marathons/${pngBasename}`;
+  lightSvg = lightSvg.replace(whole, `${attr}="${publicHref}"`);
+  written.push({ path: pngOut, bytes: pngBuf.length });
+  console.log(`Extracted embedded PNG #${imageIndex}: ${(pngBuf.length / 1024 / 1024).toFixed(2)} MB → ${pngBasename}`);
+}
 
-const pngOut = `${outputPrefix}.png`;
-const svgOut = `${outputPrefix}.svg`;
-const pngBasename = basename(pngOut);
-
-writeFileSync(pngOut, pngBuf);
-
-// Replace the data URL with an absolute path under /public so the SVG can
-// be inlined into any HTML page and still locate the route image.
-const publicHref = `/marathons/${pngBasename}`;
-const lightSvg = svg.replace(dataUrlRe, `${attr}="${publicHref}"`);
 writeFileSync(svgOut, lightSvg);
 
 console.log(`Wrote ${svgOut} (${(statSync(svgOut).size / 1024).toFixed(1)} KB)`);
-console.log(`Wrote ${pngOut} (${(statSync(pngOut).size / 1024 / 1024).toFixed(2)} MB)`);
+for (const w of written) {
+  console.log(`Wrote ${w.path} (${(w.bytes / 1024 / 1024).toFixed(2)} MB)`);
+}

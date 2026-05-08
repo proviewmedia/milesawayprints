@@ -406,11 +406,36 @@ function Field({
 
 /**
  * Apply customer values to the inline SVG by mutating the textContent of the
- * placeholder tspan elements. The placeholder strings ("John Doe", "#11456",
- * etc.) are unique within the SVG, so we find them by exact text match.
+ * placeholder tspan elements. Different city posters can ship with slightly
+ * different placeholder values (Las Vegas uses `02:30:22`, Chicago uses
+ * `03:02:22`, etc.) — so we identify each tspan's role by *pattern* the
+ * first time we see it, store the role on the element, and after that just
+ * write the customer's value (or fall back to the SVG's original placeholder
+ * when the field is empty).
  *
- * This keeps the SVG itself source-of-truth (no required IDs, no preprocessing).
+ * Conventions a marathon SVG must follow for the customizer to wire up:
+ *   - Name placeholder must be exactly "John Doe"
+ *   - Bib placeholder matches /^#\d+$/  (e.g. "#11456")
+ *   - Finish-time placeholder matches /^\d{1,2}:\d{2}:\d{2}$/  (e.g. "02:30:22")
+ *   - Date placeholder matches /^\d{1,2}\s*·\s*\d{1,2}\s*·\s*\d{2,4}$/ (e.g. "01 · 10 · 27")
+ *   - Distance placeholder is "26.2" (full) or "13.1" (half), as in LV
  */
+
+const RE_BIB = /^#\d+$/;
+const RE_TIME = /^\d{1,2}:\d{2}:\d{2}$/;
+const RE_DATE = /^\d{1,2}\s*·\s*\d{1,2}\s*·\s*\d{2,4}$/;
+
+type TspanRole = 'name' | 'bib' | 'time' | 'date' | 'distance';
+
+function classifyOriginal(orig: string): TspanRole | null {
+  if (orig === SVG_PLACEHOLDERS.name) return 'name';
+  if (orig === SVG_PLACEHOLDERS.distanceFull || orig === SVG_PLACEHOLDERS.distanceHalf) return 'distance';
+  if (RE_BIB.test(orig)) return 'bib';
+  if (RE_TIME.test(orig)) return 'time';
+  if (RE_DATE.test(orig)) return 'date';
+  return null;
+}
+
 function applyAllToDom(
   wrap: HTMLDivElement | null,
   values: {
@@ -425,33 +450,39 @@ function applyAllToDom(
   if (!wrap) return;
   const tspans = wrap.querySelectorAll('tspan');
 
-  const fullName = `${values.firstName || 'John'} ${values.lastName || 'Doe'}`.trim() || 'John Doe';
-  const bibText = values.bib ? `#${values.bib.replace(/^#/, '')}` : SVG_PLACEHOLDERS.bib;
-  const finish = values.finishTime || SVG_PLACEHOLDERS.finishTime;
-  const date = values.raceDate ? formatRaceDate(values.raceDate) : SVG_PLACEHOLDERS.date;
+  const fullName = `${values.firstName} ${values.lastName}`.trim();
+  const bibText = values.bib ? `#${values.bib.replace(/^#/, '')}` : '';
+  const finish = values.finishTime;
+  const date = values.raceDate ? formatRaceDate(values.raceDate) : '';
 
   const distance =
     values.variant === 'half' ? SVG_PLACEHOLDERS.distanceHalf : SVG_PLACEHOLDERS.distanceFull;
 
   for (const t of Array.from(tspans)) {
-    const original = t.dataset.originalText ?? t.textContent ?? '';
-    if (!t.dataset.originalText) t.dataset.originalText = original;
+    if (!t.dataset.originalText) {
+      const orig = t.textContent ?? '';
+      t.dataset.originalText = orig;
+      const role = classifyOriginal(orig);
+      if (role) t.dataset.role = role;
+    }
 
-    switch (original) {
-      case SVG_PLACEHOLDERS.name:
-        t.textContent = fullName;
+    const original = t.dataset.originalText ?? '';
+    const role = (t.dataset.role as TspanRole | undefined) ?? null;
+
+    switch (role) {
+      case 'name':
+        t.textContent = fullName || original;
         break;
-      case SVG_PLACEHOLDERS.bib:
-        t.textContent = bibText;
+      case 'bib':
+        t.textContent = bibText || original;
         break;
-      case SVG_PLACEHOLDERS.finishTime:
-        t.textContent = finish;
+      case 'time':
+        t.textContent = finish || original;
         break;
-      case SVG_PLACEHOLDERS.date:
-        t.textContent = date;
+      case 'date':
+        t.textContent = date || original;
         break;
-      case SVG_PLACEHOLDERS.distanceFull:
-      case SVG_PLACEHOLDERS.distanceHalf:
+      case 'distance':
         t.textContent = distance;
         break;
       default:
