@@ -35,30 +35,47 @@ export default function DesignCard({ design }: Props) {
         ? `/shop?category=${design.type}`
         : `/shop/${design.slug}`;
 
+  const isMarathon = design.type === 'marathon';
+
   return (
     <Link href={href} className="group block">
-      {/* Image tile — Printful images already have lifestyle context, so no inner padding.
-          For SVG previews (custom designs), use the WallFrame inside an off-white tile. */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-soft">
-        {design.image_url ? (
-          <Image
+      {/* Image tile.
+          - Marathon items: render the supplied PNG poster contained inside
+            a matted, drop-shadowed frame. Tile aspect matches the other
+            cards so heights line up.
+          - Printful product images: full-bleed `object-cover` over bg-soft.
+          - SVG previews (no image_url): WallFrame + PrintPreview fallback. */}
+      {isMarathon && design.image_url ? (
+        <div className="relative aspect-[4/5] flex items-center justify-center px-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={design.image_url}
             alt={`${design.name} — ${design.location}`}
-            width={800}
-            height={1000}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            unoptimized
+            className="block w-full max-h-full object-contain bg-white p-[6%] shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)] transition-transform duration-500 group-hover:scale-[1.02]"
           />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center p-8 md:p-10">
-            <div className="w-full transition-transform duration-500 group-hover:scale-[1.02]">
-              <WallFrame compact>
-                <PrintPreview type={design.type} values={design.values} />
-              </WallFrame>
+        </div>
+      ) : (
+        <div className="relative aspect-[4/5] overflow-hidden bg-soft">
+          {design.image_url ? (
+            <Image
+              src={design.image_url}
+              alt={`${design.name} — ${design.location}`}
+              width={800}
+              height={1000}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              unoptimized
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center p-8 md:p-10">
+              <div className="w-full transition-transform duration-500 group-hover:scale-[1.02]">
+                <WallFrame compact>
+                  <PrintPreview type={design.type} values={design.values} />
+                </WallFrame>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Caption */}
       <div className="mt-4">
