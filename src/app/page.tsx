@@ -197,21 +197,18 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — outer tile EXACTLY matches the other
-                  // tiles (aspect-[4/5] + bg-soft + overflow-hidden) so the
-                  // row's top/bottom edges align. The white-bordered framed
-                  // print sits inset INSIDE that tile so the shadow stays
-                  // within the tile bounds.
-                  <div className="relative aspect-[4/5] overflow-hidden bg-soft">
+                  // Marathon poster — outer tile is aspect-[4/5] (same size
+                  // as other tiles). The full PNG (already has a white
+                  // border baked in) gets scaled down with object-contain
+                  // and a drop shadow.
+                  <div className="relative aspect-[4/5]">
                     {c.image ? (
-                      <div className="absolute inset-[7%] bg-white shadow-[0_18px_28px_-10px_rgba(26,26,46,0.30),0_6px_12px_-6px_rgba(26,26,46,0.18)]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={c.image}
-                          alt={c.name}
-                          className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
-                        />
-                      </div>
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={c.image}
+                        alt={c.name}
+                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_18px_28px_rgba(26,26,46,0.30)] transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
                     ) : null}
                   </div>
                 ) : (
