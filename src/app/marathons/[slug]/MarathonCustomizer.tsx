@@ -221,14 +221,14 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
             {/* Size picker */}
             <div className="mb-6">
               <div className="text-xs font-semibold text-ink mb-2">Size</div>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                 {MARATHON_SIZES.filter((s) =>
                   Object.prototype.hasOwnProperty.call(marathon.printful_prices, s.value),
                 ).map((s) => (
                   <button
                     key={s.value}
                     onClick={() => setSize(s.value)}
-                    className={`py-2.5 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
+                    className={`min-h-[44px] py-2.5 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
                       size === s.value
                         ? 'border-primary bg-primary-light text-primary'
                         : 'border-border bg-white text-ink hover:border-primary/50'

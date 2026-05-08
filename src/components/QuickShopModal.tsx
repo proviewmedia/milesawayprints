@@ -136,12 +136,12 @@ export default function QuickShopModal({ design, onClose }: Props) {
             {format === 'physical' && physicalSizes.length > 0 && (
               <div className="mb-5">
                 <div className="text-xs font-semibold text-ink mb-2">Size</div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {physicalSizes.map((s) => (
                     <button
                       key={s}
                       onClick={() => setSize(s)}
-                      className={`py-2 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
+                      className={`min-h-[40px] py-2 rounded-lg text-xs font-semibold border-[1.5px] transition-all ${
                         size === s
                           ? 'border-primary bg-primary-light text-primary'
                           : 'border-border bg-white text-ink hover:border-primary/50'

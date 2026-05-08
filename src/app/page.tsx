@@ -109,7 +109,7 @@ export default async function HomePage() {
 
             {/* Right — lifestyle placeholder, landscape, fills the column. Replace once photos arrive. */}
             <div className="relative bg-soft aspect-[5/4] md:aspect-auto md:min-h-[460px] flex items-center justify-center overflow-hidden">
-              <div className="grid grid-cols-3 gap-4 md:gap-6 w-[88%] py-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-[88%] py-8">
                 <div className="pt-6">
                   <WallFrame compact>
                     <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />

@@ -84,9 +84,9 @@ export default function ShopClient({ designs, collections }: Props) {
           the navbar so it pins flush as the customer scrolls. */}
       <section
         id="grid"
-        className="border-y border-border bg-paper sticky top-[80px] z-30"
+        className="border-y border-border bg-paper sticky top-[104px] md:top-[80px] z-30"
       >
-        <div className="max-w-[1400px] mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+        <div className="max-w-[1400px] mx-auto px-6 py-3 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-3 md:gap-4">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0">
             {CATEGORIES.map((c) => (
               <button
@@ -104,21 +104,21 @@ export default function ShopClient({ designs, collections }: Props) {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="relative">
+          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            <div className="relative flex-1 md:flex-none">
               <Search size={14} strokeWidth={1.75} className="absolute left-3 top-1/2 -translate-y-1/2 text-mid" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search locations"
-                className="bg-paper border border-border rounded-full pl-9 pr-4 py-2 text-sm placeholder:text-light-mid w-48 focus:w-60 focus:outline-none focus:border-ink transition-all"
+                className="bg-paper border border-border rounded-full pl-9 pr-4 py-2 text-sm placeholder:text-light-mid w-full md:w-48 md:focus:w-60 focus:outline-none focus:border-ink transition-all"
               />
             </div>
 
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortOption)}
-              className="bg-paper border border-border rounded-full px-4 py-2 text-sm text-ink focus:outline-none focus:border-ink"
+              className="bg-paper border border-border rounded-full px-3 md:px-4 py-2 text-sm text-ink focus:outline-none focus:border-ink"
             >
               <option value="featured">Featured</option>
               <option value="name-asc">A–Z</option>

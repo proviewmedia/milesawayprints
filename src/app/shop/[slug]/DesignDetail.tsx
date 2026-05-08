@@ -149,12 +149,12 @@ export default function DesignDetail({ design, related }: Props) {
                       Size guide
                     </button>
                   </div>
-                  <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2">
                     {physicalSizes.map((s) => (
                       <button
                         key={s}
                         onClick={() => setSize(s)}
-                        className={`py-3 rounded-lg border text-sm transition-colors ${
+                        className={`min-h-[44px] py-3 rounded-lg border text-sm transition-colors ${
                           size === s ? 'border-ink text-ink' : 'border-border text-mid hover:text-ink'
                         }`}
                       >
