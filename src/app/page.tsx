@@ -313,7 +313,7 @@ export default async function HomePage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {[
-              { src: '/lifestyle/ord-dresser.jpg', alt: 'Chicago O’Hare airport print displayed on a wood credenza', position: 'object-center' },
+              { src: '/lifestyle/ord-dresser.jpg', alt: 'Chicago O’Hare airport print displayed on a wood credenza', position: 'object-[center_35%]' },
               { src: '/lifestyle/maui-wall.jpg', alt: 'Maui Nui golf course print framed on a white wall', position: 'object-top' },
             ].map((p) => (
               <div
