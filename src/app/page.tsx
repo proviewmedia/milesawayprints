@@ -304,15 +304,14 @@ export default async function HomePage() {
       {/* Lifestyle photography section */}
       <section className="py-10 md:py-14 border-y border-border">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {[
               { src: '/lifestyle/ord-dresser.jpg', alt: 'Chicago O’Hare airport print displayed on a wood credenza' },
               { src: '/lifestyle/maui-wall.jpg', alt: 'Maui Nui golf course print framed on a white wall' },
-              { src: '/lifestyle/stjohns-table.jpg', alt: 'St. John’s golf course print framed beside a basket of golf balls' },
             ].map((p) => (
               <div
                 key={p.src}
-                className="aspect-[4/5] bg-soft-2 overflow-hidden"
+                className="aspect-[5/4] bg-soft-2 overflow-hidden"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
