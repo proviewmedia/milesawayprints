@@ -8,12 +8,15 @@ import DesignCardWrapper from './DesignCardWrapper';
 import MarathonCard from '@/components/MarathonCard';
 import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
-import { supabase } from '@/lib/supabase';
+import { supabase, createAdminClient } from '@/lib/supabase';
 
 const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
 
 async function getReviews() {
-  const { data } = await supabase
+  // Use admin client — same anon-truncation we hit on /shop and
+  // /marathons/[slug] in prod.
+  const admin = createAdminClient();
+  const { data } = await admin
     .from('reviews')
     .select('*')
     .eq('featured', true)
