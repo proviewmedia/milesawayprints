@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import { loadSvgFromPublic } from '@/lib/marathon-svg';
 import type { MarathonRow } from '@/data/marathons';
 import MarathonCustomizer from './MarathonCustomizer';
@@ -9,15 +9,17 @@ import Footer from '@/components/Footer';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
+// Use the admin client — this is a server-only page and we want a direct
+// read regardless of any RLS policy state on the marathons table.
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const { data } = await supabase
+  const admin = createAdminClient();
+  const { data } = await admin
     .from('marathons')
     .select('city')
-    .eq('slug', slug)
+    .eq('slug', params.slug)
     .eq('active', true)
     .maybeSingle();
   if (!data) return { title: 'Marathon — Miles Away Prints' };
@@ -28,15 +30,17 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function MarathonPage({ params }: Props) {
-  const { slug } = await params;
-
-  const { data: row } = await supabase
+  const admin = createAdminClient();
+  const { data: row, error } = await admin
     .from('marathons')
     .select('*')
-    .eq('slug', slug)
+    .eq('slug', params.slug)
     .eq('active', true)
     .maybeSingle();
 
+  if (error) {
+    console.error('[marathon page] supabase error', error);
+  }
   if (!row) return notFound();
 
   const marathon = row as MarathonRow;
