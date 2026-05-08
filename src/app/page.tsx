@@ -9,6 +9,7 @@ import MarathonCard from '@/components/MarathonCard';
 import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
+import { loadSvgFromPublic } from '@/lib/marathon-svg';
 
 const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
 
@@ -70,6 +71,14 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
   });
 }
 
+async function loadSvgSafely(path: string): Promise<string | null> {
+  try {
+    return await loadSvgFromPublic(path);
+  } catch {
+    return null;
+  }
+}
+
 async function getMarathons() {
   const { data } = await supabase
     .from('marathons')
@@ -93,6 +102,13 @@ export default async function HomePage() {
     getDesignsByType('skyline', 10),
     getMarathons(),
   ]);
+
+  // Pull the first active marathon's SVG to feature in the Gift section,
+  // replacing the symbolic curve-line marathon preview.
+  const giftMarathon = marathons[0];
+  const giftSvg = giftMarathon?.full_svg_path
+    ? await loadSvgSafely(giftMarathon.full_svg_path)
+    : null;
 
   return (
     <>
@@ -207,9 +223,6 @@ export default async function HomePage() {
                   Personalize with your bib, finish time, and race date.
                 </p>
               </div>
-              <Link href="/marathons" className="btn-secondary py-2.5 px-5 text-[13px]">
-                Show all
-              </Link>
             </div>
           </div>
 
@@ -314,12 +327,24 @@ export default async function HomePage() {
                 Find a gift
               </Link>
             </div>
-            <div className="bg-paper aspect-[4/5] max-w-[420px] mx-auto w-full flex items-center justify-center p-10">
-              <div className="w-full">
-                <WallFrame compact>
-                  <PrintPreview type="marathon" values={DEFAULT_GALLERY.marathon[0].values} />
-                </WallFrame>
-              </div>
+            <div className="bg-paper aspect-[4/5] max-w-[420px] mx-auto w-full flex items-center justify-center p-6 md:p-10">
+              {giftSvg ? (
+                <Link
+                  href={`/marathons/${giftMarathon!.slug}`}
+                  className="block w-full transition-transform duration-500 hover:scale-[1.02]"
+                >
+                  <div
+                    className="w-full bg-white shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)] [&>svg]:w-full [&>svg]:h-auto [&>svg]:block"
+                    dangerouslySetInnerHTML={{ __html: giftSvg }}
+                  />
+                </Link>
+              ) : (
+                <div className="w-full">
+                  <WallFrame compact>
+                    <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
+                  </WallFrame>
+                </div>
+              )}
             </div>
           </div>
         </div>
