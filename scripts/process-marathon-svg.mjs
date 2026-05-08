@@ -65,6 +65,15 @@ for (const match of matches) {
   console.log(`Extracted embedded PNG #${imageIndex}: ${(pngBuf.length / 1024 / 1024).toFixed(2)} MB → ${pngBasename}`);
 }
 
+// Self-contain the Josefin Sans font so the SVG renders the same when
+// embedded via <object> on the homepage as when opened directly. Without
+// this, the SVG falls back to a system serif/sans because the parent
+// page's font links don't reach into the <object>'s document.
+const fontImport = "@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;700&display=swap');";
+if (!lightSvg.includes('fonts.googleapis.com')) {
+  lightSvg = lightSvg.replace('<style>', `<style>${fontImport}`);
+}
+
 writeFileSync(svgOut, lightSvg);
 
 console.log(`Wrote ${svgOut} (${(statSync(svgOut).size / 1024).toFixed(1)} KB)`);
