@@ -46,7 +46,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
               </Link>
             </li>
             <li>
-              <Link href="/marathons/las-vegas" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
+              <Link href="/marathons" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
                 Marathons
               </Link>
             </li>
@@ -107,7 +107,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
             <Link href="/shop" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
               Shop
             </Link>
-            <Link href="/marathons/las-vegas" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
+            <Link href="/marathons" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
               Marathons
             </Link>
             <Link href="/#how" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>

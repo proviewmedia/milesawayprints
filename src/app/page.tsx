@@ -5,11 +5,12 @@ import Footer from '@/components/Footer';
 import PrintPreview from '@/components/PrintPreview';
 import WallFrame from '@/components/WallFrame';
 import DesignCardWrapper from './DesignCardWrapper';
+import MarathonCard from '@/components/MarathonCard';
 import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
 
-const CATEGORY_ORDER: PrintType[] = ['golf', 'stadium', 'airport', 'marathon', 'city'];
+const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
 
 async function getReviews() {
   const { data } = await supabase
@@ -69,12 +70,28 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
   });
 }
 
+async function getMarathons() {
+  const { data } = await supabase
+    .from('marathons')
+    .select('slug, city, full_svg_path, printful_prices')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+  return (data ?? []) as Array<{
+    slug: string;
+    city: string;
+    full_svg_path: string | null;
+    printful_prices: Record<string, number> | null;
+  }>;
+}
+
 export default async function HomePage() {
-  const [reviews, featured, airports, golf] = await Promise.all([
+  const [reviews, featured, airports, golf, skylines, marathons] = await Promise.all([
     getReviews(),
     getFeaturedDesigns(),
     getDesignsByType('airport', 10),
     getDesignsByType('golf', 10),
+    getDesignsByType('skyline', 10),
+    getMarathons(),
   ]);
 
   return (
@@ -171,11 +188,66 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Marathon prints — personalized posters from a separate table */}
+      {marathons.length > 0 && (
+        <section className="py-16 md:py-24 bg-soft">
+          <div className="max-w-[1400px] mx-auto px-6">
+            <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
+              <div>
+                <div
+                  className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase mb-2"
+                  style={{ background: '#fee2e2', color: '#dc2626' }}
+                >
+                  For Runners
+                </div>
+                <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
+                  Marathon prints
+                </h2>
+                <p className="text-mid text-sm md:text-base mt-1">
+                  Personalize with your bib, finish time, and race date.
+                </p>
+              </div>
+              <Link href="/marathons" className="btn-secondary py-2.5 px-5 text-[13px]">
+                Show all
+              </Link>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex gap-6 px-6 max-w-[1400px] mx-auto">
+              {marathons.map((m) => {
+                const prices = (m.printful_prices ?? {}) as Record<string, number>;
+                const fromCents = Object.values(prices)
+                  .filter((n) => typeof n === 'number')
+                  .sort((a, b) => a - b)[0];
+                return (
+                  <div key={m.slug} className="flex-shrink-0 w-56 md:w-64">
+                    <MarathonCard
+                      slug={m.slug}
+                      city={m.city}
+                      svgPath={m.full_svg_path ?? ''}
+                      fromCents={fromCents}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Airport prints — horizontal scroll row */}
       <CategoryRow
         heading="Airport prints"
         viewAllHref="/shop?category=airport"
         designs={airports}
+      />
+
+      {/* Skyline prints — horizontal scroll row */}
+      <CategoryRow
+        heading="City skylines"
+        viewAllHref="/shop?category=skyline"
+        designs={skylines}
       />
 
       {/* Golf course prints — horizontal scroll row */}
