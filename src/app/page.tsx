@@ -202,7 +202,7 @@ export default async function HomePage() {
                     <img
                       src={c.image}
                       alt={c.name}
-                      className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
+                      className="absolute inset-0 w-full h-full object-contain p-[14%] transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   ) : null}
                 </div>
