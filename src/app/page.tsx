@@ -9,7 +9,6 @@ import MarathonCard from '@/components/MarathonCard';
 import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase } from '@/lib/supabase';
-import { loadSvgFromPublic } from '@/lib/marathon-svg';
 
 const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
 
@@ -71,14 +70,6 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
   });
 }
 
-async function loadSvgSafely(path: string): Promise<string | null> {
-  try {
-    return await loadSvgFromPublic(path);
-  } catch {
-    return null;
-  }
-}
-
 async function getMarathons() {
   const { data } = await supabase
     .from('marathons')
@@ -103,12 +94,9 @@ export default async function HomePage() {
     getMarathons(),
   ]);
 
-  // Pull the first active marathon's SVG to feature in the Gift section,
-  // replacing the symbolic curve-line marathon preview.
+  // Pull the first active marathon to feature in the Gift section as the
+  // poster preview (loaded via `<object>` so its internal clipPath works).
   const giftMarathon = marathons[0];
-  const giftSvg = giftMarathon?.full_svg_path
-    ? await loadSvgSafely(giftMarathon.full_svg_path)
-    : null;
 
   return (
     <>
@@ -328,14 +316,16 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="bg-paper aspect-[4/5] max-w-[420px] mx-auto w-full flex items-center justify-center p-6 md:p-10">
-              {giftSvg ? (
+              {giftMarathon?.full_svg_path ? (
                 <Link
-                  href={`/marathons/${giftMarathon!.slug}`}
+                  href={`/marathons/${giftMarathon.slug}`}
                   className="block w-full transition-transform duration-500 hover:scale-[1.02]"
                 >
-                  <div
-                    className="w-full bg-white shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)] [&>svg]:w-full [&>svg]:h-auto [&>svg]:block"
-                    dangerouslySetInnerHTML={{ __html: giftSvg }}
+                  <object
+                    data={giftMarathon.full_svg_path}
+                    type="image/svg+xml"
+                    aria-label={`${giftMarathon.city} Marathon poster`}
+                    className="block w-full h-auto pointer-events-none shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)]"
                   />
                 </Link>
               ) : (
