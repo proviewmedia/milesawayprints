@@ -263,16 +263,25 @@ export default async function HomePage() {
         designs={golf}
       />
 
-      {/* Lifestyle photography section — placeholders for now */}
+      {/* Lifestyle photography section */}
       <section className="py-10 md:py-14 bg-soft">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-4 md:gap-6">
-            {[1, 2, 3].map((n) => (
+            {[
+              { src: '/lifestyle/ord-dresser.jpg', alt: 'Chicago O’Hare airport print displayed on a wood credenza' },
+              { src: '/lifestyle/maui-wall.jpg', alt: 'Maui Nui golf course print framed on a white wall' },
+              { src: '/lifestyle/stjohns-table.jpg', alt: 'St. John’s golf course print framed beside a basket of golf balls' },
+            ].map((p) => (
               <div
-                key={n}
-                className="aspect-[4/5] bg-soft-2 flex items-center justify-center text-[11px] uppercase tracking-wider text-mid"
+                key={p.src}
+                className="aspect-[4/5] bg-soft-2 overflow-hidden"
               >
-                Lifestyle photo {n}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={p.src}
+                  alt={p.alt}
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
           </div>
