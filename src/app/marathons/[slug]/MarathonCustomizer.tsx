@@ -37,8 +37,12 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
 
   const svgWrapRef = useRef<HTMLDivElement | null>(null);
 
-  const activeSvg = variant === 'half' ? halfSvg : fullSvg;
-  const variantAvailable = { full: !!fullSvg, half: !!halfSvg };
+  // If the half SVG hasn't been uploaded yet, fall back to the full SVG so
+  // the toggle still works — the customer just sees the full route under
+  // the half labels until the half artwork lands. The variant *labels*
+  // (MARATHON ↔ HALF MARATHON, 26.2 ↔ 13.1) are swapped via DOM mutation.
+  const activeSvg = variant === 'half' ? (halfSvg ?? fullSvg) : fullSvg;
+  const variantAvailable = { full: !!fullSvg, half: !!fullSvg };
 
   const priceCents = marathon.printful_prices?.[size] ?? 0;
 
@@ -111,18 +115,24 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
     <section className="pt-32 md:pt-36 pb-16">
       <div className="max-w-[1280px] mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Live preview */}
+          {/* Live preview — outer cream surface + inner white border around
+              the actual print, with a deeper drop shadow so the poster
+              visibly lifts off the page. */}
           <div className="md:sticky md:top-32 md:self-start">
             <div
-              className="rounded-2xl p-[6%] shadow-[0_20px_60px_rgba(26,26,46,0.12)]"
+              className="rounded-2xl p-[6%] shadow-[0_40px_80px_-20px_rgba(26,26,46,0.35),0_18px_36px_-12px_rgba(26,26,46,0.20)]"
               style={{ background: 'linear-gradient(180deg, #faf8f3 0%, #f4efe4 100%)' }}
             >
               {activeSvg ? (
                 <div
-                  ref={svgWrapRef}
-                  className="marathon-svg-wrap"
-                  dangerouslySetInnerHTML={{ __html: activeSvg }}
-                />
+                  className="bg-white p-[5%] shadow-[0_8px_24px_rgba(26,26,46,0.18)] rounded-sm"
+                >
+                  <div
+                    ref={svgWrapRef}
+                    className="marathon-svg-wrap"
+                    dangerouslySetInnerHTML={{ __html: activeSvg }}
+                  />
+                </div>
               ) : (
                 <div className="aspect-[3/4] flex items-center justify-center text-sm text-mid bg-soft rounded-xl">
                   {variant === 'half' ? 'Half marathon design coming soon.' : 'Loading…'}
@@ -377,6 +387,13 @@ function applyAllToDom(
   const finish = values.finishTime || SVG_PLACEHOLDERS.finishTime;
   const date = values.raceDate ? formatRaceDate(values.raceDate) : SVG_PLACEHOLDERS.date;
 
+  const variantLabel =
+    values.variant === 'half'
+      ? SVG_PLACEHOLDERS.variantLabelHalf
+      : SVG_PLACEHOLDERS.variantLabelFull;
+  const distance =
+    values.variant === 'half' ? SVG_PLACEHOLDERS.distanceHalf : SVG_PLACEHOLDERS.distanceFull;
+
   for (const t of Array.from(tspans)) {
     const original = t.dataset.originalText ?? t.textContent ?? '';
     if (!t.dataset.originalText) t.dataset.originalText = original;
@@ -394,9 +411,16 @@ function applyAllToDom(
       case SVG_PLACEHOLDERS.date:
         t.textContent = date;
         break;
+      case SVG_PLACEHOLDERS.variantLabelFull:
+      case SVG_PLACEHOLDERS.variantLabelHalf:
+        t.textContent = variantLabel;
+        break;
+      case SVG_PLACEHOLDERS.distanceFull:
+      case SVG_PLACEHOLDERS.distanceHalf:
+        t.textContent = distance;
+        break;
       default:
-        // Static elements (LAS VEGAS, MARATHON / HALF MARATHON, 26.2 / 13.1)
-        // are baked into each variant's SVG file — no swapping needed here.
+        // Static — LAS VEGAS, etc.
         break;
     }
   }

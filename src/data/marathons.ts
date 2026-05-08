@@ -53,10 +53,11 @@ export function formatMarathonName(c: MarathonCustomization, city: string): stri
   return runner ? `${city} ${variantLabel} — ${runner}` : `${city} ${variantLabel}`;
 }
 
-/** Format a YYYY-MM-DD date as "DD · MM · YY" to match the SVG placeholder. */
+/** Format a YYYY-MM-DD date as "MM · DD · YY" (US: month, day, year)
+ *  to match the SVG placeholder spacing. */
 export function formatRaceDate(iso: string): string {
   if (!iso) return '01 · 10 · 27';
   const [y, m, d] = iso.split('-');
   if (!y || !m || !d) return iso;
-  return `${d} · ${m} · ${y.slice(-2)}`;
+  return `${m} · ${d} · ${y.slice(-2)}`;
 }
