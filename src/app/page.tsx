@@ -197,17 +197,16 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — outer tile is aspect-[4/5] (same size
-                  // as other tiles). The full PNG (already has a white
-                  // border baked in) gets scaled down with object-contain
-                  // and a drop shadow.
-                  <div className="relative aspect-[4/5]">
+                  // Marathon poster — outer tile is aspect-[4/5] (same as
+                  // other tiles). Image scaled to fit inside with breathing
+                  // room so the drop shadow stays within the tile bounds.
+                  <div className="relative aspect-[4/5] flex items-center justify-center p-[5%]">
                     {c.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="absolute inset-0 w-full h-full object-contain drop-shadow-[0_18px_28px_rgba(26,26,46,0.30)] transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="max-w-full max-h-full object-contain drop-shadow-[0_14px_22px_rgba(26,26,46,0.28)] transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>
