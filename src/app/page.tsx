@@ -190,7 +190,7 @@ export default async function HomePage() {
 
       {/* Marathon prints — personalized posters from a separate table */}
       {marathons.length > 0 && (
-        <section className="py-16 md:py-24 bg-soft">
+        <section id="marathons" className="py-16 md:py-24 bg-soft scroll-mt-32">
           <div className="max-w-[1400px] mx-auto px-6">
             <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
               <div>

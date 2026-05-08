@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import ShopClient from './ShopClient';
-import { supabase } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import { PrintType } from '@/data/prints';
 import { DesignSummary, Collection, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 
@@ -14,8 +14,12 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
+// Use the admin (service-role) client server-side. The anon client was
+// silently truncating responses in production for reasons we couldn't
+// reproduce locally; admin client sidesteps any RLS / proxy oddities.
 async function getAllDesigns(): Promise<DesignSummary[]> {
-  const { data } = await supabase
+  const admin = createAdminClient();
+  const { data } = await admin
     .from('gallery_items')
     .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, sort_order, printful_product_id, printful_variants, printful_prices, digital_price_cents')
     .eq('active', true)
@@ -30,7 +34,8 @@ async function getAllDesigns(): Promise<DesignSummary[]> {
 }
 
 async function getCollections(): Promise<Collection[]> {
-  const { data: cols } = await supabase
+  const admin = createAdminClient();
+  const { data: cols } = await admin
     .from('collections')
     .select('id, slug, name, description, hero_image_url, sort_order')
     .eq('active', true)
@@ -38,7 +43,7 @@ async function getCollections(): Promise<Collection[]> {
 
   if (!cols || cols.length === 0) return [];
 
-  const { data: items } = await supabase
+  const { data: items } = await admin
     .from('collection_items')
     .select(`collection_id, sort_order, gallery_item:gallery_items (id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, printful_product_id, printful_variants, printful_prices, digital_price_cents)`)
     .order('sort_order', { ascending: true });
