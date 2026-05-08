@@ -95,9 +95,11 @@ export default async function HomePage() {
     getMarathons(),
   ]);
 
-  // Pull the first active marathon to feature in the Gift section as the
-  // poster preview (loaded via `<object>` so its internal clipPath works).
-  const giftMarathon = marathons[0];
+  // Pick a single featured gallery item to anchor the Gift section. We
+  // intentionally avoid using a marathon poster here — those are
+  // personalized prints, not the universal "any print can be a gift"
+  // story the section is telling.
+  const giftDesign = featured.find((d) => d.image_url) ?? featured[0] ?? null;
 
   return (
     <>
@@ -317,15 +319,15 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="bg-paper aspect-[4/5] max-w-[420px] mx-auto w-full flex items-center justify-center p-6 md:p-10">
-              {giftMarathon?.thumbnail_path ? (
+              {giftDesign?.image_url ? (
                 <Link
-                  href={`/marathons/${giftMarathon.slug}`}
+                  href={`/shop/${giftDesign.slug}`}
                   className="block w-full transition-transform duration-500 hover:scale-[1.02]"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={giftMarathon.thumbnail_path}
-                    alt={`${giftMarathon.city} Marathon poster`}
+                    src={giftDesign.image_url}
+                    alt={giftDesign.name}
                     className="block w-full h-auto shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)]"
                   />
                 </Link>
