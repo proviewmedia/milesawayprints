@@ -114,23 +114,26 @@ export default async function HomePage() {
     <>
       <NavbarShell />
 
-      {/* Hero — split-screen, image right-bled to the viewport edge so
-          there's no gutter between it and the page edge on wider screens. */}
+      {/* Hero — split-screen, content aligned with the navbar gutters
+          (max-w-1400 + mx-auto + px-6) so the left edge of the headline
+          matches the wordmark and the right edge of the image matches the
+          cart icon. */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
-        <div className="max-w-[1400px] ml-auto pl-6 md:pl-12">
+        <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-[1fr_minmax(0,440px)] gap-8 md:gap-12 items-center">
             <div className="flex flex-col justify-between py-6 md:py-2 gap-10">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
                   Custom location art · Est. 2020
                 </p>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-ink leading-[0.95] mb-6">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-ink leading-[0.95] mb-6">
                   The places you love,<br />printed.
                 </h1>
-                <p className="text-base md:text-lg text-mid max-w-md leading-relaxed">
-                  Airports, marathons, golf courses, and city skylines —
-                  designed in-house, printed on archival paper, shipped
-                  worldwide.
+                <p className="text-base md:text-lg text-mid max-w-xl leading-relaxed">
+                  Custom airport, marathon, golf course, and skyline prints —
+                  drawn from scratch in our Mojave studio, produced on archival
+                  fine-art paper through our American production partner, and
+                  shipped worldwide within a week.
                 </p>
               </div>
 
