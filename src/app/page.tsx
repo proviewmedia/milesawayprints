@@ -193,7 +193,7 @@ export default async function HomePage() {
               { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf' },
               { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline' },
               { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport' },
-              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/#marathons' },
+              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon' },
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 <div className="relative aspect-square overflow-hidden bg-white">
@@ -206,7 +206,7 @@ export default async function HomePage() {
                     />
                   ) : null}
                 </div>
-                <div className="mt-4 text-[15px] text-ink">{c.name}</div>
+                <div className="mt-4 text-[15px] text-ink text-center">{c.name}</div>
               </Link>
             ))}
           </div>
