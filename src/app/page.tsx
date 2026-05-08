@@ -317,7 +317,7 @@ export default async function HomePage() {
                 <img
                   src={p.src}
                   alt={p.alt}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
             ))}
