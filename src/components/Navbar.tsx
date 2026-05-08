@@ -45,16 +45,6 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
                 Shop
               </Link>
             </li>
-            <li>
-              <Link href="/#how" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                How It Works
-              </Link>
-            </li>
-            <li>
-              <Link href="/#gift" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                Gifts
-              </Link>
-            </li>
           </ul>
 
           <div className="flex items-center gap-1">
@@ -101,12 +91,6 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
           <div className="md:hidden bg-paper border-t border-border px-6 py-5 space-y-4">
             <Link href="/shop" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
               Shop
-            </Link>
-            <Link href="/#how" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
-              How It Works
-            </Link>
-            <Link href="/#gift" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
-              Gifts
             </Link>
             <Link href="/about" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
               About
