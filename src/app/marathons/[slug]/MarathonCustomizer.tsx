@@ -27,7 +27,14 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [raceDate, setRaceDate] = useState('');
-  const [finishTime, setFinishTime] = useState('');
+  const [finishHours, setFinishHours] = useState('');
+  const [finishMinutes, setFinishMinutes] = useState('');
+  const [finishSeconds, setFinishSeconds] = useState('');
+  const finishTime = useMemo(() => {
+    if (!finishHours && !finishMinutes && !finishSeconds) return '';
+    const pad = (s: string) => s.padStart(2, '0');
+    return `${pad(finishHours || '0')}:${pad(finishMinutes || '0')}:${pad(finishSeconds || '0')}`;
+  }, [finishHours, finishMinutes, finishSeconds]);
   const [size, setSize] = useState<string>(() => {
     const sizes = Object.keys(marathon.printful_prices ?? {});
     return sizes.includes('16x20') ? '16x20' : sizes[0] ?? '11x14';
@@ -47,11 +54,19 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
 
   const priceCents = marathon.printful_prices?.[size] ?? 0;
 
-  // After the SVG is injected (or when variant swaps), apply current values
-  // to the placeholder text nodes. Keep this effect cheap — only runs on
-  // variant change. Per-keystroke updates use a separate effect below.
+  // Inject the SVG once per variant change via innerHTML — never via
+  // dangerouslySetInnerHTML. React would otherwise re-set innerHTML on
+  // every parent re-render (e.g. picking a size), which wipes the live
+  // text mutations and snaps the preview back to placeholders.
   useEffect(() => {
-    applyAllToDom(svgWrapRef.current, {
+    const wrap = svgWrapRef.current;
+    if (!wrap) return;
+    if (activeSvg) {
+      wrap.innerHTML = activeSvg;
+    } else {
+      wrap.innerHTML = '';
+    }
+    applyAllToDom(wrap, {
       variant,
       bib,
       firstName,
@@ -60,9 +75,11 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
       finishTime,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant, activeSvg]);
+  }, [activeSvg]);
 
-  // Live mutation: each input change rewrites just the relevant tspan text.
+  // Live mutation: each form-field change rewrites just the relevant tspan
+  // text in place. Does not touch innerHTML so re-renders on size/gift/etc.
+  // are no-ops for the preview DOM.
   useEffect(() => {
     applyAllToDom(svgWrapRef.current, {
       variant,
@@ -108,8 +125,10 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
       lastName.trim().length > 0 &&
       bib.trim().length > 0 &&
       raceDate.length > 0 &&
-      finishTime.trim().length > 0,
-    [firstName, lastName, bib, raceDate, finishTime],
+      // require at least minutes — runners with sub-1-hour halves still
+      // have minutes; an all-zero time is almost certainly an empty form.
+      (finishHours.length > 0 || finishMinutes.length > 0),
+    [firstName, lastName, bib, raceDate, finishHours, finishMinutes],
   );
 
   return (
@@ -123,11 +142,7 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
             <div className="max-w-[420px] mx-auto md:mx-0">
               {activeSvg ? (
                 <div className="bg-white p-[5%] shadow-[0_40px_80px_-20px_rgba(26,26,46,0.35),0_18px_36px_-12px_rgba(26,26,46,0.20)] rounded-sm">
-                  <div
-                    ref={svgWrapRef}
-                    className="marathon-svg-wrap"
-                    dangerouslySetInnerHTML={{ __html: activeSvg }}
-                  />
+                  <div ref={svgWrapRef} className="marathon-svg-wrap" />
                 </div>
               ) : (
                 <div className="aspect-[3/4] flex items-center justify-center text-sm text-mid bg-soft rounded-xl">
@@ -209,13 +224,45 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
                 value={raceDate}
                 onChange={setRaceDate}
               />
-              <Field
-                label="Finish time"
-                required
-                value={finishTime}
-                onChange={setFinishTime}
-                placeholder="02:30:22"
-              />
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1.5">
+                  Finish time <span className="text-coral">*</span>
+                </label>
+                <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
+                  <input
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
+                    aria-label="Hours"
+                    placeholder="HH"
+                    className="input-field text-center"
+                    value={finishHours}
+                    onChange={(e) => setFinishHours(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                  />
+                  <span className="text-mid font-semibold">:</span>
+                  <input
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
+                    aria-label="Minutes"
+                    placeholder="MM"
+                    className="input-field text-center"
+                    value={finishMinutes}
+                    onChange={(e) => setFinishMinutes(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                  />
+                  <span className="text-mid font-semibold">:</span>
+                  <input
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={2}
+                    aria-label="Seconds"
+                    placeholder="SS"
+                    className="input-field text-center"
+                    value={finishSeconds}
+                    onChange={(e) => setFinishSeconds(e.target.value.replace(/\D/g, '').slice(0, 2))}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Size picker */}
