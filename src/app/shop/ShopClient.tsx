@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, ArrowRight } from 'lucide-react';
 import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
@@ -26,11 +27,46 @@ const CATEGORIES: { value: FilterCategory; label: string }[] = [
   { value: 'city', label: 'City' },
 ];
 
+const VALID_CATEGORIES = new Set(CATEGORIES.map((c) => c.value));
+
+function parseCategory(raw: string | null): FilterCategory {
+  if (raw && VALID_CATEGORIES.has(raw as FilterCategory)) return raw as FilterCategory;
+  return 'all';
+}
+
 export default function ShopClient({ designs, collections }: Props) {
-  const [category, setCategory] = useState<FilterCategory>('all');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Initialize category from the ?category= URL param so links from the
+  // homepage's "Shop by category" tiles land on a pre-filtered view.
+  const [category, setCategory] = useState<FilterCategory>(() =>
+    parseCategory(searchParams?.get('category') ?? null),
+  );
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortOption>('featured');
   const [quickShopDesign, setQuickShopDesign] = useState<DesignSummary | null>(null);
+
+  // Keep state in sync if the user navigates between filters via the URL
+  // (e.g. browser back/forward, or another internal link to /shop?category=…).
+  useEffect(() => {
+    const next = parseCategory(searchParams?.get('category') ?? null);
+    setCategory(next);
+  }, [searchParams]);
+
+  // Reflect filter changes back into the URL so the active state is
+  // shareable + survives reload.
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams?.toString() ?? '');
+    if (category === 'all') params.delete('category');
+    else params.set('category', category);
+    const qs = params.toString();
+    const target = qs ? `${pathname}?${qs}` : pathname;
+    const current = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`;
+    if (target !== current) router.replace(target, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
 
   const filtered = useMemo(() => {
     let list = designs;
