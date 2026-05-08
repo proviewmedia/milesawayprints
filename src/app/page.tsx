@@ -181,7 +181,7 @@ export default async function HomePage() {
       <section className="py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink">
+            <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
               Featured prints
             </h2>
             <Link href="/shop" className="btn-secondary py-2.5 px-5 text-[13px]">
