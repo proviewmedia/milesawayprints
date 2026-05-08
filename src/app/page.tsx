@@ -219,6 +219,18 @@ export default async function HomePage() {
             {featured.map((d) => (
               <DesignCardWrapper key={d.slug} design={d} />
             ))}
+            {giftMarathon && (
+              <MarathonCard
+                slug={giftMarathon.slug}
+                city={giftMarathon.city}
+                thumbnailPath={giftMarathon.thumbnail_path}
+                fromCents={
+                  Object.values((giftMarathon.printful_prices ?? {}) as Record<string, number>)
+                    .filter((n) => typeof n === 'number')
+                    .sort((a, b) => a - b)[0]
+                }
+              />
+            )}
           </div>
         </div>
       </section>
