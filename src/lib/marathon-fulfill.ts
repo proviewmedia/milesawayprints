@@ -1,13 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { PrintfulOrderItem } from '@/lib/printful';
-import type { MarathonCustomization, MarathonRow } from '@/data/marathons';
-import { renderAndUploadMarathonPng } from '@/lib/marathon-render';
+import { sendMarathonFulfillmentEmail } from '@/lib/email';
+import type { MarathonCustomization } from '@/data/marathons';
 
 interface MarathonCartItem {
   slug: string;
   type: string;
   size: string;
   name: string;
+  priceCents: number;
   customization?: Record<string, string> | null;
 }
 
@@ -17,17 +17,38 @@ export function isMarathonCartItem(item: MarathonCartItem): boolean {
   return Boolean(item.customization && item.customization.marathon_slug);
 }
 
-/** For each marathon item in the cart, render the personalized print file,
- *  upload it to Vercel Blob, and return Printful order items ready to be
- *  appended to the order payload. Items that fail to render are skipped
- *  and the failure is reported in `errors`. */
-export async function buildMarathonPrintfulItems(
-  admin: SupabaseClient,
-  items: MarathonCartItem[],
-  orderToken: string,
-): Promise<{ items: PrintfulOrderItem[]; errors: string[] }> {
+interface NotifyArgs {
+  admin: SupabaseClient;
+  items: MarathonCartItem[];
+  orderNumber: string | number;
+  orderToken: string;
+  customer: { name: string; email: string };
+  shipping?: {
+    name: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state?: string | null;
+    postalCode: string;
+    country: string;
+  };
+}
+
+/** For each marathon item in the cart, look up the race and send an admin
+ *  email with the personalization details so the print can be built and
+ *  submitted to Printful manually. Returns true if at least one marathon
+ *  item was processed (caller uses this to flag the order as needing
+ *  manual fulfillment). */
+export async function notifyMarathonOrder({
+  admin,
+  items,
+  orderNumber,
+  orderToken,
+  customer,
+  shipping,
+}: NotifyArgs): Promise<{ count: number; errors: string[] }> {
   const marathonItems = items.filter(isMarathonCartItem);
-  if (marathonItems.length === 0) return { items: [], errors: [] };
+  if (marathonItems.length === 0) return { count: 0, errors: [] };
 
   const slugs = Array.from(
     new Set(marathonItems.map((it) => it.customization?.marathon_slug).filter(Boolean) as string[]),
@@ -35,44 +56,42 @@ export async function buildMarathonPrintfulItems(
 
   const { data: rows } = await admin
     .from('marathons')
-    .select('*')
+    .select('slug, city')
     .in('slug', slugs);
 
-  const bySlug = new Map<string, MarathonRow>(
-    ((rows ?? []) as MarathonRow[]).map((r) => [r.slug, r]),
+  const cityBySlug = new Map<string, string>(
+    ((rows ?? []) as { slug: string; city: string }[]).map((r) => [r.slug, r.city]),
   );
 
-  const result: PrintfulOrderItem[] = [];
   const errors: string[] = [];
-
   for (const it of marathonItems) {
     const c = it.customization as MarathonCustomization | undefined;
     if (!c?.marathon_slug) continue;
-    const marathon = bySlug.get(c.marathon_slug);
-    if (!marathon) {
-      errors.push(`Unknown marathon slug ${c.marathon_slug}`);
-      continue;
-    }
-    const catalogVariantId = marathon.printful_catalog_variants?.[it.size];
-    if (!catalogVariantId) {
-      errors.push(`No catalog variant for ${marathon.slug} ${it.size}`);
-      continue;
-    }
-
+    const city = cityBySlug.get(c.marathon_slug) ?? c.marathon_slug;
     try {
-      const { url } = await renderAndUploadMarathonPng(marathon, c, { orderToken });
-      result.push({
-        variant_id: Number(catalogVariantId),
-        quantity: 1,
-        name: `${marathon.city} ${c.variant === 'half' ? 'Half ' : ''}Marathon — ${c.first_name} ${c.last_name} ${it.size}`,
-        files: [{ url, filename: `${orderToken}-${marathon.slug}-${c.variant}.png` }],
+      await sendMarathonFulfillmentEmail({
+        orderNumber,
+        orderToken,
+        customer,
+        shipping,
+        city,
+        variant: c.variant,
+        size: it.size,
+        pricePaidCents: it.priceCents,
+        customization: {
+          bib: c.bib,
+          firstName: c.first_name,
+          lastName: c.last_name,
+          raceDate: c.race_date,
+          finishTime: c.finish_time,
+        },
       });
     } catch (err) {
       errors.push(
-        `Render failed for ${marathon.slug}: ${err instanceof Error ? err.message : String(err)}`,
+        `Notify failed for ${c.marathon_slug}: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
 
-  return { items: result, errors };
+  return { count: marathonItems.length, errors };
 }

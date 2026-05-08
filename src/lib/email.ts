@@ -393,6 +393,87 @@ export async function sendContactEmail(args: ContactArgs) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Marathon manual-fulfillment notification — sent to the admin inbox when
+// a marathon order is paid, since marathons aren't auto-submitted to Printful
+// (admin builds the print file by hand).
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface MarathonFulfillmentArgs {
+  orderNumber: string | number;
+  orderToken: string;
+  customer: { name: string; email: string };
+  shipping?: OrderShippingAddress;
+  city: string;
+  variant: 'full' | 'half';
+  size: string;
+  pricePaidCents: number;
+  customization: {
+    bib: string;
+    firstName: string;
+    lastName: string;
+    raceDate: string;
+    finishTime: string;
+  };
+}
+
+export async function sendMarathonFulfillmentEmail(args: MarathonFulfillmentArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY missing; skipping marathon fulfillment notification');
+    return { skipped: true };
+  }
+
+  const variantLabel = args.variant === 'half' ? 'Half Marathon' : 'Marathon';
+  const subject = `[Marathon] ${args.city} ${variantLabel} #${args.orderNumber} — ${args.customization.firstName} ${args.customization.lastName}`;
+
+  const shippingHtml = args.shipping
+    ? `<p style="font-size:13px;color:#0e0e0e;margin:0 0 4px;line-height:1.5;">
+         ${escapeHtml(args.shipping.name)}<br/>
+         ${escapeHtml(args.shipping.line1)}${args.shipping.line2 ? `<br/>${escapeHtml(args.shipping.line2)}` : ''}<br/>
+         ${escapeHtml(args.shipping.city)}${args.shipping.state ? `, ${escapeHtml(args.shipping.state)}` : ''} ${escapeHtml(args.shipping.postalCode)}<br/>
+         ${escapeHtml(args.shipping.country)}
+       </p>`
+    : '<p style="font-size:13px;color:#9c9c9c;margin:0;">No shipping address on file.</p>';
+
+  const html = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0e0e0e;background:#fff;">
+<p style="font-size:12px;color:#9c9c9c;margin:0 0 16px;letter-spacing:0.06em;text-transform:uppercase;">Marathon order — manual fulfillment</p>
+<h2 style="font-size:20px;margin:0 0 16px;font-weight:500;">${escapeHtml(args.city)} ${variantLabel}</h2>
+<table style="font-size:14px;color:#0e0e0e;border-collapse:collapse;margin:0 0 24px;">
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Order</td><td>#${escapeHtml(String(args.orderNumber))} <span style="color:#9c9c9c;font-size:12px;">(${escapeHtml(args.orderToken)})</span></td></tr>
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Variant</td><td>${escapeHtml(variantLabel)}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Size</td><td>${escapeHtml(args.size)}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Paid</td><td>$${(args.pricePaidCents / 100).toFixed(2)}</td></tr>
+</table>
+<h3 style="font-size:14px;margin:16px 0 8px;color:#0e0e0e;font-weight:600;">Personalization</h3>
+<table style="font-size:14px;color:#0e0e0e;border-collapse:collapse;margin:0 0 24px;">
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Name</td><td>${escapeHtml(args.customization.firstName)} ${escapeHtml(args.customization.lastName)}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Bib</td><td>#${escapeHtml(args.customization.bib)}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Race date</td><td>${escapeHtml(args.customization.raceDate)}</td></tr>
+  <tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;">Finish time</td><td>${escapeHtml(args.customization.finishTime)}</td></tr>
+</table>
+<h3 style="font-size:14px;margin:16px 0 8px;color:#0e0e0e;font-weight:600;">Customer</h3>
+<p style="font-size:13px;color:#0e0e0e;margin:0 0 4px;">${escapeHtml(args.customer.name)} &lt;${escapeHtml(args.customer.email)}&gt;</p>
+<h3 style="font-size:14px;margin:16px 0 8px;color:#0e0e0e;font-weight:600;">Ship to</h3>
+${shippingHtml}
+<hr style="border:none;border-top:1px solid #e8e6e0;margin:24px 0;" />
+<p style="font-size:13px;color:#6b6b6b;margin:0;line-height:1.5;">
+  Build the personalized print file, place the order in Printful manually
+  (matte poster catalog variant for ${escapeHtml(args.size)}), then update
+  this order in Supabase with the Printful order ID.
+</p>
+</body></html>`.trim();
+
+  return resend.emails.send({
+    from: FROM,
+    to: SUPPORT_INBOX,
+    subject,
+    html,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ────────────────────────────────────────────────────────────────────────────
 

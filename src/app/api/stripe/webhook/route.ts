@@ -8,7 +8,7 @@ import {
   sendOrderConfirmationEmail,
   type OrderConfirmationItem,
 } from '@/lib/email';
-import { buildMarathonPrintfulItems, isMarathonCartItem } from '@/lib/marathon-fulfill';
+import { notifyMarathonOrder, isMarathonCartItem } from '@/lib/marathon-fulfill';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -158,17 +158,30 @@ export async function POST(req: Request) {
           });
         }
 
-        // Marathon items: render personalized print file, upload to Blob,
-        // attach as a Printful order item with the matte-poster catalog
-        // variant_id + a `files` override so Printful prints what we send.
-        const marathonResult = await buildMarathonPrintfulItems(
+        // Marathon items are NOT submitted to Printful automatically.
+        // Send the admin a notification email with all personalization
+        // details — admin builds the print file by hand and submits the
+        // job to Printful manually.
+        const marathonNotify = await notifyMarathonOrder({
           admin,
-          physicalItems,
-          order.token as string,
-        );
-        printfulItems.push(...marathonResult.items);
-        if (marathonResult.errors.length > 0) {
-          update.printful_error = marathonResult.errors.join('; ');
+          items: physicalItems,
+          orderNumber: order.order_number ?? order.token,
+          orderToken: order.token as string,
+          customer: { name: customerName, email: customerEmail },
+          shipping: shipping?.address
+            ? {
+                name: shipping.name ?? customerName,
+                line1: shipping.address.line1 ?? '',
+                line2: shipping.address.line2 ?? null,
+                city: shipping.address.city ?? '',
+                state: shipping.address.state ?? null,
+                postalCode: shipping.address.postal_code ?? '',
+                country: shipping.address.country ?? 'US',
+              }
+            : undefined,
+        });
+        if (marathonNotify.errors.length > 0) {
+          update.printful_error = marathonNotify.errors.join('; ');
         }
 
         if (printfulItems.length > 0) {
@@ -371,14 +384,27 @@ export async function POST(req: Request) {
           if (!v) continue;
           printfulItems.push({ sync_variant_id: v, quantity: 1, name: `${it.name} ${it.size}` });
         }
-        const marathonResult = await buildMarathonPrintfulItems(
+        // Marathons → admin email notification (manual fulfillment).
+        const marathonNotify = await notifyMarathonOrder({
           admin,
-          physicalItems,
-          order.token as string,
-        );
-        printfulItems.push(...marathonResult.items);
-        if (marathonResult.errors.length > 0) {
-          update.printful_error = marathonResult.errors.join('; ');
+          items: physicalItems,
+          orderNumber: order.token,
+          orderToken: order.token as string,
+          customer: { name: customerName, email: customerEmail },
+          shipping: shipping?.address
+            ? {
+                name: shipping.name ?? customerName,
+                line1: shipping.address.line1 ?? '',
+                line2: shipping.address.line2 ?? null,
+                city: shipping.address.city ?? '',
+                state: shipping.address.state ?? null,
+                postalCode: shipping.address.postal_code ?? '',
+                country: shipping.address.country ?? 'US',
+              }
+            : undefined,
+        });
+        if (marathonNotify.errors.length > 0) {
+          update.printful_error = marathonNotify.errors.join('; ');
         }
         if (printfulItems.length > 0) {
           // Same gift-forward as above.
