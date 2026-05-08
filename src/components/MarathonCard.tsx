@@ -19,18 +19,16 @@ export default function MarathonCard({ slug, city, thumbnailPath, fromCents }: P
 
   return (
     <Link href={`/marathons/${slug}`} className="group block">
-      <div className="relative aspect-[4/5] overflow-hidden bg-white">
+      <div className="relative aspect-[4/5] overflow-hidden bg-white flex items-center justify-center">
         {thumbnailPath ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbnailPath}
             alt={`${city} Marathon poster`}
-            className="absolute inset-0 w-full h-full object-contain p-[5%] transition-transform duration-500 group-hover:scale-[1.02]"
+            className="w-[85%] h-auto object-contain drop-shadow-[0_10px_18px_rgba(26,26,46,0.20)] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         ) : (
-          <span className="absolute inset-0 flex items-center justify-center text-xs text-mid">
-            Preview unavailable
-          </span>
+          <span className="text-xs text-mid">Preview unavailable</span>
         )}
       </div>
       <div className="mt-4">

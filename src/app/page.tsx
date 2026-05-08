@@ -198,15 +198,15 @@ export default async function HomePage() {
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
                   // Marathon poster — white tile background with the poster
-                  // inset by 5% so a white border is visible on all 4 sides.
-                  // Outer aspect-[4/5] matches the other category tiles.
-                  <div className="relative aspect-[4/5] overflow-hidden bg-white">
+                  // scaled to ~85% width (visible white border on all sides)
+                  // and a soft drop shadow underneath.
+                  <div className="relative aspect-[4/5] overflow-hidden bg-white flex items-center justify-center">
                     {c.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="absolute inset-0 w-full h-full object-contain p-[5%] transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="w-[85%] h-auto object-contain drop-shadow-[0_10px_18px_rgba(26,26,46,0.20)] transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>

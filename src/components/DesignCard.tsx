@@ -46,12 +46,12 @@ export default function DesignCard({ design }: Props) {
           - Printful product images: full-bleed `object-cover` over bg-soft.
           - SVG previews (no image_url): WallFrame + PrintPreview fallback. */}
       {isMarathon && design.image_url ? (
-        <div className="relative aspect-[4/5] overflow-hidden bg-white">
+        <div className="relative aspect-[4/5] overflow-hidden bg-white flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={design.image_url}
             alt={`${design.name} — ${design.location}`}
-            className="absolute inset-0 w-full h-full object-contain p-[5%] transition-transform duration-500 group-hover:scale-[1.02]"
+            className="w-[85%] h-auto object-contain drop-shadow-[0_10px_18px_rgba(26,26,46,0.20)] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         </div>
       ) : (
