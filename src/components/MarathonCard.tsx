@@ -25,7 +25,7 @@ export default function MarathonCard({ slug, city, thumbnailPath, fromCents }: P
           <img
             src={thumbnailPath}
             alt={`${city} Marathon poster`}
-            className="absolute inset-0 w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+            className="absolute inset-0 w-full h-full object-contain p-[5%] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         ) : (
           <span className="absolute inset-0 flex items-center justify-center text-xs text-mid">

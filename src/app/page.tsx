@@ -197,18 +197,16 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — white background. Poster fills the
-                  // tile vertically via object-contain so its top/bottom
-                  // line up with the airport tile's black panel. The 3:4
-                  // poster in a 4:5 tile leaves thin white bars on the
-                  // sides — that's the visible white background.
+                  // Marathon poster — white tile background with the poster
+                  // inset by 5% so a white border is visible on all 4 sides.
+                  // Outer aspect-[4/5] matches the other category tiles.
                   <div className="relative aspect-[4/5] overflow-hidden bg-white">
                     {c.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="absolute inset-0 w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="absolute inset-0 w-full h-full object-contain p-[5%] transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>

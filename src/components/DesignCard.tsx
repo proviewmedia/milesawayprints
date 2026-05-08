@@ -51,7 +51,7 @@ export default function DesignCard({ design }: Props) {
           <img
             src={design.image_url}
             alt={`${design.name} — ${design.location}`}
-            className="absolute inset-0 w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+            className="absolute inset-0 w-full h-full object-contain p-[5%] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         </div>
       ) : (
