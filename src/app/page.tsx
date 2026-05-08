@@ -11,12 +11,14 @@ import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop
 import { supabase, createAdminClient } from '@/lib/supabase';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { unstable_noStore as noStore } from 'next/cache';
 
 const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
 
 async function getReviews() {
-  // Use admin client — same anon-truncation we hit on /shop and
-  // /marathons/[slug] in prod.
+  // Bust Next.js fetch cache so DB edits to reviews show up immediately
+  // without needing a fresh deploy.
+  noStore();
   const admin = createAdminClient();
   const { data } = await admin
     .from('reviews')
