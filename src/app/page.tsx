@@ -148,7 +148,7 @@ export default async function HomePage() {
                 <img
                   src={heroSrc}
                   alt="Miles Away Prints — custom location art"
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover object-top"
                 />
               ) : (
                 <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-wider text-mid">
