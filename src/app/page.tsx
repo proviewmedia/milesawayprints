@@ -188,13 +188,24 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
+          {(() => {
+            const laSkyline =
+              skylines.find((d) => d.slug === 'los-angeles-california') ??
+              skylines.find((d) => d.slug.startsWith('los-angeles')) ??
+              skylines[0];
+            const denverAirport =
+              airports.find((d) => d.slug === 'denver-international-airport') ??
+              airports.find((d) => d.slug.startsWith('denver')) ??
+              airports[0];
+            const tiles = [
               { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', isMarathon: false },
-              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline', isMarathon: false },
-              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport', isMarathon: false },
+              { name: 'City skylines', image: laSkyline?.image_url, href: '/shop?category=skyline', isMarathon: false },
+              { name: 'Airports', image: denverAirport?.image_url, href: '/shop?category=airport', isMarathon: false },
               { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', isMarathon: true },
-            ].map((c) => (
+            ];
+            return (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {tiles.map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
                   // Marathon poster — white tile background with the poster
@@ -226,6 +237,8 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+            );
+          })()}
         </div>
       </section>
 
