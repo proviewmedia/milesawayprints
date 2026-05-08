@@ -264,7 +264,7 @@ export default async function HomePage() {
       />
 
       {/* Lifestyle photography section */}
-      <section className="py-10 md:py-14 bg-soft">
+      <section className="py-10 md:py-14 border-y border-border">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-4 md:gap-6">
             {[

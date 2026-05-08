@@ -20,8 +20,15 @@ interface ProductHit {
   image_url: string | null;
 }
 
+interface MarathonHit {
+  slug: string;
+  city: string;
+  thumbnail_path: string | null;
+}
+
 const PRODUCT_LIMIT = 6;
 const PAGE_LIMIT = 4;
+const MARATHON_LIMIT = 4;
 
 export default function SearchOverlay() {
   const { isOpen, close } = useSearch();
@@ -29,34 +36,43 @@ export default function SearchOverlay() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState<ProductHit[]>([]);
+  const [marathons, setMarathons] = useState<MarathonHit[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Load product list lazily on first open
+  // Load gallery + marathon catalogs lazily on first open
   useEffect(() => {
     if (!isOpen || loaded) return;
     const supabase = createSupabaseBrowserClient();
-    supabase
-      .from('gallery_items')
-      .select('slug, name, location, description, tags, print_type_slug, image_url, featured, sort_order')
-      .eq('active', true)
-      .order('featured', { ascending: false })
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => {
-        const rows = (data ?? []) as Array<ProductHit & { print_type_slug: string; featured: boolean; sort_order: number }>;
-        setProducts(
-          rows.map((r) => ({
-            slug: r.slug,
-            name: r.name,
-            location: r.location,
-            description: r.description,
-            tags: r.tags,
-            type: r.print_type_slug as PrintType,
-            image_url: r.image_url,
-          })),
-        );
-        setLoaded(true);
-      });
+    Promise.all([
+      supabase
+        .from('gallery_items')
+        .select('slug, name, location, description, tags, print_type_slug, image_url, featured, sort_order')
+        .eq('active', true)
+        .order('featured', { ascending: false })
+        .order('sort_order', { ascending: true }),
+      supabase
+        .from('marathons')
+        .select('slug, city, thumbnail_path')
+        .eq('active', true)
+        .order('sort_order', { ascending: true }),
+    ]).then(([prodRes, marRes]) => {
+      const rows = (prodRes.data ?? []) as Array<ProductHit & { print_type_slug: string; featured: boolean; sort_order: number }>;
+      setProducts(
+        rows.map((r) => ({
+          slug: r.slug,
+          name: r.name,
+          location: r.location,
+          description: r.description,
+          tags: r.tags,
+          type: r.print_type_slug as PrintType,
+          image_url: r.image_url,
+        })),
+      );
+      const marRows = (marRes.data ?? []) as MarathonHit[];
+      setMarathons(marRows);
+      setLoaded(true);
+    });
   }, [isOpen, loaded]);
 
   // Body lock + autofocus when open
@@ -83,10 +99,12 @@ export default function SearchOverlay() {
 
     let prodHits: ProductHit[];
     let pageHits: SitePage[];
+    let marHits: MarathonHit[];
 
     if (!q) {
       prodHits = products.slice(0, PRODUCT_LIMIT);
       pageHits = SITE_PAGES.slice(0, PAGE_LIMIT);
+      marHits = marathons.slice(0, MARATHON_LIMIT);
     } else {
       prodHits = products
         .filter((p) => {
@@ -105,14 +123,22 @@ export default function SearchOverlay() {
         const hay = `${page.title} ${page.keywords ?? ''} ${page.description ?? ''}`.toLowerCase();
         return hay.includes(q);
       }).slice(0, PAGE_LIMIT);
+
+      marHits = marathons
+        .filter((m) => {
+          const hay = `${m.city} marathon`.toLowerCase();
+          return hay.includes(q);
+        })
+        .slice(0, MARATHON_LIMIT);
     }
 
-    return { prodHits, pageHits };
-  }, [products, query]);
+    return { prodHits, pageHits, marHits };
+  }, [products, marathons, query]);
 
-  // Flat list for keyboard nav
+  // Flat list for keyboard nav — order: marathons → products → pages
   const flat = useMemo(() => {
-    const items: Array<{ kind: 'product' | 'page'; href: string }> = [];
+    const items: Array<{ kind: 'marathon' | 'product' | 'page'; href: string }> = [];
+    filtered.marHits.forEach((m) => items.push({ kind: 'marathon', href: `/marathons/${m.slug}` }));
     filtered.prodHits.forEach((p) => items.push({ kind: 'product', href: `/shop/${p.slug}` }));
     filtered.pageHits.forEach((p) => items.push({ kind: 'page', href: p.href }));
     return items;
@@ -150,7 +176,10 @@ export default function SearchOverlay() {
 
   if (!isOpen) return null;
 
-  const empty = filtered.prodHits.length === 0 && filtered.pageHits.length === 0;
+  const empty =
+    filtered.prodHits.length === 0 &&
+    filtered.pageHits.length === 0 &&
+    filtered.marHits.length === 0;
 
   return (
     <div className="fixed inset-0 z-[100] bg-ink/40 flex items-start justify-center px-4 pt-20 md:pt-32" onClick={close}>
@@ -185,18 +214,54 @@ export default function SearchOverlay() {
             </p>
           )}
 
+          {filtered.marHits.length > 0 && (
+            <div>
+              <div className="px-5 pt-4 pb-2 text-[11px] uppercase tracking-wider text-mid">
+                Custom marathons
+              </div>
+              {filtered.marHits.map((m, i) => (
+                <Link
+                  key={`m-${m.slug}`}
+                  href={`/marathons/${m.slug}`}
+                  onClick={close}
+                  className={`flex items-center gap-4 px-5 py-3 transition-colors ${
+                    activeIndex === i ? 'bg-soft' : 'hover:bg-soft'
+                  }`}
+                >
+                  <div className="w-12 h-14 flex-shrink-0 bg-soft overflow-hidden">
+                    {m.thumbnail_path ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={m.thumbnail_path}
+                        alt={`${m.city} Marathon`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-ink truncate">{m.city} Marathon</div>
+                    <div className="text-[12px] text-mid truncate">Personalized print</div>
+                  </div>
+                  <ArrowRight size={14} strokeWidth={1.75} className="text-mid" />
+                </Link>
+              ))}
+            </div>
+          )}
+
           {filtered.prodHits.length > 0 && (
             <div>
               <div className="px-5 pt-4 pb-2 text-[11px] uppercase tracking-wider text-mid">
                 Products
               </div>
-              {filtered.prodHits.map((p, i) => (
+              {filtered.prodHits.map((p, i) => {
+                const idx = filtered.marHits.length + i;
+                return (
                 <Link
                   key={`p-${p.slug}`}
                   href={`/shop/${p.slug}`}
                   onClick={close}
                   className={`flex items-center gap-4 px-5 py-3 transition-colors ${
-                    activeIndex === i ? 'bg-soft' : 'hover:bg-soft'
+                    activeIndex === idx ? 'bg-soft' : 'hover:bg-soft'
                   }`}
                 >
                   <div className="w-12 h-14 flex-shrink-0 bg-soft overflow-hidden">
@@ -219,7 +284,8 @@ export default function SearchOverlay() {
                   </div>
                   <ArrowRight size={14} strokeWidth={1.75} className="text-mid" />
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -229,7 +295,7 @@ export default function SearchOverlay() {
                 Pages
               </div>
               {filtered.pageHits.map((page, i) => {
-                const idx = filtered.prodHits.length + i;
+                const idx = filtered.marHits.length + filtered.prodHits.length + i;
                 return (
                   <Link
                     key={`page-${page.href}`}
