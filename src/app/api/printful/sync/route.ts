@@ -155,7 +155,10 @@ export async function POST() {
         svs[0]?.product?.image ??
         null;
 
-      // Upsert. Use slug as natural key.
+      // Upsert by printful_product_id. The slug is regenerated from the
+      // current Printful product name on every sync, so renaming a product
+      // (e.g. "Los Angeles" → "Los Angeles, California") updates the
+      // existing row in place instead of inserting a stale duplicate.
       const { error: upErr, data: existing } = await admin
         .from('gallery_items')
         .upsert(
@@ -174,7 +177,7 @@ export async function POST() {
             featured: false,
             sort_order: 0,
           },
-          { onConflict: 'slug' },
+          { onConflict: 'printful_product_id' },
         )
         .select('id')
         .single();

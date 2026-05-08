@@ -23,18 +23,16 @@ export default async function MarathonCard({ slug, city, svgPath, fromCents }: P
 
   return (
     <Link href={`/marathons/${slug}`} className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden bg-white">
-        {svgInline ? (
-          <div
-            className="w-full h-full transition-transform duration-500 group-hover:scale-[1.02] [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
-            dangerouslySetInnerHTML={{ __html: svgInline }}
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-xs text-mid">
-            Preview unavailable
-          </div>
-        )}
-      </div>
+      {svgInline ? (
+        <div
+          className="block transition-transform duration-500 group-hover:scale-[1.02] [&>svg]:w-full [&>svg]:h-auto [&>svg]:block"
+          dangerouslySetInnerHTML={{ __html: svgInline }}
+        />
+      ) : (
+        <div className="aspect-[3/4] flex items-center justify-center text-xs text-mid bg-soft">
+          Preview unavailable
+        </div>
+      )}
       <div className="mt-4">
         <div className="text-[15px] text-ink truncate">{city} Marathon</div>
         {fromDollars && (
