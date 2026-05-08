@@ -122,7 +122,7 @@ export default async function HomePage() {
           cart icon. */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-[1fr_minmax(0,440px)] gap-8 md:gap-12 items-center">
+          <div className="grid md:grid-cols-[1.1fr_1fr] gap-8 md:gap-12 items-center">
             <div className="flex flex-col justify-between py-6 md:py-2 gap-10">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
@@ -170,13 +170,13 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="relative bg-soft aspect-[4/5] overflow-hidden w-full">
+            <div className="relative bg-soft aspect-square overflow-hidden w-full">
               {heroSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={heroSrc}
                   alt="Miles Away Prints — custom location art"
-                  className="absolute inset-0 w-full h-full object-cover object-center scale-[1.25] origin-center"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
                 />
               ) : (
                 <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-wider text-mid">
