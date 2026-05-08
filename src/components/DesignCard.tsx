@@ -22,12 +22,18 @@ export default function DesignCard({ design }: Props) {
 
   const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? '';
 
-  // If the slug is a `prints/<type>` placeholder (no real product synced
-  // for this type yet), route to the filtered shop view rather than to
-  // the legacy customizer.
-  const href = design.slug.startsWith('prints/')
-    ? `/shop?category=${design.type}`
-    : `/shop/${design.slug}`;
+  // Routing rules:
+  //   - marathon items live in the marathons table; click goes to the
+  //     customizer page (/marathons/<slug>) not the static shop SKU page
+  //   - `prints/<type>` placeholder slugs (no real product synced for this
+  //     type yet) route to the filtered shop view
+  //   - everything else routes to the standard /shop/<slug>
+  const href =
+    design.type === 'marathon'
+      ? `/marathons/${design.slug}`
+      : design.slug.startsWith('prints/')
+        ? `/shop?category=${design.type}`
+        : `/shop/${design.slug}`;
 
   return (
     <Link href={href} className="group block">

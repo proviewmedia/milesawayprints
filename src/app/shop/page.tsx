@@ -19,18 +19,44 @@ export const dynamic = 'force-dynamic';
 // reproduce locally; admin client sidesteps any RLS / proxy oddities.
 async function getAllDesigns(): Promise<DesignSummary[]> {
   const admin = createAdminClient();
-  const { data } = await admin
-    .from('gallery_items')
-    .select('id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, sort_order, printful_product_id, printful_variants, printful_prices, digital_price_cents')
-    .eq('active', true)
-    .order('sort_order', { ascending: true })
-    .order('name', { ascending: true })
-    .limit(500);
 
-  if (!data) return [];
-  return data.map((row: GalleryItemWithMeta) =>
-    toDesignSummary(row, row.print_type_slug as PrintType),
+  const [galleryRes, marathonRes] = await Promise.all([
+    admin
+      .from('gallery_items')
+      .select(
+        'id, print_type_slug, name, location, slug, description, tags, values, image_url, room_mockup_url, sort_order, printful_product_id, printful_variants, printful_prices, digital_price_cents',
+      )
+      .eq('active', true)
+      .order('sort_order', { ascending: true })
+      .order('name', { ascending: true })
+      .limit(500),
+    admin
+      .from('marathons')
+      .select('slug, city, thumbnail_path, printful_catalog_variants, printful_prices, sort_order')
+      .eq('active', true)
+      .order('sort_order', { ascending: true }),
+  ]);
+
+  const gallery = (galleryRes.data ?? []).map((row) =>
+    toDesignSummary(row as GalleryItemWithMeta, (row as { print_type_slug?: PrintType }).print_type_slug),
   );
+
+  // Marathons live in their own table (personalized prints). Surface them
+  // in the shop as DesignSummary entries so the marathon filter chip has
+  // results. The DesignCard component routes anything with type='marathon'
+  // to /marathons/<slug> instead of /shop/<slug>.
+  const marathons: DesignSummary[] = (marathonRes.data ?? []).map((m) => ({
+    slug: (m as { slug: string }).slug,
+    name: `${(m as { city: string }).city} Marathon`,
+    location: 'Personalized print',
+    type: 'marathon' as PrintType,
+    values: {},
+    image_url: (m as { thumbnail_path: string | null }).thumbnail_path ?? undefined,
+    printful_variants: (m as { printful_catalog_variants?: Record<string, number> }).printful_catalog_variants,
+    printful_prices: (m as { printful_prices?: Record<string, number> }).printful_prices,
+  }));
+
+  return [...gallery, ...marathons];
 }
 
 async function getCollections(): Promise<Collection[]> {
