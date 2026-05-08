@@ -47,7 +47,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
             </li>
             <li>
               <Link href="/#marathons" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                Marathons
+                Custom
               </Link>
             </li>
             <li>
