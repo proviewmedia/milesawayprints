@@ -197,16 +197,17 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — display as a matted, drop-shadowed
-                  // framed print sitting on the page (the way you'd see it
-                  // when previewing the PNG file in macOS Preview).
-                  <div className="aspect-[4/5] flex items-center justify-center px-2">
+                  // Marathon poster — locked to aspect-[4/5] like the other
+                  // tiles so the top/bottom align across the row. The PNG
+                  // sits inside via object-contain (full image, no crop)
+                  // with a white matt + drop shadow on the tile itself.
+                  <div className="relative aspect-[4/5] bg-white shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)]">
                     {c.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="block w-full max-h-full object-contain bg-white p-[6%] shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)] transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>

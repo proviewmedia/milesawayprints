@@ -19,18 +19,18 @@ export default function MarathonCard({ slug, city, thumbnailPath, fromCents }: P
 
   return (
     <Link href={`/marathons/${slug}`} className="group block">
-      <div className="relative aspect-[4/5] flex items-center justify-center px-2">
+      <div className="relative aspect-[4/5] bg-white shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)]">
         {thumbnailPath ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbnailPath}
             alt={`${city} Marathon poster`}
-            className="block w-full max-h-full object-contain bg-white p-[6%] shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)] transition-transform duration-500 group-hover:scale-[1.02]"
+            className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="aspect-[4/5] w-full flex items-center justify-center text-xs text-mid bg-soft">
+          <span className="absolute inset-0 flex items-center justify-center text-xs text-mid">
             Preview unavailable
-          </div>
+          </span>
         )}
       </div>
       <div className="mt-4">
