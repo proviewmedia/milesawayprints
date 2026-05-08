@@ -217,7 +217,7 @@ export default async function HomePage() {
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="w-[85%] h-auto object-contain drop-shadow-[0_10px_18px_rgba(26,26,46,0.20)] transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="w-[85%] h-auto object-contain drop-shadow-[0_6px_10px_rgba(26,26,46,0.10)] transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>
