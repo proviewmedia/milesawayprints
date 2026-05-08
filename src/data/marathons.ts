@@ -25,6 +25,10 @@ export interface MarathonRow {
   country: string;
   full_svg_path: string | null;
   half_svg_path: string | null;
+  /** Static image used as the homepage card preview. Avoids the SVG/font/
+   *  clipPath quirks of inline rendering. The full SVG is still used on
+   *  the customizer page for the live preview. */
+  thumbnail_path: string | null;
   printful_catalog_variants: Record<string, number>;
   printful_prices: Record<string, number>;
   active: boolean;

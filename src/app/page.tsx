@@ -73,13 +73,14 @@ async function getFeaturedDesigns(): Promise<DesignSummary[]> {
 async function getMarathons() {
   const { data } = await supabase
     .from('marathons')
-    .select('slug, city, full_svg_path, printful_prices')
+    .select('slug, city, full_svg_path, thumbnail_path, printful_prices')
     .eq('active', true)
     .order('sort_order', { ascending: true });
   return (data ?? []) as Array<{
     slug: string;
     city: string;
     full_svg_path: string | null;
+    thumbnail_path: string | null;
     printful_prices: Record<string, number> | null;
   }>;
 }
@@ -226,7 +227,7 @@ export default async function HomePage() {
                     <MarathonCard
                       slug={m.slug}
                       city={m.city}
-                      svgPath={m.full_svg_path ?? ''}
+                      thumbnailPath={m.thumbnail_path}
                       fromCents={fromCents}
                     />
                   </div>
@@ -316,16 +317,16 @@ export default async function HomePage() {
               </Link>
             </div>
             <div className="bg-paper aspect-[4/5] max-w-[420px] mx-auto w-full flex items-center justify-center p-6 md:p-10">
-              {giftMarathon?.full_svg_path ? (
+              {giftMarathon?.thumbnail_path ? (
                 <Link
                   href={`/marathons/${giftMarathon.slug}`}
                   className="block w-full transition-transform duration-500 hover:scale-[1.02]"
                 >
-                  <object
-                    data={giftMarathon.full_svg_path}
-                    type="image/svg+xml"
-                    aria-label={`${giftMarathon.city} Marathon poster`}
-                    className="block w-full h-auto pointer-events-none shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)]"
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={giftMarathon.thumbnail_path}
+                    alt={`${giftMarathon.city} Marathon poster`}
+                    className="block w-full h-auto shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)]"
                   />
                 </Link>
               ) : (
