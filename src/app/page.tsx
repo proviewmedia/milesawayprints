@@ -197,16 +197,17 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — outer tile is aspect-[4/5] (same as
-                  // other tiles). Image scaled to fit inside with breathing
-                  // room so the drop shadow stays within the tile bounds.
-                  <div className="relative aspect-[4/5] flex items-center justify-center p-[5%]">
+                  // Marathon poster — outer tile is identical to the other
+                  // category tiles (aspect-[4/5] + bg-soft + overflow-hidden).
+                  // Image is scaled to ~65% width so it sits in the tile the
+                  // way Printful product photos sit inside their bg-soft tile.
+                  <div className="relative aspect-[4/5] overflow-hidden bg-soft flex items-center justify-center">
                     {c.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="max-w-full max-h-full object-contain drop-shadow-[0_14px_22px_rgba(26,26,46,0.28)] transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="w-[65%] h-auto object-contain drop-shadow-[0_14px_22px_rgba(26,26,46,0.25)] transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>
