@@ -188,25 +188,24 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-start">
             {[
-              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', fit: 'cover' as const },
-              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline', fit: 'cover' as const },
-              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport', fit: 'cover' as const },
-              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', fit: 'contain' as const },
+              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', aspect: 'aspect-[4/5]', isMarathon: false },
+              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline', aspect: 'aspect-[4/5]', isMarathon: false },
+              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport', aspect: 'aspect-[4/5]', isMarathon: false },
+              // Marathon tile aspect matches the PNG (3:4) so the LV poster
+              // shows edge-to-edge with no crop and no white padding — exactly
+              // the file as designed.
+              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', aspect: 'aspect-[3/4]', isMarathon: true },
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
-                <div
-                  className={`relative aspect-[4/5] overflow-hidden ${c.fit === 'contain' ? 'bg-white' : 'bg-soft'}`}
-                >
+                <div className={`relative ${c.aspect} overflow-hidden ${c.isMarathon ? 'bg-white' : 'bg-soft'}`}>
                   {c.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={c.image}
                       alt={c.name}
-                      className={`absolute inset-0 w-full h-full transition-transform duration-500 group-hover:scale-[1.02] ${
-                        c.fit === 'contain' ? 'object-contain p-[8%]' : 'object-cover'
-                      }`}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   ) : null}
                 </div>
