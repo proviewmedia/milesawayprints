@@ -190,23 +190,19 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', fit: 'cover' as const },
-              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline', fit: 'cover' as const },
-              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport', fit: 'cover' as const },
-              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', fit: 'contain' as const },
+              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf' },
+              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline' },
+              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport' },
+              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon' },
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
-                <div
-                  className={`relative aspect-[4/5] overflow-hidden ${c.fit === 'contain' ? 'bg-white' : 'bg-soft'}`}
-                >
+                <div className="relative aspect-[4/5] overflow-hidden bg-soft">
                   {c.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={c.image}
                       alt={c.name}
-                      className={`absolute inset-0 w-full h-full transition-transform duration-500 group-hover:scale-[1.02] ${
-                        c.fit === 'contain' ? 'object-contain p-[10%]' : 'object-cover'
-                      }`}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                     />
                   ) : null}
                 </div>
