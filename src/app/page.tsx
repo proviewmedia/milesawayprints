@@ -174,9 +174,9 @@ export default async function HomePage() {
       </section>
 
       {/* Featured prints */}
-      <section className="py-20 md:py-28">
+      <section className="py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-end justify-between mb-10 flex-wrap gap-3">
+          <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink">
               Featured prints
             </h2>
@@ -195,9 +195,9 @@ export default async function HomePage() {
 
       {/* Marathon prints — personalized posters from a separate table */}
       {marathons.length > 0 && (
-        <section id="marathons" className="py-16 md:py-24 bg-soft scroll-mt-32">
+        <section id="marathons" className="py-10 md:py-14 bg-soft scroll-mt-32">
           <div className="max-w-[1400px] mx-auto px-6">
-            <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
+            <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
               <div>
                 <div
                   className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase mb-2"
@@ -260,7 +260,7 @@ export default async function HomePage() {
       />
 
       {/* Lifestyle photography section — placeholders for now */}
-      <section className="py-16 md:py-24 bg-soft">
+      <section className="py-10 md:py-14 bg-soft">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-4 md:gap-6">
             {[1, 2, 3].map((n) => (
@@ -276,9 +276,9 @@ export default async function HomePage() {
       </section>
 
       {/* How It Works — minimal numbered steps */}
-      <section id="how" className="py-20 md:py-28 bg-soft scroll-mt-40">
+      <section id="how" className="py-12 md:py-16 bg-soft scroll-mt-40">
         <div className="max-w-[1280px] mx-auto px-6">
-          <div className="text-center mb-14 max-w-xl mx-auto">
+          <div className="text-center mb-10 max-w-xl mx-auto">
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink mb-3">
               Four steps. Done.
             </h2>
@@ -302,7 +302,7 @@ export default async function HomePage() {
       </section>
 
       {/* Gift Section */}
-      <section id="gift" className="py-20 md:py-28 scroll-mt-40">
+      <section id="gift" className="py-12 md:py-16 scroll-mt-40">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="bg-soft p-10 md:p-20 grid md:grid-cols-2 gap-10 items-center">
             <div>
@@ -343,9 +343,9 @@ export default async function HomePage() {
 
       {/* Reviews */}
       {reviews.length > 0 && (
-        <section className="py-20 md:py-28">
+        <section className="py-12 md:py-16">
           <div className="max-w-[1280px] mx-auto px-6">
-            <div className="text-center mb-14">
+            <div className="text-center mb-10">
               <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink">
                 What customers are saying.
               </h2>
@@ -371,7 +371,7 @@ export default async function HomePage() {
       )}
 
       {/* CTA */}
-      <section className="py-24 md:py-32 bg-ink text-paper">
+      <section className="py-16 md:py-20 bg-ink text-paper">
         <div className="max-w-[900px] mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.05] mb-5">
             Ready to make yours?
@@ -411,9 +411,9 @@ function CategoryRow({
   if (designs.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-10 md:py-14">
       <div className="max-w-[1400px] mx-auto px-6">
-        <div className="flex items-end justify-between mb-8 flex-wrap gap-3">
+        <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
           <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
             {heading}
           </h2>
