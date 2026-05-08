@@ -197,17 +197,18 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — outer tile is identical to the other
-                  // category tiles (aspect-[4/5] + bg-soft + overflow-hidden).
-                  // Image is scaled to ~65% width so it sits in the tile the
-                  // way Printful product photos sit inside their bg-soft tile.
-                  <div className="relative aspect-[4/5] overflow-hidden bg-soft flex items-center justify-center">
+                  // Marathon poster — white background. Poster fills the
+                  // tile vertically via object-contain so its top/bottom
+                  // line up with the airport tile's black panel. The 3:4
+                  // poster in a 4:5 tile leaves thin white bars on the
+                  // sides — that's the visible white background.
+                  <div className="relative aspect-[4/5] overflow-hidden bg-white">
                     {c.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={c.image}
                         alt={c.name}
-                        className="w-[65%] h-auto object-contain drop-shadow-[0_14px_22px_rgba(26,26,46,0.25)] transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="absolute inset-0 w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                       />
                     ) : null}
                   </div>
