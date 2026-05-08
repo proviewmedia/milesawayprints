@@ -168,7 +168,7 @@ export default function ShopClient({ designs, collections }: Props) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-12">
               {filtered.map((d) => (
                 <DesignCard key={d.slug} design={d} onQuickShop={setQuickShopDesign} />
               ))}
