@@ -2,11 +2,9 @@ import Link from 'next/link';
 import { Star } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
-import PrintPreview from '@/components/PrintPreview';
-import WallFrame from '@/components/WallFrame';
 import DesignCardWrapper from './DesignCardWrapper';
 import MarathonCard from '@/components/MarathonCard';
-import { PrintType, DEFAULT_GALLERY } from '@/data/prints';
+import { PrintType } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 import { supabase, createAdminClient } from '@/lib/supabase';
 import { existsSync } from 'node:fs';
@@ -354,43 +352,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Gift Section */}
-      <section id="gift" className="py-8 md:py-12 scroll-mt-40">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="bg-soft p-6 md:p-10 grid md:grid-cols-2 gap-6 md:gap-10 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-medium text-ink tracking-tight leading-[1.05] mb-3">
-                Make it<br />meaningful.
-              </h2>
-              <p className="text-mid text-sm md:text-base mb-5 leading-relaxed max-w-sm">
-                Every print can be a gift. Add a personal message, ship it straight to the recipient, and we&apos;ll leave the price off. Perfect for birthdays, anniversaries, and weddings.
-              </p>
-              <Link href="/shop" className="btn-primary">
-                Find a gift
-              </Link>
-            </div>
-            <div className="max-w-[320px] md:max-w-[360px] mx-auto w-full">
-              {giftMarathon?.thumbnail_path ? (
-                <Link
-                  href={`/marathons/${giftMarathon.slug}`}
-                  className="block w-full transition-transform duration-500 hover:scale-[1.02]"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={giftMarathon.thumbnail_path}
-                    alt={`${giftMarathon.city} Marathon poster`}
-                    className="block w-full h-auto shadow-[0_18px_36px_-12px_rgba(26,26,46,0.20)]"
-                  />
-                </Link>
-              ) : (
-                <WallFrame compact>
-                  <PrintPreview type="city" values={DEFAULT_GALLERY.city[0].values} />
-                </WallFrame>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Reviews */}
       {reviews.length > 0 && (
