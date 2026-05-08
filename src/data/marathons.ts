@@ -6,7 +6,10 @@ export type MarathonVariant = 'full' | 'half';
  *  customizer can import without pulling in Node fs APIs. */
 export const SVG_PLACEHOLDERS = {
   variantLabelFull: 'M A R A T H O N',
-  variantLabelHalf: 'H A L F  M A R A T H O N',
+  // No letter-spacing on the half label so it fits in the same horizontal
+  // slot as the full's letter-spaced version. The customizer also shrinks
+  // the font when half is selected so it doesn't overflow.
+  variantLabelHalf: 'HALF MARATHON',
   distanceFull: '26.2',
   distanceHalf: '13.1',
   finishTime: '02:30:22',

@@ -115,30 +115,22 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
     <section className="pt-32 md:pt-36 pb-16">
       <div className="max-w-[1280px] mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Live preview — outer cream surface + inner white border around
-              the actual print, with a deeper drop shadow so the poster
-              visibly lifts off the page. */}
+          {/* Live preview — white matted poster lifted off the page with a
+              soft drop shadow. No surrounding tan/cream surface. */}
           <div className="md:sticky md:top-32 md:self-start">
-            <div
-              className="rounded-2xl p-[6%] shadow-[0_40px_80px_-20px_rgba(26,26,46,0.35),0_18px_36px_-12px_rgba(26,26,46,0.20)]"
-              style={{ background: 'linear-gradient(180deg, #faf8f3 0%, #f4efe4 100%)' }}
-            >
-              {activeSvg ? (
+            {activeSvg ? (
+              <div className="bg-white p-[5%] shadow-[0_40px_80px_-20px_rgba(26,26,46,0.35),0_18px_36px_-12px_rgba(26,26,46,0.20)] rounded-sm">
                 <div
-                  className="bg-white p-[5%] shadow-[0_8px_24px_rgba(26,26,46,0.18)] rounded-sm"
-                >
-                  <div
-                    ref={svgWrapRef}
-                    className="marathon-svg-wrap"
-                    dangerouslySetInnerHTML={{ __html: activeSvg }}
-                  />
-                </div>
-              ) : (
-                <div className="aspect-[3/4] flex items-center justify-center text-sm text-mid bg-soft rounded-xl">
-                  {variant === 'half' ? 'Half marathon design coming soon.' : 'Loading…'}
-                </div>
-              )}
-            </div>
+                  ref={svgWrapRef}
+                  className="marathon-svg-wrap"
+                  dangerouslySetInnerHTML={{ __html: activeSvg }}
+                />
+              </div>
+            ) : (
+              <div className="aspect-[3/4] flex items-center justify-center text-sm text-mid bg-soft rounded-xl">
+                {variant === 'half' ? 'Half marathon design coming soon.' : 'Loading…'}
+              </div>
+            )}
             <p className="text-center text-xs text-light-mid mt-4 italic">
               Live preview — updates as you type
             </p>
@@ -412,9 +404,18 @@ function applyAllToDom(
         t.textContent = date;
         break;
       case SVG_PLACEHOLDERS.variantLabelFull:
-      case SVG_PLACEHOLDERS.variantLabelHalf:
+      case SVG_PLACEHOLDERS.variantLabelHalf: {
         t.textContent = variantLabel;
+        // The full's "M A R A T H O N" is letter-spaced at 83.4px and fills
+        // a known width. The half's compact "HALF MARATHON" needs a smaller
+        // size to fit that same slot — set it on the parent <text> so the
+        // <tspan>'s position-only `x/y` doesn't have to move.
+        const parent = t.closest('text') as SVGTextElement | null;
+        if (parent) {
+          parent.style.fontSize = values.variant === 'half' ? '60px' : '';
+        }
         break;
+      }
       case SVG_PLACEHOLDERS.distanceFull:
       case SVG_PLACEHOLDERS.distanceHalf:
         t.textContent = distance;
