@@ -197,18 +197,21 @@ export default async function HomePage() {
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (
-                  // Marathon poster — locked to aspect-[4/5] like the other
-                  // tiles so the top/bottom align across the row. The PNG
-                  // sits inside via object-contain (full image, no crop)
-                  // with a white matt + drop shadow on the tile itself.
-                  <div className="relative aspect-[4/5] bg-white shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)]">
+                  // Marathon poster — outer tile EXACTLY matches the other
+                  // tiles (aspect-[4/5] + bg-soft + overflow-hidden) so the
+                  // row's top/bottom edges align. The white-bordered framed
+                  // print sits inset INSIDE that tile so the shadow stays
+                  // within the tile bounds.
+                  <div className="relative aspect-[4/5] overflow-hidden bg-soft">
                     {c.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={c.image}
-                        alt={c.name}
-                        className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
-                      />
+                      <div className="absolute inset-[7%] bg-white shadow-[0_18px_28px_-10px_rgba(26,26,46,0.30),0_6px_12px_-6px_rgba(26,26,46,0.18)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={c.image}
+                          alt={c.name}
+                          className="absolute inset-0 w-full h-full object-contain p-[6%] transition-transform duration-500 group-hover:scale-[1.02]"
+                        />
+                      </div>
                     ) : null}
                   </div>
                 ) : (
