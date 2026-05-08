@@ -114,19 +114,18 @@ export default async function HomePage() {
     <>
       <NavbarShell />
 
-      {/* Hero — split-screen with a single hero image instead of the
-          symbolic-preview grid. Drop a 1600×1200-ish JPG at
-          /public/hero.jpg to replace the placeholder. */}
+      {/* Hero — split-screen, image right-bled to the viewport edge so
+          there's no gutter between it and the page edge on wider screens. */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-[1.3fr_1fr] gap-10 md:gap-12 items-center">
+        <div className="max-w-[1400px] ml-auto pl-6 md:pl-12">
+          <div className="grid md:grid-cols-[1fr_minmax(0,440px)] gap-8 md:gap-12 items-center">
             <div className="flex flex-col justify-between py-6 md:py-2 gap-10">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
                   Custom location art · Est. 2020
                 </p>
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-medium tracking-tight text-ink leading-[0.95] mb-6">
-                  The places<br />you love,<br />printed.
+                  The places you love,<br />printed.
                 </h1>
                 <p className="text-base md:text-lg text-mid max-w-md leading-relaxed">
                   Airports, marathons, golf courses, and city skylines —
@@ -166,7 +165,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="relative bg-soft aspect-[4/5] overflow-hidden max-w-[380px] md:max-w-[440px] w-full mx-auto md:mx-0 md:ml-auto">
+            <div className="relative bg-soft aspect-[4/5] overflow-hidden w-full">
               {heroSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
