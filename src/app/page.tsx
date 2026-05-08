@@ -188,27 +188,40 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 items-start">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', aspect: 'aspect-[4/5]', isMarathon: false },
-              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline', aspect: 'aspect-[4/5]', isMarathon: false },
-              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport', aspect: 'aspect-[4/5]', isMarathon: false },
-              // Marathon tile aspect matches the PNG (3:4) so the LV poster
-              // shows edge-to-edge with no crop and no white padding — exactly
-              // the file as designed.
-              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', aspect: 'aspect-[3/4]', isMarathon: true },
+              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', isMarathon: false },
+              { name: 'City skylines', image: skylines[0]?.image_url, href: '/shop?category=skyline', isMarathon: false },
+              { name: 'Airports', image: airports[0]?.image_url, href: '/shop?category=airport', isMarathon: false },
+              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', isMarathon: true },
             ].map((c) => (
               <Link key={c.name} href={c.href} className="group block">
-                <div className={`relative ${c.aspect} overflow-hidden ${c.isMarathon ? 'bg-white' : 'bg-soft'}`}>
-                  {c.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={c.image}
-                      alt={c.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                    />
-                  ) : null}
-                </div>
+                {c.isMarathon ? (
+                  // Marathon poster — display as a matted, drop-shadowed
+                  // framed print sitting on the page (the way you'd see it
+                  // when previewing the PNG file in macOS Preview).
+                  <div className="aspect-[4/5] flex items-center justify-center px-2">
+                    {c.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={c.image}
+                        alt={c.name}
+                        className="block w-full max-h-full object-contain bg-white p-[6%] shadow-[0_24px_40px_-12px_rgba(26,26,46,0.30),0_8px_16px_-8px_rgba(26,26,46,0.18)] transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="relative aspect-[4/5] overflow-hidden bg-soft">
+                    {c.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={c.image}
+                        alt={c.name}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                      />
+                    ) : null}
+                  </div>
+                )}
                 <div className="mt-4 text-[15px] text-ink text-center">{c.name}</div>
               </Link>
             ))}
