@@ -119,7 +119,7 @@ export default async function HomePage() {
           /public/hero.jpg to replace the placeholder. */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-10 md:gap-12 items-stretch">
+          <div className="grid md:grid-cols-[1.3fr_1fr] gap-10 md:gap-12 items-center">
             <div className="flex flex-col justify-between py-6 md:py-2 gap-10">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
@@ -166,7 +166,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="relative bg-soft aspect-[4/5] overflow-hidden">
+            <div className="relative bg-soft aspect-[4/5] overflow-hidden max-w-[380px] md:max-w-[440px] w-full mx-auto md:mx-0 md:ml-auto">
               {heroSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
