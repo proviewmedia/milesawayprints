@@ -8,6 +8,7 @@ import {
   sendOrderConfirmationEmail,
   type OrderConfirmationItem,
 } from '@/lib/email';
+import { buildMarathonPrintfulItems, isMarathonCartItem } from '@/lib/marathon-fulfill';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -132,18 +133,21 @@ export async function POST(req: Request) {
       let printfulOrderId: string | null = null;
 
       if (physicalItems.length > 0 && shipping?.address) {
-        const slugs = Array.from(new Set(physicalItems.map((it) => it.slug)));
-        const { data: designs } = await admin
-          .from('gallery_items')
-          .select('slug, printful_variants')
-          .in('slug', slugs);
+        const galleryPhysical = physicalItems.filter((it) => !isMarathonCartItem(it));
+        const slugs = Array.from(new Set(galleryPhysical.map((it) => it.slug)));
+        const { data: designs } = slugs.length
+          ? await admin
+              .from('gallery_items')
+              .select('slug, printful_variants')
+              .in('slug', slugs)
+          : { data: [] as { slug: string; printful_variants: Record<string, number> | null }[] };
 
         const variantMap = new Map<string, Record<string, number>>(
           (designs ?? []).map((d) => [d.slug as string, (d.printful_variants ?? {}) as Record<string, number>]),
         );
 
         const printfulItems: PrintfulOrderItem[] = [];
-        for (const it of physicalItems) {
+        for (const it of galleryPhysical) {
           const variants = variantMap.get(it.slug);
           const syncVariantId = variants?.[it.size];
           if (!syncVariantId) continue;
@@ -152,6 +156,19 @@ export async function POST(req: Request) {
             quantity: 1,
             name: `${it.name} ${it.size}`,
           });
+        }
+
+        // Marathon items: render personalized print file, upload to Blob,
+        // attach as a Printful order item with the matte-poster catalog
+        // variant_id + a `files` override so Printful prints what we send.
+        const marathonResult = await buildMarathonPrintfulItems(
+          admin,
+          physicalItems,
+          order.token as string,
+        );
+        printfulItems.push(...marathonResult.items);
+        if (marathonResult.errors.length > 0) {
+          update.printful_error = marathonResult.errors.join('; ');
         }
 
         if (printfulItems.length > 0) {
@@ -337,19 +354,31 @@ export async function POST(req: Request) {
 
       // Physical fulfillment — submit to Printful with confirm:true
       if (physicalItems.length > 0 && shipping?.address) {
-        const slugs = Array.from(new Set(physicalItems.map((it) => it.slug)));
-        const { data: designs } = await admin
-          .from('gallery_items')
-          .select('slug, printful_variants')
-          .in('slug', slugs);
+        const galleryPhysical = physicalItems.filter((it) => !isMarathonCartItem(it));
+        const slugs = Array.from(new Set(galleryPhysical.map((it) => it.slug)));
+        const { data: designs } = slugs.length
+          ? await admin
+              .from('gallery_items')
+              .select('slug, printful_variants')
+              .in('slug', slugs)
+          : { data: [] as { slug: string; printful_variants: Record<string, number> | null }[] };
         const variantMap = new Map<string, Record<string, number>>(
           (designs ?? []).map((d) => [d.slug as string, (d.printful_variants ?? {}) as Record<string, number>]),
         );
         const printfulItems: PrintfulOrderItem[] = [];
-        for (const it of physicalItems) {
+        for (const it of galleryPhysical) {
           const v = variantMap.get(it.slug)?.[it.size];
           if (!v) continue;
           printfulItems.push({ sync_variant_id: v, quantity: 1, name: `${it.name} ${it.size}` });
+        }
+        const marathonResult = await buildMarathonPrintfulItems(
+          admin,
+          physicalItems,
+          order.token as string,
+        );
+        printfulItems.push(...marathonResult.items);
+        if (marathonResult.errors.length > 0) {
+          update.printful_error = marathonResult.errors.join('; ');
         }
         if (printfulItems.length > 0) {
           // Same gift-forward as above.
