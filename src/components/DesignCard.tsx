@@ -51,7 +51,7 @@ export default function DesignCard({ design }: Props) {
           <img
             src={design.image_url}
             alt={`${design.name} — ${design.location}`}
-            className="w-[85%] h-auto object-contain drop-shadow-[0_6px_10px_rgba(26,26,46,0.10)] transition-transform duration-500 group-hover:scale-[1.02]"
+            className="w-[85%] h-auto object-contain drop-shadow-[0_3px_6px_rgba(26,26,46,0.06)] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         </div>
       ) : (
