@@ -121,18 +121,28 @@ export default async function HomePage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-10 md:gap-12 items-stretch">
             <div className="flex flex-col justify-center py-4">
-              <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.02] mb-5">
-                The places<br />you love.<br />Printed.
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
+                Custom location art
+              </p>
+              <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-ink leading-[0.98] mb-5">
+                The places<br />you love,<br />printed.
               </h1>
               <p className="text-base md:text-lg text-mid mb-7 max-w-md leading-relaxed">
-                Custom map and skyline prints, made to last. Airports, marathons, golf courses, and city skylines — printed on archival paper.
+                Airports, marathons, golf courses, and city skylines — designed
+                in-house, printed on archival paper, shipped worldwide.
               </p>
-              <div className="flex flex-wrap items-center gap-5">
+              <div className="flex flex-wrap items-center gap-4">
                 <Link href="/shop" className="btn-primary">
-                  Shop all
+                  Shop the collection
+                </Link>
+                <Link
+                  href="/marathons/las-vegas"
+                  className="text-sm font-medium text-ink underline underline-offset-4 decoration-1 hover:opacity-70 transition-opacity"
+                >
+                  Or start a custom print →
                 </Link>
               </div>
-              <div className="flex items-center gap-2 mt-7">
+              <div className="flex items-center gap-2 mt-8">
                 <div className="flex gap-0.5 text-ink">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
