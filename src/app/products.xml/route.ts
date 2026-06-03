@@ -81,7 +81,10 @@ function emitItemsForDesign(d: DesignSummary): string[] {
         groupId: d.slug,
         title: `${d.name} ${typeLabel} Print — ${size}`,
         description,
-        link: `${SITE}/shop/${d.slug}?size=${encodeURIComponent(size)}`,
+        // Clean canonical link (no ?size=) so the feed matches the product
+        // page's canonical tag — avoids Merchant Center canonical-mismatch
+        // warnings. Variants are differentiated by g:id + g:item_group_id.
+        link: `${SITE}/shop/${d.slug}`,
         imageLink: d.image_url ?? `${SITE}/api/og/product/${d.slug}`,
         priceUsd: cents / 100,
         productType,
@@ -100,7 +103,7 @@ function emitItemsForDesign(d: DesignSummary): string[] {
         groupId: d.slug,
         title: `${d.name} ${typeLabel} Print — Digital`,
         description,
-        link: `${SITE}/shop/${d.slug}?format=digital`,
+        link: `${SITE}/shop/${d.slug}`,
         imageLink: d.image_url ?? `${SITE}/api/og/product/${d.slug}`,
         priceUsd: digitalCents / 100,
         productType,
@@ -140,6 +143,9 @@ function xmlItem(a: XmlItemArgs): string {
       <g:product_type>${escapeXml(a.productType)}</g:product_type>
       <g:google_product_category>500045</g:google_product_category>
       <g:size>${escapeXml(a.size)}</g:size>
+      <g:product_highlight>Made to order — printed in 3–5 business days</g:product_highlight>
+      <g:product_highlight>Archival fine-art giclée paper</g:product_highlight>
+      <g:product_highlight>Personalized with your name, location, and details</g:product_highlight>
       <g:shipping>
         <g:country>US</g:country>
         <g:service>Standard</g:service>

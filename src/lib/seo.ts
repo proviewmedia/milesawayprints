@@ -195,18 +195,42 @@ export function productJsonLd({
           })),
         }
       : {}),
-    offers: offers.map((o) => ({
-      '@type': 'Offer',
-      name: o.name,
-      price: (o.priceCents / 100).toFixed(2),
+    ...buildOffers(offers, url.startsWith('http') ? url : `${SITE_URL}${url}`),
+  };
+}
+
+/**
+ * Builds the `offers` property. With multiple sizes we emit a single
+ * AggregateOffer (low/high price + offerCount, with the individual size
+ * Offers nested) so Google can show a price range; with one size we emit a
+ * single Offer; with none we omit `offers` entirely.
+ */
+function buildOffers(offers: ProductOffer[], absoluteUrl: string) {
+  if (offers.length === 0) return {};
+  const offerObjs = offers.map((o) => ({
+    '@type': 'Offer' as const,
+    name: o.name,
+    price: (o.priceCents / 100).toFixed(2),
+    priceCurrency: 'USD',
+    priceValidUntil: priceValidUntil(),
+    availability: 'https://schema.org/InStock',
+    itemCondition: 'https://schema.org/NewCondition',
+    url: absoluteUrl,
+    shippingDetails: OFFER_SHIPPING_DETAILS,
+    hasMerchantReturnPolicy: MERCHANT_RETURN_POLICY,
+  }));
+  if (offerObjs.length === 1) return { offers: offerObjs[0] };
+  const cents = offers.map((o) => o.priceCents);
+  return {
+    offers: {
+      '@type': 'AggregateOffer' as const,
       priceCurrency: 'USD',
-      priceValidUntil: priceValidUntil(),
+      lowPrice: (Math.min(...cents) / 100).toFixed(2),
+      highPrice: (Math.max(...cents) / 100).toFixed(2),
+      offerCount: offerObjs.length,
       availability: 'https://schema.org/InStock',
-      itemCondition: 'https://schema.org/NewCondition',
-      url: url.startsWith('http') ? url : `${SITE_URL}${url}`,
-      shippingDetails: OFFER_SHIPPING_DETAILS,
-      hasMerchantReturnPolicy: MERCHANT_RETURN_POLICY,
-    })),
+      offers: offerObjs,
+    },
   };
 }
 
