@@ -1,26 +1,28 @@
 import type { Metadata } from 'next';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
-import SignInForm from './SignInForm';
+import ForgotPasswordForm from './ForgotPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Sign in — Miles Away Prints',
-  description: 'Sign in to view your orders, track shipments, and download digital files.',
+  title: 'Reset your password — Miles Away Prints',
+  description:
+    'Forgot your password? Enter your email and we\'ll send a reset link.',
+  alternates: { canonical: '/forgot-password' },
 };
 
-export default function SignInPage() {
+export default function ForgotPasswordPage() {
   return (
     <>
       <NavbarShell />
       <section className="pt-32 md:pt-40 pb-20 min-h-[70vh]">
         <div className="max-w-[440px] mx-auto px-6">
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink leading-[1.05] mb-3 text-center">
-            Sign in
+            Reset your password
           </h1>
           <p className="text-mid text-center mb-10">
-            Sign in to see your orders, track shipments, and reorder faster.
+            Enter the email tied to your account and we&apos;ll send you a link to set a new password.
           </p>
-          <SignInForm />
+          <ForgotPasswordForm />
         </div>
       </section>
       <Footer />

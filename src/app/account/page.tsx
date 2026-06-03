@@ -1,11 +1,50 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ExternalLink } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { trackingUrlFor } from '@/lib/tracking';
 import SignOutButton from './SignOutButton';
 import ProfileForm from './ProfileForm';
+
+const STATUS_LABEL: Record<string, string> = {
+  new: 'Awaiting payment',
+  paid: 'Ordered',
+  in_progress: 'Being printed',
+  in_production: 'Being printed',
+  approved: 'Ready to download',
+  proof_sent: 'Proof sent',
+  shipped: 'Shipped',
+  fulfilled: 'Shipped',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
+};
+
+// Mint dot for active/in-progress, mid grey for terminal, coral for cancelled.
+const STATUS_DOT: Record<string, string> = {
+  new: 'bg-mid',
+  paid: 'bg-mint',
+  in_progress: 'bg-mint',
+  in_production: 'bg-mint',
+  approved: 'bg-mint',
+  proof_sent: 'bg-mint',
+  shipped: 'bg-mint',
+  fulfilled: 'bg-mid',
+  delivered: 'bg-mid',
+  cancelled: 'bg-coral',
+};
+
+function statusLabel(s: string | null | undefined): string {
+  if (!s) return 'Ordered';
+  return STATUS_LABEL[s] ?? s.replace(/_/g, ' ');
+}
+
+function statusDot(s: string | null | undefined): string {
+  if (!s) return 'bg-mid';
+  return STATUS_DOT[s] ?? 'bg-mid';
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +70,7 @@ export default async function AccountPage() {
 
   const { data: orders } = await supabase
     .from('orders')
-    .select('id, order_number, token, created_at, status, format, size, price_cents, print_type_slug, customer_name, shipping_city, shipping_state')
+    .select('id, order_number, token, created_at, status, format, size, price_cents, print_type_slug, customer_name, shipping_city, shipping_state, tracking_number, tracking_url, tracking_carrier')
     .order('created_at', { ascending: false });
 
   return (
@@ -69,34 +108,63 @@ export default async function AccountPage() {
               </h2>
               {orders && orders.length > 0 ? (
                 <div className="border-t border-border">
-                  {orders.map((o) => (
-                    <Link
-                      key={o.id}
-                      href={`/order/${o.token}`}
-                      className="flex items-center justify-between py-5 border-b border-border hover:bg-soft -mx-3 px-3 transition-colors"
-                    >
-                      <div>
-                        <div className="text-sm text-ink">
-                          Order #{o.order_number}
-                        </div>
-                        <div className="text-[13px] text-mid mt-0.5">
-                          {new Date(o.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}{' '}
-                          · {o.print_type_slug} · {o.format}
-                          {o.size ? ` · ${o.size}` : ''}
+                  {orders.map((o) => {
+                    const trackingHref = o.tracking_number
+                      ? trackingUrlFor({
+                          tracking: o.tracking_number,
+                          carrier: o.tracking_carrier,
+                          trackingUrl: o.tracking_url,
+                        })
+                      : null;
+                    return (
+                      <div
+                        key={o.id}
+                        className="flex items-center justify-between gap-4 py-5 border-b border-border -mx-3 px-3"
+                      >
+                        <Link
+                          href={`/order/${o.token}`}
+                          className="flex-1 min-w-0 hover:opacity-70 transition-opacity"
+                        >
+                          <div className="text-sm text-ink">
+                            Order #{o.order_number}
+                          </div>
+                          <div className="text-[13px] text-mid mt-0.5">
+                            {new Date(o.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}{' '}
+                            · {o.print_type_slug} · {o.format}
+                            {o.size ? ` · ${o.size}` : ''}
+                          </div>
+                        </Link>
+                        <div className="text-right shrink-0">
+                          <div className="text-sm text-ink">
+                            ${(o.price_cents / 100).toFixed(2)}
+                          </div>
+                          <div className="flex items-center justify-end gap-1.5 mt-1">
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${statusDot(o.status)}`}
+                              aria-hidden
+                            />
+                            <span className="text-[12px] text-mid">
+                              {statusLabel(o.status)}
+                            </span>
+                          </div>
+                          {trackingHref && (
+                            <a
+                              href={trackingHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] text-ink underline underline-offset-2 hover:opacity-70 mt-1"
+                            >
+                              Track <ExternalLink size={10} strokeWidth={1.75} />
+                            </a>
+                          )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm text-ink">${(o.price_cents / 100).toFixed(2)}</div>
-                        <div className="text-[12px] text-mid uppercase tracking-wider mt-0.5">
-                          {o.status}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="border-t border-b border-border py-12 text-center">

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { isAdminEmail } from '@/lib/admin';
 import { createOrder, PrintfulOrderRequest } from '@/lib/printful';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/printful/submit
@@ -15,6 +20,17 @@ import { createOrder, PrintfulOrderRequest } from '@/lib/printful';
  */
 export async function POST(req: Request) {
   try {
+    // Admin-only: this endpoint triggers real Printful fulfillment using the
+    // service-role client. Middleware does not gate /api routes, so re-check
+    // the admin gate here (same check as /api/admin/orders).
+    const supabase = createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user || !isAdminEmail(user.email)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { orderId, confirm = false } = await req.json();
     if (!orderId) return NextResponse.json({ error: 'orderId required' }, { status: 400 });
 

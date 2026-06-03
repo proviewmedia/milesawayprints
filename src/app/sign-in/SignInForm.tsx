@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, EyeOff } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 type Mode = 'signin' | 'signup';
@@ -15,6 +17,7 @@ export default function SignInForm() {
   const [mode, setMode] = useState<Mode>(presetEmail ? 'signup' : 'signin');
   const [email, setEmail] = useState(presetEmail);
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter();
@@ -87,7 +90,7 @@ export default function SignInForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-[13px] font-medium text-ink mb-2">Email</label>
+        <label className="block text-sm font-medium text-ink mb-2">Email</label>
         <input
           type="email"
           required
@@ -101,20 +104,43 @@ export default function SignInForm() {
       </div>
 
       <div>
-        <label className="block text-[13px] font-medium text-ink mb-2">Password</label>
-        <input
-          type="password"
-          required
-          autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder={mode === 'signin' ? 'Your password' : 'Pick a password (8+ characters)'}
-          minLength={mode === 'signup' ? 8 : undefined}
-          className="input-field"
-        />
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-ink">Password</label>
+          {mode === 'signin' && (
+            <Link
+              href="/forgot-password"
+              className="text-[12px] text-mid hover:text-ink underline underline-offset-2"
+            >
+              Forgot password?
+            </Link>
+          )}
+        </div>
+        <div className="relative">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            required
+            autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={mode === 'signin' ? 'Your password' : 'Pick a password (8+ characters)'}
+            minLength={mode === 'signup' ? 8 : undefined}
+            className="input-field pr-10"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-mid hover:text-ink"
+          >
+            {showPassword ? <EyeOff size={16} strokeWidth={1.75} /> : <Eye size={16} strokeWidth={1.75} />}
+          </button>
+        </div>
       </div>
 
-      {errorMsg && <p className="text-sm text-accent">{errorMsg}</p>}
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {errorMsg && <p className="text-sm text-accent">{errorMsg}</p>}
+      </div>
 
       <button
         type="submit"

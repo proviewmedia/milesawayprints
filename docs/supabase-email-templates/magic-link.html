@@ -1,0 +1,47 @@
+<!--
+  Supabase Auth → Email Templates → "Magic Link"
+
+  Subject line to paste above the body:
+    Your sign-in link — Miles Away Prints
+
+  Currently the site is password-based, so this template only fires if
+  magic-link sign-in is enabled later. Keeping it branded for that day.
+
+  Template variables:
+    {{ .ConfirmationURL }} — single-use sign-in link
+    {{ .Email }}           — recipient
+    {{ .SiteURL }}         — https://www.milesawayprints.com
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Your sign-in link — Miles Away Prints</title>
+  </head>
+  <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #0e0e0e; background: #ffffff;">
+    <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 24px; letter-spacing: 0.06em; text-transform: uppercase;">
+      Miles Away Prints
+    </p>
+    <h1 style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 16px; line-height: 1.15;">
+      Your sign-in link
+    </h1>
+    <p style="font-size: 15px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
+      Click the button below to sign in to Miles Away Prints. This link expires in 1 hour and works once.
+    </p>
+    <div style="margin: 32px 0;">
+      <a href="{{ .ConfirmationURL }}" style="display: inline-block; background: #0e0e0e; color: #ffffff; text-decoration: none; font-weight: 500; font-size: 14px; padding: 14px 28px; border-radius: 999px;">
+        Sign in
+      </a>
+    </div>
+    <p style="font-size: 13px; color: #9c9c9c; margin: 0 0 24px; line-height: 1.6;">
+      Didn't ask to sign in? You can safely ignore this email.
+    </p>
+    <hr style="border: none; border-top: 1px solid #e8e6e0; margin: 32px 0;" />
+    <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 8px;">
+      Miles Away Prints · <a href="{{ .SiteURL }}" style="color: #6b6b6b;">milesawayprints.com</a>
+    </p>
+    <p style="font-size: 12px; color: #9c9c9c; margin: 0;">
+      Questions? Reply to this email or reach <a href="mailto:milesawayprintsllc@gmail.com" style="color: #6b6b6b;">milesawayprintsllc@gmail.com</a>.
+    </p>
+  </body>
+</html>
