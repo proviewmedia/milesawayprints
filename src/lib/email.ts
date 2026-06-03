@@ -474,6 +474,115 @@ ${shippingHtml}
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Newsletter welcome — sent on signup with the 10% off promo code
+// ────────────────────────────────────────────────────────────────────────────
+
+interface NewsletterWelcomeArgs {
+  to: string;
+  promoCode: string;
+}
+
+export async function sendNewsletterWelcomeEmail({
+  to,
+  promoCode,
+}: NewsletterWelcomeArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set — skipping newsletter welcome');
+    return { skipped: true };
+  }
+
+  const html = wrapEmail({
+    preheader: `Welcome — your 10% off code is ${promoCode}`,
+    heading: 'Welcome to Miles Away.',
+    bodyHtml: `
+<p style="font-size: 15px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
+  Thanks for signing up. As a thank-you, here's <strong style="color: #0e0e0e;">10% off your first print</strong> — apply this code at checkout:
+</p>
+<div style="margin: 0 0 24px; padding: 20px 24px; background: #f5f3ef; border-radius: 12px; text-align: center;">
+  <p style="font-size: 11px; color: #6b6b6b; margin: 0 0 8px; letter-spacing: 0.12em; text-transform: uppercase;">Your code</p>
+  <p style="font-family: ui-monospace, SFMono-Regular, monospace; font-size: 22px; color: #0e0e0e; margin: 0; letter-spacing: 0.04em;">
+    ${escapeHtml(promoCode)}
+  </p>
+</div>
+<p style="font-size: 14px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
+  This code is good for one use and applies to your first order. We'll occasionally email when we add new prints or run a promotion — and never any spam.
+</p>`,
+    cta: {
+      label: 'Browse the shop',
+      // ?code= is read by /checkout's auto-apply logic — the discount
+      // shows up in the Stripe panel from the first render so the
+      // customer never has to copy/paste.
+      href: `${SITE_URL}/shop?code=${encodeURIComponent(promoCode)}`,
+    },
+  });
+
+  return resend.emails.send({
+    from: FROM,
+    to,
+    reply_to: REPLY_TO,
+    subject: `Welcome — here's 10% off your first print`,
+    html,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Stripe health alert — sent when the hourly cron probe fails
+// ────────────────────────────────────────────────────────────────────────────
+
+interface StripeAlertArgs {
+  errorMessage: string;
+}
+
+export async function sendStripeBrokenAlertEmail({ errorMessage }: StripeAlertArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set — skipping Stripe alert');
+    return { skipped: true };
+  }
+
+  const timestamp = new Date().toUTCString();
+
+  const html = wrapEmail({
+    preheader: 'Stripe API is failing on milesawayprints.com',
+    heading: 'Stripe API check failed',
+    bodyHtml: `
+<p style="font-size: 15px; color: #6b6b6b; margin: 0 0 16px; line-height: 1.6;">
+  The hourly health check at <code style="background:#f5f3ef;padding:1px 4px;border-radius:4px;">/api/health/stripe</code> failed. Customers may be unable to check out until this is fixed.
+</p>
+<div style="margin: 0 0 24px; padding: 16px 20px; background: #fff5f5; border-left: 3px solid #dc2626; border-radius: 4px;">
+  <p style="font-size: 11px; color: #6b6b6b; margin: 0 0 6px; letter-spacing: 0.1em; text-transform: uppercase;">Error</p>
+  <p style="font-family: ui-monospace, SFMono-Regular, monospace; font-size: 13px; color: #0e0e0e; margin: 0; word-break: break-word;">
+    ${escapeHtml(errorMessage)}
+  </p>
+</div>
+<p style="font-size: 13px; color: #6b6b6b; margin: 0 0 8px;">
+  <strong style="color:#0e0e0e;">Detected:</strong> ${escapeHtml(timestamp)}
+</p>
+<p style="font-size: 13px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
+  Most common cause: the live Stripe secret key was rotated or expired. Check Stripe Dashboard → API keys, then update <code style="background:#f5f3ef;padding:1px 4px;border-radius:4px;">STRIPE_SECRET_KEY</code> in Vercel and redeploy.
+</p>
+<table style="width: 100%; margin: 0 0 8px;">
+  <tr>
+    <td style="padding: 0 8px 0 0;">
+      <a href="https://dashboard.stripe.com/apikeys" style="display: inline-block; background: #0e0e0e; color: #ffffff; text-decoration: none; font-weight: 500; font-size: 14px; padding: 12px 20px; border-radius: 999px;">Stripe Dashboard →</a>
+    </td>
+    <td>
+      <a href="https://vercel.com/melvinxmorales-projects/milesawayprints/settings/environment-variables" style="display: inline-block; background: #f5f3ef; color: #0e0e0e; text-decoration: none; font-weight: 500; font-size: 14px; padding: 12px 20px; border-radius: 999px;">Vercel env vars →</a>
+    </td>
+  </tr>
+</table>`,
+  });
+
+  return resend.emails.send({
+    from: FROM,
+    to: SUPPORT_INBOX,
+    subject: '🚨 Stripe API is failing on milesawayprints.com',
+    html,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ────────────────────────────────────────────────────────────────────────────
 

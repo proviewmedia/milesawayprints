@@ -22,6 +22,9 @@ interface CartSnapshotItem {
   format: 'digital' | 'physical';
   size: string;
   priceCents: number;
+  /** Quantity per cart row. Legacy orders pre-dating this field default
+   *  to 1. */
+  quantity?: number;
   name: string;
   location: string;
   isGift?: boolean;
@@ -68,6 +71,22 @@ export async function POST(req: Request) {
 
       if (order.status === 'paid' || order.status === 'in_production' || order.status === 'shipped') {
         return NextResponse.json({ received: true, note: 'already processed' });
+      }
+
+      // Atomically claim the order before doing any fulfillment work.
+      // Stripe can deliver the same event more than once (retries / at-least-
+      // once delivery); the in-memory guard above is read-then-write and races.
+      // This compare-and-swap transitions only the exact status we just read,
+      // so concurrent deliveries can't both reach the Printful call below —
+      // exactly one wins the row, the rest short-circuit here.
+      const { data: claimed } = await admin
+        .from('orders')
+        .update({ status: 'paid' })
+        .eq('id', order.id)
+        .eq('status', order.status)
+        .select('id');
+      if (!claimed || claimed.length === 0) {
+        return NextResponse.json({ received: true, note: 'already claimed' });
       }
 
       const customerEmail = session.customer_details?.email ?? session.customer_email ?? 'unknown@placeholder.local';
@@ -153,7 +172,7 @@ export async function POST(req: Request) {
           if (!syncVariantId) continue;
           printfulItems.push({
             sync_variant_id: syncVariantId,
-            quantity: 1,
+            quantity: Math.max(1, it.quantity ?? 1),
             name: `${it.name} ${it.size}`,
           });
         }
@@ -227,15 +246,18 @@ export async function POST(req: Request) {
       // inline so the customer doesn't get two emails.
       try {
         const origin = new URL(req.url).origin;
-        const subtotalCents = cart.reduce((sum, it) => sum + (it.priceCents || 0), 0);
+        const subtotalCents = cart.reduce(
+          (sum, it) => sum + (it.priceCents || 0) * (it.quantity ?? 1),
+          0,
+        );
         const shippingCents = session.shipping_cost?.amount_subtotal ?? 0;
         const totalCents = session.amount_total ?? subtotalCents + shippingCents;
 
         const emailItems: OrderConfirmationItem[] = cart.map((it) => ({
-          name: it.name,
+          name: it.name + ((it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ''),
           format: it.format,
           size: it.format === 'physical' ? it.size : undefined,
-          priceCents: it.priceCents,
+          priceCents: it.priceCents * (it.quantity ?? 1),
           isGift: it.isGift,
         }));
 
@@ -297,6 +319,19 @@ export async function POST(req: Request) {
       }
       if (order.status === 'paid' || order.status === 'in_production' || order.status === 'shipped' || order.status === 'approved') {
         return NextResponse.json({ received: true, note: 'already processed' });
+      }
+
+      // Atomically claim the order — same CAS guard as the
+      // checkout.session.completed branch, so duplicate PaymentIntent
+      // deliveries can't double-submit to Printful.
+      const { data: claimed } = await admin
+        .from('orders')
+        .update({ status: 'paid' })
+        .eq('id', order.id)
+        .eq('status', order.status)
+        .select('id');
+      if (!claimed || claimed.length === 0) {
+        return NextResponse.json({ received: true, note: 'already claimed' });
       }
 
       // Customer info — Stripe Elements stores it on the charge
@@ -382,7 +417,7 @@ export async function POST(req: Request) {
         for (const it of galleryPhysical) {
           const v = variantMap.get(it.slug)?.[it.size];
           if (!v) continue;
-          printfulItems.push({ sync_variant_id: v, quantity: 1, name: `${it.name} ${it.size}` });
+          printfulItems.push({ sync_variant_id: v, quantity: Math.max(1, it.quantity ?? 1), name: `${it.name} ${it.size}` });
         }
         // Marathons → admin email notification (manual fulfillment).
         const marathonNotify = await notifyMarathonOrder({

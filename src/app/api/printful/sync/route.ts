@@ -155,39 +155,64 @@ export async function POST() {
         svs[0]?.product?.image ??
         null;
 
-      // Upsert by printful_product_id. The slug is regenerated from the
-      // current Printful product name on every sync, so renaming a product
-      // (e.g. "Los Angeles" → "Los Angeles, California") updates the
-      // existing row in place instead of inserting a stale duplicate.
-      const { error: upErr, data: existing } = await admin
+      // Branch on existing row so we never clobber user-set retail prices.
+      // - New product (no row with this printful_product_id): INSERT with
+      //   Printful's default retail as the initial price map.
+      // - Existing product: UPDATE everything that mirrors Printful's
+      //   source of truth (slug, name, image, variant IDs) but PRESERVE
+      //   printful_prices — those are the retail prices the operator has
+      //   standardized in Supabase. Resyncing must not undo manual price
+      //   work (which is what happened on 2026-05-21 when bringing in
+      //   Pebble Beach + St. Andrews silently reset every product's
+      //   retail to Printful's defaults).
+      const { data: existingRow } = await admin
         .from('gallery_items')
-        .upsert(
-          {
+        .select('id')
+        .eq('printful_product_id', String(sp.id))
+        .maybeSingle();
+
+      let upErr: { message: string } | null = null;
+      if (existingRow) {
+        const { error } = await admin
+          .from('gallery_items')
+          .update({
             slug,
             print_type_slug: type,
             name: parsed.name,
             location: parsed.location || '—',
             image_url: image,
-            values: {},
-            printful_product_id: String(sp.id),
             printful_variants: variantMap,
             printful_catalog_variants: catalogVariantMap,
-            printful_prices: priceMap,
+            // printful_prices intentionally omitted — see comment above
             active: true,
-            featured: false,
-            sort_order: 0,
-          },
-          { onConflict: 'printful_product_id' },
-        )
-        .select('id')
-        .single();
+          })
+          .eq('printful_product_id', String(sp.id));
+        upErr = error;
+      } else {
+        const { error } = await admin.from('gallery_items').insert({
+          slug,
+          print_type_slug: type,
+          name: parsed.name,
+          location: parsed.location || '—',
+          image_url: image,
+          values: {},
+          printful_product_id: String(sp.id),
+          printful_variants: variantMap,
+          printful_catalog_variants: catalogVariantMap,
+          printful_prices: priceMap,
+          active: true,
+          featured: false,
+          sort_order: 0,
+        });
+        upErr = error;
+      }
 
       if (upErr) {
         report.push({ name: parsed.name, action: 'skipped', slug, type, sizes: sizesFound, reason: upErr.message });
       } else {
         report.push({
           name: parsed.name,
-          action: existing ? 'updated' : 'created',
+          action: existingRow ? 'updated' : 'created',
           slug,
           type,
           sizes: sizesFound,

@@ -16,6 +16,11 @@ interface CheckoutBody {
     state?: string;
     zip?: string;
   };
+  /** Customer-facing promotion code string (e.g. "WELCOME10").
+   *  Resolved server-side to a Stripe `promotion_code` ID before passing
+   *  into the session. Silently ignored if the code is unknown or
+   *  inactive — keeps the cart flow uninterrupted. */
+  promoCode?: string;
 }
 
 export async function POST(req: Request) {
@@ -67,7 +72,7 @@ export async function POST(req: Request) {
     //   txcd_99999999 — General Tangible Personal Property (physical goods)
     //   txcd_10000000 — Electronically Supplied Services (digital downloads)
     const line_items = items.map((it) => ({
-      quantity: 1,
+      quantity: Math.max(1, it.quantity ?? 1),
       price_data: {
         currency: 'usd',
         unit_amount: it.priceCents,
@@ -83,22 +88,31 @@ export async function POST(req: Request) {
             type: it.type,
             format: it.format,
             size: it.size,
+            quantity: String(it.quantity ?? 1),
             isGift: it.isGift ? '1' : '0',
           },
         },
       },
     }));
 
-    const totalCents = items.reduce((acc, it) => acc + it.priceCents, 0);
+    const totalCents = items.reduce(
+      (acc, it) => acc + it.priceCents * (it.quantity ?? 1),
+      0,
+    );
     const first = items[0];
 
     // Per-item regional shipping with size-band surcharges (volumetric).
     // Each item gets a tube size — small / medium / large — based on its
     // print size; the largest tube in the cart sets the base rate, and
     // every additional item adds its own per-band per-item bump.
+    // Multi-quantity items count each unit toward the bump tier so a
+    // single "3 × 16x20" expands to three size bands for pricing.
     const physicalItems = items.filter((it) => it.format === 'physical');
+    const shippingSizes = physicalItems.flatMap((it) =>
+      Array.from({ length: it.quantity ?? 1 }, () => it.size),
+    );
     const shippingCents = physicalItems.length > 0
-      ? shippingForCart(body.shipping?.country, physicalItems.map((it) => it.size))
+      ? shippingForCart(body.shipping?.country, shippingSizes)
       : 0;
     const shippingMethodName = 'Standard shipping';
     const shippingDeliveryEstimate: { min: number; max: number } | null =
@@ -134,6 +148,7 @@ export async function POST(req: Request) {
       format: it.format,
       size: it.size,
       priceCents: it.priceCents,
+      quantity: it.quantity ?? 1,
       name: it.name,
       location: it.location,
       isGift: it.isGift ?? false,
@@ -141,10 +156,29 @@ export async function POST(req: Request) {
       customization: it.customization ?? null,
     }));
 
+    // Resolve customer-facing promo code (e.g. "WELCOME10") into
+    // Stripe's internal `promotion_code` ID. Silent failure: an unknown
+    // or expired code simply falls through to the manual-entry UX.
+    let promotionCodeId: string | undefined;
+    if (body.promoCode) {
+      const codes = await stripe.promotionCodes.list({
+        code: body.promoCode,
+        active: true,
+        limit: 1,
+      });
+      promotionCodeId = codes.data[0]?.id;
+    }
+
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       mode: 'payment',
       line_items,
+      // Auto-apply the resolved promo code if we have one, otherwise
+      // expose the manual "Add promotion code" link so customers can
+      // paste a code from email.
+      ...(promotionCodeId
+        ? { discounts: [{ promotion_code: promotionCodeId }] }
+        : { allow_promotion_codes: true }),
       // Stripe Tax disabled — we're below nexus thresholds in every
       // state and not registered anywhere yet, so tax would show as
       // $0 to the customer (confusing). Re-enable this AND add the
