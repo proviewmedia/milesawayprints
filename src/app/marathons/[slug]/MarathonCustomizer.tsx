@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Truck, Gift } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { ArrowRight, Check, Truck, Gift } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import {
   MARATHON_SIZES,
@@ -19,17 +20,47 @@ interface Props {
   halfSvg: string | null;
 }
 
+function splitFinish(t: string | null): [string, string, string] {
+  if (!t) return ['', '', ''];
+  const parts = t.split(':');
+  return [parts[0] ?? '', parts[1] ?? '', parts[2] ?? ''];
+}
+
 export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props) {
   const { addItem } = useCart();
+  // Read URL params once at mount so the admin's "Build print file" deep
+  // link from /admin/orders/<token> lands here with every field already
+  // filled in, ready to export the PDF for Printful upload.
+  const searchParams = useSearchParams();
+  const initial = useMemo(() => {
+    const variantParam = (searchParams.get('variant') as MarathonVariant | null) ?? null;
+    const [h, m, s] = splitFinish(searchParams.get('finishTime'));
+    return {
+      variant: variantParam === 'half' || variantParam === 'full' ? variantParam : null,
+      bib: searchParams.get('bib') ?? '',
+      firstName: searchParams.get('firstName') ?? '',
+      lastName: searchParams.get('lastName') ?? '',
+      raceDate: searchParams.get('raceDate') ?? '',
+      finishHours: h,
+      finishMinutes: m,
+      finishSeconds: s,
+      size: searchParams.get('size') ?? '',
+    };
+    // Intentional one-shot: only honor params on first render so the form
+    // is editable afterwards without URL re-syncing weirdness.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const [variant, setVariant] = useState<MarathonVariant>(fullSvg ? 'full' : 'half');
-  const [bib, setBib] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [raceDate, setRaceDate] = useState('');
-  const [finishHours, setFinishHours] = useState('');
-  const [finishMinutes, setFinishMinutes] = useState('');
-  const [finishSeconds, setFinishSeconds] = useState('');
+  const defaultVariant: MarathonVariant =
+    initial.variant ?? (fullSvg ? 'full' : 'half');
+  const [variant, setVariant] = useState<MarathonVariant>(defaultVariant);
+  const [bib, setBib] = useState(initial.bib);
+  const [firstName, setFirstName] = useState(initial.firstName);
+  const [lastName, setLastName] = useState(initial.lastName);
+  const [raceDate, setRaceDate] = useState(initial.raceDate);
+  const [finishHours, setFinishHours] = useState(initial.finishHours);
+  const [finishMinutes, setFinishMinutes] = useState(initial.finishMinutes);
+  const [finishSeconds, setFinishSeconds] = useState(initial.finishSeconds);
   const finishTime = useMemo(() => {
     if (!finishHours && !finishMinutes && !finishSeconds) return '';
     const pad = (s: string) => s.padStart(2, '0');
@@ -37,10 +68,12 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
   }, [finishHours, finishMinutes, finishSeconds]);
   const [size, setSize] = useState<string>(() => {
     const sizes = Object.keys(marathon.printful_prices ?? {});
+    if (initial.size && sizes.includes(initial.size)) return initial.size;
     return sizes.includes('16x20') ? '16x20' : sizes[0] ?? '11x14';
   });
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
+  const [added, setAdded] = useState(false);
 
   const svgWrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -112,11 +145,20 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
       format: 'physical',
       size,
       priceCents,
+      // Marathon items are unique per personalization — quantity stays
+      // at 1. If a customer wants two, they go through the customizer
+      // again so each gift can have its own bib/name/etc.
+      quantity: 1,
+      // Show the marathon poster in the cart instead of falling back to
+      // the generic PrintPreview placeholder.
+      imageUrl: marathon.thumbnail_path ?? undefined,
       isCustom: true,
       customization,
       isGift,
       giftMessage: isGift ? giftMessage : undefined,
     });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
   };
 
   const formValid = useMemo(
@@ -173,7 +215,7 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
 
             {/* Variant toggle */}
             <div className="mb-6">
-              <div className="text-xs font-semibold text-ink mb-2">Race</div>
+              <div className="text-sm font-semibold text-ink mb-2">Race</div>
               <div className="grid grid-cols-2 gap-2">
                 <VariantOption
                   active={variant === 'full'}
@@ -225,10 +267,13 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
                 onChange={setRaceDate}
               />
               <div>
-                <label className="block text-xs font-semibold text-ink mb-1.5">
+                <label className="block text-sm font-semibold text-ink mb-1.5">
                   Finish time <span className="text-coral">*</span>
                 </label>
-                <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
+                {/* Mobile: simple 3-col grid (no visual colon separators
+                    — the placeholders HH/MM/SS already convey the format).
+                    Tablet+: revert to the original colon-separated layout. */}
+                <div className="grid grid-cols-3 sm:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2">
                   <input
                     inputMode="numeric"
                     pattern="[0-9]*"
@@ -239,7 +284,7 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
                     value={finishHours}
                     onChange={(e) => setFinishHours(e.target.value.replace(/\D/g, '').slice(0, 2))}
                   />
-                  <span className="text-mid font-semibold">:</span>
+                  <span className="hidden sm:inline text-mid font-semibold" aria-hidden="true">:</span>
                   <input
                     inputMode="numeric"
                     pattern="[0-9]*"
@@ -250,7 +295,7 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
                     value={finishMinutes}
                     onChange={(e) => setFinishMinutes(e.target.value.replace(/\D/g, '').slice(0, 2))}
                   />
-                  <span className="text-mid font-semibold">:</span>
+                  <span className="hidden sm:inline text-mid font-semibold" aria-hidden="true">:</span>
                   <input
                     inputMode="numeric"
                     pattern="[0-9]*"
@@ -267,7 +312,7 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
 
             {/* Size picker */}
             <div className="mb-6">
-              <div className="text-xs font-semibold text-ink mb-2">Size</div>
+              <div className="text-sm font-semibold text-ink mb-2">Size</div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                 {MARATHON_SIZES.filter((s) =>
                   Object.prototype.hasOwnProperty.call(marathon.printful_prices, s.value),
@@ -327,9 +372,22 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
               <button
                 onClick={handleAddToCart}
                 disabled={!formValid}
-                className="inline-flex items-center gap-2 bg-white text-ink px-6 py-3 rounded-full text-sm font-semibold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-live="polite"
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  added
+                    ? 'bg-mint text-paper'
+                    : 'bg-white text-ink hover:bg-primary hover:text-white'
+                }`}
               >
-                Add to Cart <ArrowRight size={14} />
+                {added ? (
+                  <>
+                    <Check size={14} strokeWidth={2} aria-hidden="true" /> Added
+                  </>
+                ) : (
+                  <>
+                    Add to Cart <ArrowRight size={14} aria-hidden="true" />
+                  </>
+                )}
               </button>
             </div>
             {!formValid && (
@@ -390,7 +448,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-ink mb-1.5">
+      <label className="block text-sm font-semibold text-ink mb-1.5">
         {label} {required && <span className="text-coral">*</span>}
       </label>
       <input

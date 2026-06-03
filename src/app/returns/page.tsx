@@ -6,9 +6,10 @@ import PolicySection from '@/components/PolicySection';
 import PolicyCTA from '@/components/PolicyCTA';
 
 export const metadata: Metadata = {
-  title: 'Returns',
+  title: 'Damage & replacement policy',
   description:
-    'Made-to-order means we can\'t take returns once a print is produced. Refunds before production and replacements for damage — full policy.',
+    'Every print is made to order — all sales are final. If anything arrives damaged or misprinted, we replace it free within 14 days.',
+  alternates: { canonical: '/returns' },
 };
 
 export default function ReturnsPage() {
@@ -19,12 +20,12 @@ export default function ReturnsPage() {
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">
           <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.05] mb-4">
-            Returns.
+            Damage &amp; replacement policy.
           </h1>
           <p className="text-mid text-base md:text-lg leading-relaxed max-w-xl">
-            Every print is made to order, so we can&apos;t take returns once one
-            has been produced. We can refund any order that hasn&apos;t been sent
-            to the printer yet, and we replace anything that arrives damaged.
+            Every print is made to order, so all sales are final — there are no
+            returns. If anything arrives damaged or misprinted, we replace it
+            free within 14 days. No need to ship anything back.
           </p>
         </div>
       </section>
@@ -35,10 +36,10 @@ export default function ReturnsPage() {
             <strong>Important:</strong> once an order moves from{' '}
             <em>paid</em> to <em>in production</em>, the printer has accepted
             the file and started work. We can&apos;t cancel or refund after that
-            point.
+            point. Reach out fast if you spot an issue with what you ordered.
           </div>
 
-          <PolicySection title="Refund window — before production">
+          <PolicySection title="Canceling before production starts">
             <p>
               If your order is still showing <strong className="text-ink">paid</strong> on your{' '}
               <Link href="/account" className="text-ink underline underline-offset-2">
@@ -59,13 +60,14 @@ export default function ReturnsPage() {
             </p>
           </PolicySection>
 
-          <PolicySection title="Damaged in transit">
+          <PolicySection title="Damaged or misprinted">
             <p>
-              Things happen in shipping. If your print arrives damaged, email us
-              within <strong className="text-ink">14 days</strong> of the
-              shipping notification with photos of the damage and the
-              packaging. We&apos;ll send a free replacement or refund the order
-              in full — your call.
+              Things happen in shipping. If your print arrives damaged or
+              misprinted, email us within{' '}
+              <strong className="text-ink">14 days</strong> of the shipping
+              notification with photos of the damage and the packaging.
+              We&apos;ll send a free replacement at no cost — no need to ship
+              anything back.
             </p>
           </PolicySection>
 
@@ -77,26 +79,17 @@ export default function ReturnsPage() {
             </p>
           </PolicySection>
 
-          <PolicySection title="Buyer's remorse">
+          <PolicySection title="Change of mind">
             <p>
-              Made-to-order prints can&apos;t be resold, so we don&apos;t accept
-              returns for change-of-mind. If you&apos;re uncertain about size or
-              format, message us before you order — we&apos;d rather help you
-              pick than process a no-go return that won&apos;t happen.
+              Because every print is custom-made for you specifically, we
+              don&apos;t accept change-of-mind cancellations after production
+              starts. If you&apos;re unsure about size or details, message us
+              before you order — we&apos;d rather help you pick the right one
+              upfront than disappoint after.
             </p>
           </PolicySection>
 
-          <PolicySection title="Digital downloads">
-            <p>
-              Once a digital download link is delivered to your email, the
-              product has been delivered. <strong className="text-ink">Digital
-              downloads are not refundable.</strong> If there&apos;s a technical
-              issue accessing the file, email us — we&apos;ll get the file to
-              you another way.
-            </p>
-          </PolicySection>
-
-          <PolicySection title="How to start a return or refund">
+          <PolicySection title="How to get a replacement">
             <p>
               Email{' '}
               <a
@@ -109,8 +102,8 @@ export default function ReturnsPage() {
             </p>
             <ul className="list-disc list-inside text-mid space-y-1.5 ml-2">
               <li>Your order number</li>
-              <li>What&apos;s wrong (or what you&apos;d like to do)</li>
-              <li>Photos if it&apos;s a damage or wrong-item issue</li>
+              <li>What&apos;s wrong with the item</li>
+              <li>Photos of the damage, misprint, or wrong item</li>
             </ul>
             <p className="text-mid">
               We aim to respond within 24–48 hours, M–F.

@@ -38,7 +38,9 @@
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-border rounded-lg font-sans text-sm font-normal text-ink
+    /* text-base (16px) prevents iOS Safari from auto-zooming on focus.
+       Anything smaller forces a viewport zoom that bumps form abandonment. */
+    @apply w-full px-4 py-3 border border-border rounded-lg font-sans text-base font-normal text-ink
            outline-none transition-colors duration-200 placeholder:text-light-mid
            focus:border-ink;
   }

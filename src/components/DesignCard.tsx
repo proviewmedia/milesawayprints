@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import WallFrame from './WallFrame';
 import PrintPreview from './PrintPreview';
-import { DesignSummary, DEFAULT_DIGITAL_PRICE_CENTS } from '@/data/shop';
+import { DesignSummary } from '@/data/shop';
 import { PRINT_CONFIGS } from '@/data/prints';
 
 interface Props {
@@ -14,11 +14,9 @@ interface Props {
 }
 
 export default function DesignCard({ design }: Props) {
-  // Cheapest of digital or smallest physical for "From $X"
-  const digital = (design.digital_price_cents ?? DEFAULT_DIGITAL_PRICE_CENTS) / 100;
+  // "From $X" — physical only. Digital is no longer sold.
   const physicalPrices = Object.values(design.printful_prices ?? {}).map((c) => c / 100);
-  const cheapestPhysical = physicalPrices.length ? Math.min(...physicalPrices) : Infinity;
-  const fromPrice = Math.min(digital, cheapestPhysical);
+  const fromPrice = physicalPrices.length ? Math.min(...physicalPrices) : 0;
 
   const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? '';
 
@@ -38,7 +36,10 @@ export default function DesignCard({ design }: Props) {
   const isMarathon = design.type === 'marathon';
 
   return (
-    <Link href={href} className="group block">
+    <Link
+      href={href}
+      className="group block transition-shadow duration-300 rounded-sm hover:shadow-[0_12px_28px_-12px_rgba(14,14,14,0.14)]"
+    >
       {/* Image tile.
           - Marathon items: render the supplied PNG poster contained inside
             a matted, drop-shadowed frame. Tile aspect matches the other
@@ -81,8 +82,8 @@ export default function DesignCard({ design }: Props) {
       <div className="mt-4">
         <div className="text-[15px] text-ink truncate">{design.name}</div>
         <div className="text-[13px] text-mid mt-0.5 truncate">{typeLabel}</div>
-        <div className="text-[13px] text-ink mt-1.5">
-          <span className="text-mid">From</span> ${fromPrice}
+        <div className="text-[13px] text-ink font-medium mt-1.5">
+          <span className="text-mid font-normal">From</span> ${fromPrice}
         </div>
       </div>
     </Link>

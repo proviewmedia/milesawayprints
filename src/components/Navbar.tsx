@@ -18,13 +18,15 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Top utility bar — country + About only */}
+      {/* Top utility bar — current campaign promo. Visible on mobile +
+          desktop. Move About to the footer. */}
       <div className="bg-ink text-paper text-xs">
-        <div className="max-w-[1400px] mx-auto px-6 py-1.5 flex items-center justify-between">
-          <span className="hidden md:inline opacity-90">{defaultCountry}</span>
-          <span className="md:hidden" />
-          <Link href="/about" className="hidden md:inline opacity-90 hover:opacity-100">
-            About
+        <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-center">
+          <Link
+            href="/gifts/fathers-day"
+            className="opacity-90 hover:opacity-100 text-center"
+          >
+            Father&apos;s Day golf prints available — Pebble Beach, St. Andrews &amp; more →
           </Link>
         </div>
       </div>
@@ -66,15 +68,26 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
 
             <button
               onClick={open}
-              aria-label="Open cart"
+              aria-label={count > 0 ? `Open cart, ${count} item${count === 1 ? '' : 's'}` : 'Open cart'}
               className="relative w-10 h-10 rounded-full hover:bg-soft flex items-center justify-center transition-colors"
             >
-              <ShoppingBag size={18} strokeWidth={1.75} className="text-ink" />
+              <ShoppingBag size={18} strokeWidth={1.75} className="text-ink" aria-hidden="true" />
               {count > 0 && (
-                <span className="absolute top-1 right-1 min-w-[16px] h-[16px] bg-ink text-paper text-[10px] font-medium rounded-full flex items-center justify-center px-1">
+                <span
+                  aria-hidden="true"
+                  className="absolute top-1 right-1 min-w-[16px] h-[16px] bg-ink text-paper text-[10px] font-medium rounded-full flex items-center justify-center px-1"
+                >
                   {count}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={openSearch}
+              aria-label="Search"
+              className="md:hidden w-10 h-10 rounded-full hover:bg-soft flex items-center justify-center transition-colors"
+            >
+              <Search size={18} strokeWidth={1.75} className="text-ink" />
             </button>
 
             <button

@@ -1,10 +1,17 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { createAdminClient } from '@/lib/supabase';
 import { loadSvgFromPublic } from '@/lib/marathon-svg';
 import type { MarathonRow } from '@/data/marathons';
 import MarathonCustomizer from './MarathonCustomizer';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
+import {
+  breadcrumbJsonLd,
+  productJsonLd as buildProductJsonLd,
+} from '@/lib/seo';
+import { getReviewData } from '@/lib/reviews';
+import type { PrintType } from '@/data/prints';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +21,7 @@ interface Props {
 
 // Use the admin client — this is a server-only page and we want a direct
 // read regardless of any RLS policy state on the marathons table.
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const admin = createAdminClient();
   const { data } = await admin
     .from('marathons')
@@ -23,9 +30,26 @@ export async function generateMetadata({ params }: Props) {
     .eq('active', true)
     .maybeSingle();
   if (!data) return { title: 'Marathon — Miles Away Prints' };
+  const title = `${data.city} Marathon Print | Miles Away Prints`;
+  const description = `Custom ${data.city} Marathon and Half Marathon prints — personalized with your name, bib, finish time, and race date.`;
+  const ogImageUrl = `/api/og/marathon/${params.slug}`;
   return {
-    title: `${data.city} Marathon Print | Miles Away Prints`,
-    description: `Custom ${data.city} Marathon and Half Marathon prints — personalized with your name, bib, finish time, and race date.`,
+    title,
+    description,
+    alternates: { canonical: `/marathons/${params.slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `/marathons/${params.slug}`,
+      type: 'website',
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: `${data.city} Marathon Print` }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImageUrl],
+    },
   };
 }
 
@@ -50,6 +74,36 @@ export default async function MarathonPage({ params }: Props) {
     marathon.half_svg_path ? safeLoad(marathon.half_svg_path) : Promise.resolve(null),
   ]);
 
+  const prices = marathon.printful_prices ?? {};
+  const offers = Object.entries(prices).map(([size, cents]) => ({
+    name: `${marathon.city} Marathon Print — ${size}`,
+    priceCents: cents,
+  }));
+
+  // Reviews use the same site-wide fallback as skylines (no per-marathon
+  // reviews yet). Clears the Google "Missing review/aggregateRating"
+  // warnings on this URL.
+  const { aggregateRating, reviews } = await getReviewData('marathon' as PrintType);
+
+  const productLd = buildProductJsonLd({
+    name: `${marathon.city} Marathon Print`,
+    description: `Custom ${marathon.city} Marathon (Full + Half) prints — personalized with your name, bib, finish time, and race date.`,
+    imageUrl: marathon.thumbnail_path
+      ? `https://www.milesawayprints.com${marathon.thumbnail_path}`
+      : undefined,
+    url: `/marathons/${marathon.slug}`,
+    category: 'Marathon Print',
+    offers,
+    aggregateRating,
+    reviews,
+  });
+
+  const breadcrumbsLd = breadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'Marathons', url: '/prints/marathon' },
+    { name: `${marathon.city} Marathon`, url: `/marathons/${marathon.slug}` },
+  ]);
+
   return (
     <main className="bg-paper min-h-screen">
       {/* The marathon SVG templates were drawn in Josefin Sans. Load it on
@@ -57,6 +111,14 @@ export default async function MarathonPage({ params }: Props) {
       <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;700&display=swap"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }}
       />
       <NavbarShell />
       <MarathonCustomizer marathon={marathon} fullSvg={fullSvg} halfSvg={halfSvg} />

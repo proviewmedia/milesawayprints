@@ -15,6 +15,11 @@ export interface GalleryItem {
   values: Record<string, string>;
 }
 
+export interface PrintFaq {
+  q: string;
+  a: string;
+}
+
 export interface PrintConfig {
   type: PrintType;
   slug: string;
@@ -29,7 +34,32 @@ export interface PrintConfig {
   defaults: Record<string, string>;
   seoTitle: string;
   seoDescription: string;
+  /** SEO lede paragraph displayed at the top of /prints/[type]. */
+  lede: string;
+  /** 2-3 short paragraphs displayed in the "Why" section of /prints/[type]. */
+  whyCopy: string[];
+  /** Per-type FAQ used for both rendered content + FAQPage JSON-LD. */
+  faqs: PrintFaq[];
 }
+
+const SHARED_FAQS: PrintFaq[] = [
+  {
+    q: 'What sizes are available?',
+    a: '8×10, 11×14, 12×16, 16×20, 18×24, and 24×36 inches. Smaller sizes fit a shelf or desk; 16×20 and up are statement pieces for a wall.',
+  },
+  {
+    q: 'How long does shipping take?',
+    a: 'Made-to-order prints leave the printer in 3–5 business days. U.S. delivery adds another 3–5 business days; Canada and Europe 5–10; rest of the world 10–20. Digital downloads arrive instantly by email.',
+  },
+  {
+    q: 'Can I customize the title or details?',
+    a: 'Yes — every print is personalized. Pick the location, add a title, name, or date, and we render the artwork live so you see exactly what ships.',
+  },
+  {
+    q: 'How is the print made?',
+    a: 'Printed on archival fine-art paper through our fulfillment partner Printful. Up to 16×20 ships flat in a rigid mailer; 18×24 and larger ships rolled in a protective tube. Packaging is recyclable.',
+  },
+];
 
 export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
   golf: {
@@ -51,8 +81,21 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     ],
     statLabels: ['Length', 'Par', 'Rating'],
     defaults: { name: 'Custom Golf Course', location: 'Location', stat1: '7,040 yds', stat2: '72', stat3: '73.5' },
-    seoTitle: 'Custom Golf Course Art Print | Personalized Golf Gift',
-    seoDescription: 'Create a custom golf course art print with your favorite course. Personalized with course name, location, and stats. Digital download or museum-quality physical print.',
+    seoTitle: 'Custom Golf Course Art Prints — Pebble Beach, St. Andrews & More',
+    seoDescription: 'Custom golf course art prints — Pebble Beach Golf Links, Old Course at St. Andrews, TPC Sawgrass, Tokyo Golf Course, Quintero, Coeur d\'Alene. Personalized with course name, location, and stats. Made-to-order on archival paper.',
+    lede: "Pebble Beach. Old Course at St. Andrews. TPC Sawgrass. And your home course in the suburbs. Custom golf course prints rendered from real course data — every fairway, green, and bunker drawn with precision.",
+    whyCopy: [
+      "Built from real course maps, not generic clip art. Pebble Beach Golf Links on the California coast. Old Course at St. Andrews — the literal birthplace of golf in Scotland. TPC Sawgrass with the legendary 17th island green. Every layout is faithful to the actual course, drawn from public course data and rendered with precision.",
+      "Personalize it with course name, location, yardage, par, and rating. Print it to mark a milestone round, a hole-in-one, a course you traveled across the country to play, or as the rare Father's Day gift that actually earns wall space.",
+      "Printed on archival fine-art paper, packaged carefully, and shipped worldwide. Don't see your home course? Contact us — we can build it from public course data and add it to the catalog.",
+    ],
+    faqs: [
+      {
+        q: 'Can I order a print of my home course?',
+        a: 'Yes — request any course in the world. If we don\'t have it pre-mapped, contact us and we\'ll build it from public course data.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
   stadium: {
     type: 'stadium',
@@ -75,6 +118,19 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     defaults: { name: 'Custom Stadium', location: 'Location', stat1: '54,251', stat2: '2009', stat3: '40.8296° N' },
     seoTitle: 'Custom Stadium Art Print | Personalized Sports Gift',
     seoDescription: 'Create a custom stadium art print of your favorite venue. Personalized with stadium name, capacity, and location. Digital download or museum-quality print.',
+    lede: 'Custom stadium art prints of the ballparks, arenas, and pitches you love. Drawn from above in minimalist line work — Yankee Stadium, Fenway, Wrigley, and any venue you request.',
+    whyCopy: [
+      'Stadiums are sacred to fans. We render the architecture, the seat bowl, and the field with the same care as the games played inside.',
+      'Personalize it with the stadium name, opened-year, capacity, and coordinates. Perfect for season-ticket holders, opening-day memories, or rookie-card-collector dads.',
+      'Museum-quality archival paper. Digital file or physical print, shipped worldwide.',
+    ],
+    faqs: [
+      {
+        q: 'Which stadiums do you cover?',
+        a: 'MLB, NFL, NBA, NHL, MLS, NCAA, Premier League, La Liga, Bundesliga, and more. We can also build any minor-league or college venue on request.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
   airport: {
     type: 'airport',
@@ -97,6 +153,19 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     defaults: { name: 'Custom Airport', location: 'City, State', stat1: 'IATA', stat2: '4', stat3: '128 ft' },
     seoTitle: 'Custom Airport Map Print | Aviation Wall Art',
     seoDescription: 'Create a custom airport map print showing runways and terminals. Personalized with airport name and details. Digital download or museum-quality print.',
+    lede: 'Custom airport map prints — every runway, taxiway, and terminal in minimalist line work. From LAX and JFK to your hometown regional, drawn faithfully from real aviation data.',
+    whyCopy: [
+      'For pilots, frequent flyers, aviation geeks, and anyone with a sense of place tied to a particular airport. We map every runway and taxiway from FAA / AIP data.',
+      'Personalize it with the IATA code, runway count, and elevation. A great gift for first solos, retirements, or the family member always on a plane.',
+      'Printed on archival paper. Digital download or physical print, shipped worldwide.',
+    ],
+    faqs: [
+      {
+        q: 'Which airports do you have?',
+        a: 'Every IATA-coded commercial airport worldwide, plus most regional and general aviation fields. If you don\'t see yours, request it.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
   marathon: {
     type: 'marathon',
@@ -119,6 +188,23 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     defaults: { name: 'Marathon Name', location: 'Date', stat1: '3:45:22', stat2: '26.2', stat3: '8:35/mi' },
     seoTitle: 'Custom Marathon Map Print | Personalized Runner Gift',
     seoDescription: 'Create a custom marathon route map print. Personalized with race name, finish time, and pace. The perfect gift for runners. Digital or physical print.',
+    lede: 'Custom marathon prints celebrating every mile. The actual race route, personalized with your name, bib number, finish time, and date. Las Vegas, Chicago, Boston, NYC — and more.',
+    whyCopy: [
+      'Built race-by-race from the real course. The route on the print is the route you ran — not a generic loop.',
+      'Personalized live: your name, bib number, finish time, race date. Type, see, ship. The way every commemorative print should work.',
+      'Marathon prints are hand-built by us, not auto-generated. Ships in 5 business days; expect 8–12 days door-to-door.',
+    ],
+    faqs: [
+      {
+        q: 'Which marathons do you offer?',
+        a: 'Currently Las Vegas (Full + Half) and Chicago, with more added each season. If your race isn\'t listed, contact us — we add new courses based on demand.',
+      },
+      {
+        q: 'Can I order before I run the race?',
+        a: 'Yes — many runners pre-order with their goal time, then we ship after the race so the finish time prints correctly. Just email us your actual chip time.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
   city: {
     type: 'city',
@@ -141,6 +227,19 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     defaults: { name: 'Your City', location: 'Country', stat1: '37.77° N', stat2: '122.42° W', stat3: '1776' },
     seoTitle: 'Custom City Street Map Print | Personalized Map Art',
     seoDescription: 'Create a custom city street map print of any city in the world. Personalized with coordinates and details. Digital download or museum-quality print.',
+    lede: 'Custom city street map prints — the streets that tell your story. Any city in the world, beautifully rendered with your personal coordinates and a title of your choice.',
+    whyCopy: [
+      'Streets-only minimalist style. We render the road network with elegant linework, no clutter, no logos — just the city you love.',
+      'Personalize the title (your favorite neighborhood, anniversary date, an inside joke) and the coordinates. Great for housewarmings, weddings, and where-we-met memorabilia.',
+      'Printed on archival paper. Digital download or physical print, shipped worldwide.',
+    ],
+    faqs: [
+      {
+        q: 'Which cities can you do?',
+        a: 'Any city in the world with OpenStreetMap coverage. From major capitals down to small towns and villages.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
   skyline: {
     type: 'skyline',
@@ -163,6 +262,19 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     defaults: { name: 'City Skyline', location: 'Country', stat1: '—', stat2: '—', stat3: '—' },
     seoTitle: 'City Skyline Art Print | Minimalist Skyline Poster',
     seoDescription: 'City skyline prints of iconic cities around the world — minimalist silhouette posters. Digital download or museum-quality print.',
+    lede: 'Iconic city skylines in minimalist silhouette. New York, Chicago, Paris, Tokyo, and dozens more — each rendered as a clean profile against an open sky.',
+    whyCopy: [
+      'A skyline is shorthand for a city. We draw each one as a sharp silhouette, no clutter, faithful to the actual buildings.',
+      'Personalize the city name and details — population, founded date, coordinates. Hang it solo or build a gallery wall of cities you\'ve loved.',
+      'Printed on archival paper. Available as a digital download or physical print.',
+    ],
+    faqs: [
+      {
+        q: 'Which cities are available?',
+        a: 'Major U.S. and international cities. If you don\'t see yours in the shop, request it — we add new skylines based on demand.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
   f1: {
     type: 'f1',
@@ -185,6 +297,19 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     defaults: { name: 'Grand Prix', location: 'Circuit', stat1: '—', stat2: '—', stat3: '—' },
     seoTitle: 'F1 Circuit Art Print | Grand Prix Track Poster',
     seoDescription: 'F1 Grand Prix circuit art prints — the legendary tracks of Formula 1. Digital download or museum-quality print.',
+    lede: 'F1 Grand Prix circuit prints — the legendary layouts of Formula 1. Monaco, Silverstone, Suzuka, Spa, COTA, and every track on the calendar, rendered with precision.',
+    whyCopy: [
+      'Built from real track data. Every corner, every chicane, every DRS zone — drawn to scale so you can actually trace the racing line.',
+      'Personalized with the race name, circuit length, lap count, and first-held year. The perfect gift for the F1 fan or paddock-pass dreamer in your life.',
+      'Museum-quality print or instant digital download. Ships worldwide.',
+    ],
+    faqs: [
+      {
+        q: 'Which tracks do you have?',
+        a: 'Every current and most historic F1 circuits — Monaco, Silverstone, Suzuka, Monza, Spa, COTA, Imola, Interlagos, Yas Marina, and more.',
+      },
+      ...SHARED_FAQS,
+    ],
   },
 };
 

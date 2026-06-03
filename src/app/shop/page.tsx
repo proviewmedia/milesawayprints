@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { unstable_noStore as noStore } from 'next/cache';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import ShopClient from './ShopClient';
@@ -18,6 +19,12 @@ export const dynamic = 'force-dynamic';
 // silently truncating responses in production for reasons we couldn't
 // reproduce locally; admin client sidesteps any RLS / proxy oddities.
 async function getAllDesigns(): Promise<DesignSummary[]> {
+  // Bypass Next.js fetch cache — Supabase JS uses fetch under the hood
+  // and Next caches the response even on `force-dynamic` pages. Without
+  // this, a price update in the DB doesn't surface for hours until the
+  // function bundle re-deploys. (Same pattern as getReviews on the home
+  // page — see src/app/page.tsx.)
+  noStore();
   const admin = createAdminClient();
 
   const [galleryRes, marathonRes] = await Promise.all([
@@ -60,6 +67,7 @@ async function getAllDesigns(): Promise<DesignSummary[]> {
 }
 
 async function getCollections(): Promise<Collection[]> {
+  noStore();
   const admin = createAdminClient();
   const { data: cols } = await admin
     .from('collections')

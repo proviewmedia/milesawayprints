@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Star } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
@@ -65,11 +66,13 @@ async function getMarathons() {
 }
 
 export default async function HomePage() {
-  const [reviews, airports, golf, skylines, marathons] = await Promise.all([
+  const [reviews, airports, golf, skylines, f1, city, marathons] = await Promise.all([
     getReviews(),
     getDesignsByType('airport', 10),
     getDesignsByType('golf', 10),
     getDesignsByType('skyline', 10),
+    getDesignsByType('f1', 10),
+    getDesignsByType('city', 10),
     getMarathons(),
   ]);
 
@@ -131,9 +134,9 @@ export default async function HomePage() {
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="flex gap-0.5 text-ink">
+                  <div className="flex gap-0.5 text-warm" aria-label="4.9 out of 5 stars">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
+                      <Star key={i} size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />
                     ))}
                   </div>
                   <span className="text-sm text-mid">4.9 / 5 · 500+ happy customers</span>
@@ -143,11 +146,13 @@ export default async function HomePage() {
 
             <div className="relative bg-soft aspect-square overflow-hidden w-full">
               {heroSrc ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={heroSrc}
-                  alt="Miles Away Prints — custom location art"
-                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  alt="Custom location art prints — skylines, airports, marathons, golf, stadiums, and F1 circuits by Miles Away Prints"
+                  fill
+                  priority
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="object-cover object-center"
                 />
               ) : (
                 <span className="absolute bottom-3 right-3 text-[10px] uppercase tracking-wider text-mid">
@@ -197,14 +202,24 @@ export default async function HomePage() {
               airports.find((d) => d.slug === 'denver-international-airport') ??
               airports.find((d) => d.slug.startsWith('denver')) ??
               airports[0];
+            const miamiF1 =
+              f1.find((d) => d.slug === 'miami-grand-prix') ??
+              f1.find((d) => d.slug.startsWith('miami')) ??
+              f1[0];
+            const miamiCity =
+              city.find((d) => d.slug === 'miami-street-map-light') ??
+              city.find((d) => d.slug.startsWith('miami-street-map')) ??
+              city[0];
             const tiles = [
               { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', isMarathon: false },
               { name: 'City skylines', image: laSkyline?.image_url, href: '/shop?category=skyline', isMarathon: false },
               { name: 'Airports', image: denverAirport?.image_url, href: '/shop?category=airport', isMarathon: false },
               { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', isMarathon: true },
+              { name: 'F1 circuits', image: miamiF1?.image_url, href: '/prints/f1', isMarathon: false },
+              { name: 'City maps', image: miamiCity?.image_url, href: '/prints/city', isMarathon: false },
             ];
             return (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
             {tiles.map((c) => (
               <Link key={c.name} href={c.href} className="group block">
                 {c.isMarathon ? (

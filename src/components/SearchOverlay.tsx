@@ -76,13 +76,19 @@ export default function SearchOverlay() {
   }, [isOpen, loaded]);
 
   // Body lock + autofocus when open
+  // Track which element opened the overlay so we can return focus to
+  // it on close (keyboard a11y).
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!isOpen) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     setTimeout(() => inputRef.current?.focus(), 30);
     return () => {
       document.body.style.overflow = prev;
+      previousFocusRef.current?.focus();
     };
   }, [isOpen]);
 
@@ -182,9 +188,14 @@ export default function SearchOverlay() {
     filtered.marHits.length === 0;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-ink/40 flex items-start justify-center px-4 pt-20 md:pt-32" onClick={close}>
+    // Mobile: full-screen panel so the iOS keyboard doesn't cover the
+    // input or shrink the results below the visible viewport. The input
+    // header is the first child of the flex column → naturally pinned
+    // at the top when results scroll below it.
+    // Desktop (md+): centered modal pattern from before.
+    <div className="fixed inset-0 z-[100] bg-ink/40 flex md:items-start justify-center md:px-4 md:pt-32" onClick={close}>
       <div
-        className="w-full max-w-[640px] bg-paper rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
+        className="w-full md:max-w-[640px] bg-paper md:rounded-lg shadow-2xl overflow-hidden flex flex-col h-full md:h-auto md:max-h-[70vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
@@ -209,9 +220,31 @@ export default function SearchOverlay() {
 
         <div className="flex-1 overflow-y-auto">
           {empty && (
-            <p className="px-5 py-10 text-center text-sm text-mid">
-              No matches for &ldquo;{query}&rdquo;.
-            </p>
+            <div className="px-5 py-10 text-center">
+              <p className="text-sm text-mid mb-5">
+                No matches for &ldquo;{query}&rdquo;.
+              </p>
+              <p className="text-[12px] text-mid mb-3">Browse by category:</p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {[
+                  { label: 'Skylines', href: '/prints/skyline' },
+                  { label: 'City maps', href: '/prints/city' },
+                  { label: 'Airports', href: '/prints/airport' },
+                  { label: 'Golf', href: '/prints/golf' },
+                  { label: 'F1 circuits', href: '/prints/f1' },
+                  { label: 'Marathons', href: '/prints/marathon' },
+                ].map((c) => (
+                  <Link
+                    key={c.href}
+                    href={c.href}
+                    onClick={close}
+                    className="px-3 py-1.5 text-[13px] text-ink border border-border rounded-full hover:bg-soft transition-colors"
+                  >
+                    {c.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
 
           {filtered.marHits.length > 0 && (

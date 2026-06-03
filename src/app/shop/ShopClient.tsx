@@ -2,11 +2,36 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search, ArrowRight, ChevronDown } from 'lucide-react';
 import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
 import { Collection, DesignSummary } from '@/data/shop';
 import { PRINT_CONFIGS, PrintType } from '@/data/prints';
+
+/**
+ * Measures the fixed <header> (the navbar) at runtime and returns its
+ * current height. The sticky filter bar uses this for its `top` offset
+ * so it pins exactly flush against the navbar's bottom — no gap, no
+ * overlap — regardless of whether the SiteBanner is visible, the
+ * utility bar has content, or the viewport is mobile vs desktop.
+ */
+function useNavbarHeight(): number {
+  const [height, setHeight] = useState(80);
+  useEffect(() => {
+    const navbar = document.querySelector('header');
+    if (!navbar) return;
+    const update = () => setHeight(navbar.getBoundingClientRect().height);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(navbar);
+    window.addEventListener('resize', update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+  return height;
+}
 
 interface Props {
   designs: DesignSummary[];
@@ -47,6 +72,7 @@ export default function ShopClient({ designs, collections }: Props) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortOption>('featured');
   const [quickShopDesign, setQuickShopDesign] = useState<DesignSummary | null>(null);
+  const navHeight = useNavbarHeight();
 
   // Keep state in sync if the user navigates between filters via the URL
   // (e.g. browser back/forward, or another internal link to /shop?category=…).
@@ -116,34 +142,59 @@ export default function ShopClient({ designs, collections }: Props) {
         </section>
       )}
 
-      {/* Filter bar — text buttons, no pills. Stickied directly below
-          the navbar so it pins flush as the customer scrolls. */}
+      {/* Filter bar — text buttons, no pills. Sticky offsets match the
+          actual navbar heights so it pins flush against the navbar's
+          bottom border (no content bleed-through gap, no overlap).
+          Mobile navbar: utility bar 12px padding (empty content) +
+            main nav 24px padding + 40px icon buttons + 1px border ≈ 80px.
+          Desktop navbar: similar, utility bar shows country/about text. */}
       <section
         id="grid"
-        className="border-y border-border bg-paper sticky top-[104px] md:top-[80px] z-30"
+        className="border-b border-border bg-paper sticky z-30"
+        style={{ top: `${navHeight}px` }}
       >
-        <div className="max-w-[1400px] mx-auto px-6 py-3 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-3 md:gap-4">
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide flex-1 min-w-0">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setCategory(c.value)}
-                className={`relative px-3 py-2 text-sm whitespace-nowrap transition-opacity ${
-                  category === c.value ? 'text-ink' : 'text-mid hover:text-ink'
-                }`}
-              >
-                {c.label}
-                {category === c.value && (
-                  <span className="absolute left-3 right-3 -bottom-[13px] h-px bg-ink" />
-                )}
-              </button>
-            ))}
+        <div className="max-w-[1400px] mx-auto px-6 py-5 md:py-4 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-3 md:gap-4">
+          {/* Category chips — horizontally scrollable on mobile. The
+              right-edge fade signals more chips off-screen so customers
+              know to swipe right. */}
+          <div className="relative flex-1 min-w-0">
+            <div
+              role="tablist"
+              aria-label="Filter prints by category"
+              className="flex gap-1 overflow-x-auto overflow-y-hidden scrollbar-hide touch-pan-x overscroll-x-contain"
+            >
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.value}
+                  role="tab"
+                  aria-selected={category === c.value}
+                  onClick={() => setCategory(c.value)}
+                  className={`relative px-3 py-2 text-sm whitespace-nowrap transition-opacity ${
+                    category === c.value ? 'text-ink' : 'text-mid hover:text-ink'
+                  }`}
+                >
+                  {c.label}
+                  {category === c.value && (
+                    <span aria-hidden="true" className="absolute left-3 right-3 bottom-0 h-px bg-ink" />
+                  )}
+                </button>
+              ))}
+            </div>
+            {/* Right-edge fade indicator: only visible on mobile (md:hidden)
+                since on desktop the full chip row fits and a fade would
+                imply hidden content that doesn't exist. */}
+            <div
+              aria-hidden
+              className="md:hidden pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-paper to-transparent"
+            />
           </div>
 
           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
             <div className="relative flex-1 md:flex-none">
-              <Search size={14} strokeWidth={1.75} className="absolute left-3 top-1/2 -translate-y-1/2 text-mid" />
+              <Search size={14} strokeWidth={1.75} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-mid" />
               <input
+                type="search"
+                aria-label="Search locations"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search locations"
@@ -151,15 +202,22 @@ export default function ShopClient({ designs, collections }: Props) {
               />
             </div>
 
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortOption)}
-              className="bg-paper border border-border rounded-full px-3 md:px-4 py-2 text-sm text-ink focus:outline-none focus:border-ink"
-            >
-              <option value="featured">Featured</option>
-              <option value="name-asc">A–Z</option>
-              <option value="name-desc">Z–A</option>
-            </select>
+            <div className="relative">
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortOption)}
+                className="appearance-none bg-paper border border-border rounded-full pl-4 pr-9 py-2 text-sm text-ink focus:outline-none focus:border-ink cursor-pointer"
+              >
+                <option value="featured">Featured</option>
+                <option value="name-asc">A–Z</option>
+                <option value="name-desc">Z–A</option>
+              </select>
+              <ChevronDown
+                size={14}
+                strokeWidth={1.75}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-mid pointer-events-none"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -230,9 +288,9 @@ function CollectionRow({
     <div>
       <div className="flex items-end justify-between mb-6">
         <div>
-          <h3 className="text-2xl md:text-3xl font-medium text-ink tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight">
             {collection.name}
-          </h3>
+          </h2>
           {collection.description && (
             <p className="text-sm text-mid mt-1 max-w-lg">{collection.description}</p>
           )}
