@@ -9,6 +9,7 @@ import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
 import { DesignSummary, getPhysicalSizes, priceCentsFor, formatSize } from '@/data/shop';
 import { PRINT_CONFIGS } from '@/data/prints';
+import { productDescription } from '@/lib/product-copy';
 import { useCart } from '@/contexts/CartContext';
 import { trackViewItem } from '@/lib/track';
 
@@ -183,7 +184,12 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
               >
                 {cfg.detailsLabel}
               </Link>
-              <div className="flex items-center gap-2 mt-3 mb-8">
+              {/* Unique, data-specific paragraph (visible, not collapsed) so
+                  every product URL has real content of its own. */}
+              <p className="text-mid text-[15px] leading-relaxed mt-4">
+                {productDescription(design)}
+              </p>
+              <div className="flex items-center gap-2 mt-4 mb-8">
                 <div className="flex gap-0.5 text-ink">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={12} fill="currentColor" strokeWidth={0} />
@@ -347,7 +353,7 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
                     setOpenSection(openSection === 'about' ? null : 'about')
                   }
                 >
-                  {design.description ?? `A custom ${cfg.detailsLabel.toLowerCase()} print of ${design.name}. Each piece is printed on archival fine-art paper for a gallery-quality finish.`}
+                  A made-to-order giclée print on archival fine-art paper for a gallery-quality finish. Sizes up to 16×20 ship flat in a rigid mailer; 18×24 and larger ship rolled in a protective tube. Packaging is recyclable.
                 </ExpandSection>
                 <ExpandSection
                   title="Shipping"

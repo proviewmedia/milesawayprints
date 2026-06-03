@@ -17,6 +17,7 @@ import {
 } from '@/lib/seo';
 import { getReviewData } from '@/lib/reviews';
 import { getProductFaqs } from '@/data/product-faqs';
+import { productTitle, productDescription, productIntroFaq } from '@/lib/product-copy';
 
 async function getDesign(slug: string): Promise<{
   design: DesignSummary;
@@ -86,11 +87,9 @@ export async function generateMetadata({
   if (!result) return {};
   const { design } = result;
 
-  const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? 'art print';
-  const description =
-    design.description ??
-    `${design.name} — a ${typeLabel.toLowerCase()} print from Miles Away Prints. Made-to-order, archival fine-art paper, shipped worldwide.`;
-  const title = `${design.name} ${typeLabel} Print`;
+  // Unique, data-specific title + description per product (see lib/product-copy).
+  const description = productDescription(design);
+  const title = productTitle(design);
   const url = `/shop/${design.slug}`;
   // Use the dynamic OG route so the social preview shows the brand-chromed
   // social card instead of just the raw product photo at 800×1000.
@@ -141,9 +140,7 @@ export default async function DesignPage({ params }: { params: { slug: string } 
   const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? 'Art Print';
   const productLd = buildProductJsonLd({
     name: design.name,
-    description:
-      design.description ??
-      `${design.name} — ${typeLabel} from Miles Away Prints.`,
+    description: productDescription(design),
     imageUrl: design.image_url,
     url: `/shop/${design.slug}`,
     category: typeLabel,
@@ -162,7 +159,9 @@ export default async function DesignPage({ params }: { params: { slug: string } 
     { name: design.name, url: `/shop/${design.slug}` },
   ]);
 
-  const faqs = getProductFaqs(design.type);
+  // Prepend a product-specific FAQ so this page's FAQPage block (rendered +
+  // JSON-LD) is unique rather than byte-identical to every product of the type.
+  const faqs = [productIntroFaq(design), ...getProductFaqs(design.type)];
   const faqLd = faqPageJsonLd(faqs);
 
   return (
