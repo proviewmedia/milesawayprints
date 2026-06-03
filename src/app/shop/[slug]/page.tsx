@@ -9,8 +9,14 @@ import {
   DesignSummary,
   toDesignSummary,
   GalleryItemWithMeta,
-  DEFAULT_DIGITAL_PRICE_CENTS,
 } from '@/data/shop';
+import {
+  breadcrumbJsonLd,
+  productJsonLd as buildProductJsonLd,
+  faqPageJsonLd,
+} from '@/lib/seo';
+import { getReviewData } from '@/lib/reviews';
+import { getProductFaqs } from '@/data/product-faqs';
 
 async function getDesign(slug: string): Promise<{
   design: DesignSummary;
@@ -86,9 +92,14 @@ export async function generateMetadata({
     `${design.name} — a ${typeLabel.toLowerCase()} print from Miles Away Prints. Made-to-order, archival fine-art paper, shipped worldwide.`;
   const title = `${design.name} ${typeLabel} Print`;
   const url = `/shop/${design.slug}`;
-  const ogImages = design.image_url
-    ? [{ url: design.image_url, width: 800, height: 1000, alt: design.name }]
-    : undefined;
+  // Use the dynamic OG route so the social preview shows the brand-chromed
+  // social card instead of just the raw product photo at 800×1000.
+  const ogImageUrl = `/api/og/product/${design.slug}`;
+
+  // Cheapest physical size for product:price OG tag (Pinterest Rich Pins
+  // + Facebook/Instagram Shopping). Digital is no longer sold.
+  const physicalPrices = Object.values(design.printful_prices ?? {}).map((c) => c / 100);
+  const cheapest = physicalPrices.length ? Math.min(...physicalPrices) : 0;
 
   return {
     title,
@@ -99,13 +110,24 @@ export async function generateMetadata({
       description,
       url,
       type: 'website',
-      images: ogImages,
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: design.name }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${design.name} | Miles Away Prints`,
       description,
-      images: design.image_url ? [design.image_url] : undefined,
+      images: [ogImageUrl],
+    },
+    // Pinterest Rich Pins + Facebook Shop / Instagram Shopping read these
+    // OG product tags directly. Without them, pins/posts of the URL show
+    // as plain images instead of shoppable product cards.
+    other: {
+      'product:price:amount': cheapest.toFixed(2),
+      'product:price:currency': 'USD',
+      'product:availability': 'in stock',
+      'product:condition': 'new',
+      'product:brand': 'Miles Away Prints',
+      'product:retailer_item_id': design.slug,
     },
   };
 }
@@ -114,50 +136,54 @@ export default async function DesignPage({ params }: { params: { slug: string } 
   const result = await getDesign(params.slug);
   if (!result) notFound();
   const { design, related } = result;
+  const { aggregateRating, reviews } = await getReviewData(design.type);
 
-  // JSON-LD Product schema
-  const offers: Array<Record<string, unknown>> = [
-    {
-      '@type': 'Offer',
-      name: 'Digital download',
-      price: ((design.digital_price_cents ?? DEFAULT_DIGITAL_PRICE_CENTS) / 100).toFixed(2),
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-    },
-  ];
-  const sizesPriced = design.printful_prices ?? {};
-  for (const [size, cents] of Object.entries(sizesPriced)) {
-    offers.push({
-      '@type': 'Offer',
-      name: `Physical print — ${size}`,
-      price: (cents / 100).toFixed(2),
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-    });
-  }
-
-  const productJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
+  const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? 'Art Print';
+  const productLd = buildProductJsonLd({
     name: design.name,
     description:
       design.description ??
-      `${design.name} — ${PRINT_CONFIGS[design.type]?.detailsLabel ?? 'art print'} from Miles Away Prints.`,
-    ...(design.image_url ? { image: design.image_url } : {}),
-    brand: { '@type': 'Brand', name: 'Miles Away Prints' },
-    category: PRINT_CONFIGS[design.type]?.detailsLabel ?? undefined,
-    offers,
-  };
+      `${design.name} — ${typeLabel} from Miles Away Prints.`,
+    imageUrl: design.image_url,
+    url: `/shop/${design.slug}`,
+    category: typeLabel,
+    offers: Object.entries(design.printful_prices ?? {}).map(([size, cents]) => ({
+      name: `Physical print — ${size}`,
+      priceCents: cents,
+    })),
+    aggregateRating,
+    reviews,
+  });
+
+  const breadcrumbsLd = breadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'Shop', url: '/shop' },
+    { name: typeLabel, url: `/prints/${design.type}` },
+    { name: design.name, url: `/shop/${design.slug}` },
+  ]);
+
+  const faqs = getProductFaqs(design.type);
+  const faqLd = faqPageJsonLd(faqs);
 
   return (
     <>
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
       />
       <NavbarShell />
-      <DesignDetail design={design} related={related} />
+      <DesignDetail design={design} related={related} reviews={reviews} faqs={faqs} />
       <Footer />
     </>
   );

@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/account', '/auth', '/checkout', '/api'],
       },
     ],
-    sitemap: 'https://milesawayprints.com/sitemap.xml',
+    sitemap: 'https://www.milesawayprints.com/sitemap.xml',
   };
 }
