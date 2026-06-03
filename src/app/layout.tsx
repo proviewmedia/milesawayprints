@@ -12,11 +12,11 @@ import FirstVisitPopup from '@/components/FirstVisitPopup';
 import WelcomeCodeStasher from '@/components/WelcomeCodeStasher';
 import Analytics from '@/lib/analytics';
 
-const GOOGLE_MERCHANT_ID = 5790411058;
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
+import { SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.milesawayprints.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Miles Away Prints | Custom Location Art Prints',
     template: '%s | Miles Away Prints',
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.milesawayprints.com',
+    url: SITE_URL,
     siteName: 'Miles Away Prints',
     title: 'Miles Away Prints | Custom Location Art Prints',
     description:
@@ -104,15 +104,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </SearchProvider>
         </CartProvider>
 
-        {/* Google Customer Reviews — sitewide rating badge. Renders
-            inline wherever a <g:ratingbadge merchant_id="…"> element
-            exists (currently: the footer). Shows the seller star
-            rating once Google has accumulated ~100 verified survey
-            responses from real customers. Until then, the badge
-            quietly renders nothing — no broken UI. */}
+        {/* Google Customer Reviews — sitewide rating badge. platform.js
+            auto-renders any <g:ratingbadge merchant_id="…"> element on the
+            page (currently: the footer). The badge shows the seller star
+            rating once Google has ~100 verified survey responses; until then
+            it quietly renders nothing. NB: do NOT add ?onload=renderBadge —
+            there's no such global, so it throws a ReferenceError and the
+            custom-element auto-render is what we actually rely on. */}
         <Script
           id="gcr-platform"
-          src="https://apis.google.com/js/platform.js?onload=renderBadge"
+          src="https://apis.google.com/js/platform.js"
           strategy="afterInteractive"
           async
           defer

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { SITE_URL } from './site';
 
 let _resend: Resend | null = null;
 function getResend(): Resend | null {
@@ -12,7 +13,6 @@ function getResend(): Resend | null {
 const FROM = 'Miles Away Prints <orders@milesawayprints.com>';
 const REPLY_TO = 'milesawayprintsllc@gmail.com';
 const SUPPORT_INBOX = 'milesawayprintsllc@gmail.com';
-const SITE_URL = 'https://milesawayprints.com';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Shared layout
@@ -577,7 +577,7 @@ export async function sendStripeBrokenAlertEmail({ errorMessage }: StripeAlertAr
   return resend.emails.send({
     from: FROM,
     to: SUPPORT_INBOX,
-    subject: '🚨 Stripe API is failing on milesawayprints.com',
+    subject: '[Alert] Stripe API is failing on milesawayprints.com',
     html,
   });
 }

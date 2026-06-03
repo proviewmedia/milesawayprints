@@ -6,12 +6,10 @@ import {
   type DesignSummary,
   DEFAULT_DIGITAL_PRICE_CENTS,
 } from '@/data/shop';
+import { SITE_URL as SITE, SITE_NAME as SHOP_NAME } from '@/lib/site';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const SITE = 'https://www.milesawayprints.com';
-const SHOP_NAME = 'Miles Away Prints';
 
 /**
  * Google Merchant Center product feed.

@@ -11,7 +11,10 @@ interface ReviewRow {
 }
 
 export interface ProductReviewSummary {
-  aggregateRating: { ratingValue: number; reviewCount: number };
+  /** Null when there are no real reviews — callers must then omit the
+   *  AggregateRating from JSON-LD. Emitting a fabricated rating is a Google
+   *  structured-data policy violation and risks a manual action. */
+  aggregateRating: { ratingValue: number; reviewCount: number } | null;
   reviews: {
     author: string;
     rating: number;
@@ -48,10 +51,13 @@ export async function getReviewData(type: PrintType): Promise<ProductReviewSumma
   const typed = all.filter((r) => r.print_type_slug === type);
   const source = typed.length >= 3 ? typed : all;
 
-  const reviewCount = source.length || 1;
-  const ratingValue = source.length
-    ? source.reduce((s, r) => s + r.rating, 0) / source.length
-    : 5;
+  // No real reviews → emit nothing rather than a fake 5-star rating.
+  if (source.length === 0) {
+    return { aggregateRating: null, reviews: [] };
+  }
+
+  const reviewCount = source.length;
+  const ratingValue = source.reduce((s, r) => s + r.rating, 0) / source.length;
 
   const reviews = source.slice(0, 3).map((r) => ({
     author: r.customer_name,

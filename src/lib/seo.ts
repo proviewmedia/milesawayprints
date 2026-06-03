@@ -4,8 +4,8 @@
  * page emits the same shape Google validates against.
  */
 
-export const SITE_URL = 'https://www.milesawayprints.com';
-export const SITE_NAME = 'Miles Away Prints';
+import { SITE_URL, SITE_NAME } from './site';
+export { SITE_URL, SITE_NAME };
 
 interface BreadcrumbItem {
   name: string;
@@ -102,7 +102,7 @@ interface ProductJsonLdArgs {
   url: string;
   category?: string;
   offers: ProductOffer[];
-  aggregateRating?: AggregateRating;
+  aggregateRating?: AggregateRating | null;
   reviews?: ProductReview[];
 }
 

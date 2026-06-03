@@ -19,10 +19,10 @@ export default function Footer() {
               Custom location art prints. Stadiums, airports, marathons, golf courses, city streets — printed on archival paper, delivered worldwide.
             </p>
 
-            {/* Google Customer Reviews badge — renders inline once the
-                Google platform.js script (loaded in layout.tsx) calls
-                window.renderBadge(). Shows the seller star rating
-                aggregated from verified post-purchase surveys. */}
+            {/* Google Customer Reviews badge — platform.js (loaded in
+                layout.tsx) auto-renders this <g:ratingbadge> custom element.
+                Shows the seller star rating aggregated from verified
+                post-purchase surveys; renders nothing until Google has enough. */}
             <div
               className="mt-6"
               aria-label="Google Customer Reviews rating"

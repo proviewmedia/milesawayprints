@@ -1,6 +1,5 @@
 import { createAdminClient } from '@/lib/supabase';
-
-const BASE = 'https://www.milesawayprints.com';
+import { SITE_URL as BASE } from '@/lib/site';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

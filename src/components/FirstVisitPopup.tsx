@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { X, ArrowRight, Check } from 'lucide-react';
 
@@ -21,6 +21,8 @@ export default function FirstVisitPopup() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState<string | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const lastFocused = useRef<HTMLElement | null>(null);
 
   const skipPaths = ['/checkout', '/account', '/sign-in', '/forgot-password', '/reset-password'];
   const shouldSkip = skipPaths.some((p) => pathname.startsWith(p));
@@ -34,14 +36,48 @@ export default function FirstVisitPopup() {
     return () => window.clearTimeout(t);
   }, [shouldSkip]);
 
-  // ESC key closes
+  // Focus management while open: remember what was focused, trap Tab inside
+  // the dialog (so keyboard focus can't wander to the background behind an
+  // aria-modal overlay), close on ESC, and restore focus on close.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') dismiss();
+    lastFocused.current = (document.activeElement as HTMLElement) ?? null;
+
+    const focusables = () => {
+      const card = cardRef.current;
+      if (!card) return [] as HTMLElement[];
+      return Array.from(
+        card.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        dismiss();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      lastFocused.current?.focus?.();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -101,7 +137,7 @@ export default function FirstVisitPopup() {
       />
 
       {/* Card — bottom-sheet on mobile, centered modal on desktop */}
-      <div className="relative bg-paper w-full md:w-[420px] md:rounded-2xl rounded-t-2xl border border-border shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.15)] md:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)] p-6 md:p-7 mb-0 md:mb-0 animate-[slideUp_280ms_ease-out]">
+      <div ref={cardRef} className="relative bg-paper w-full md:w-[420px] md:rounded-2xl rounded-t-2xl border border-border shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.15)] md:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)] p-6 md:p-7 mb-0 md:mb-0 animate-[slideUp_280ms_ease-out]">
         <button
           type="button"
           onClick={dismiss}

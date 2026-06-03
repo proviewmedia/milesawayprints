@@ -103,6 +103,15 @@ export async function POST(req: Request) {
         status: 'paid',
       };
 
+      // Reconcile the stored total with what Stripe actually charged. The row
+      // was created at session-create time with the undiscounted total; if a
+      // promo code applied, amount_total is lower. Without this the order page
+      // and purchase analytics over-report (and disagree with the email, which
+      // already uses amount_total).
+      if (typeof session.amount_total === 'number') {
+        update.price_cents = session.amount_total;
+      }
+
       // If a Supabase auth user already exists for this email, link the order
       // to it now so /account immediately shows it. (If the customer creates
       // their account later via magic link, the link_orders_to_profile trigger
@@ -351,6 +360,12 @@ export async function POST(req: Request) {
         stripe_payment_intent_id: pi.id,
         status: 'paid',
       };
+
+      // Reconcile stored total with the captured amount (see the
+      // checkout.session.completed branch for the rationale).
+      if (typeof pi.amount_received === 'number') {
+        update.price_cents = pi.amount_received;
+      }
 
       const { data: existingProfile } = await admin
         .from('profiles')

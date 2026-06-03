@@ -12,6 +12,7 @@ import {
 } from '@/lib/seo';
 import { getReviewData } from '@/lib/reviews';
 import type { PrintType } from '@/data/prints';
+import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,7 +90,7 @@ export default async function MarathonPage({ params }: Props) {
     name: `${marathon.city} Marathon Print`,
     description: `Custom ${marathon.city} Marathon (Full + Half) prints — personalized with your name, bib, finish time, and race date.`,
     imageUrl: marathon.thumbnail_path
-      ? `https://www.milesawayprints.com${marathon.thumbnail_path}`
+      ? `${SITE_URL}${marathon.thumbnail_path}`
       : undefined,
     url: `/marathons/${marathon.slug}`,
     category: 'Marathon Print',

@@ -3,11 +3,13 @@ import { createAdminClient } from '@/lib/supabase';
 import { getStripe } from '@/lib/stripe';
 import { CartItem } from '@/contexts/CartContext';
 import { STRIPE_ALLOWED_COUNTRIES } from '@/data/countries';
+import { DEFAULT_DIGITAL_PRICE_CENTS } from '@/data/shop';
+import { SITE_URL } from '@/lib/site';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://milesawayprints.com';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || SITE_URL;
 
 interface CheckoutBody {
   items: CartItem[];
@@ -64,14 +66,79 @@ export async function POST(req: Request) {
       }
     }
 
+    // ---- Server-authoritative pricing ----
+    // Never trust client-sent priceCents — a crafted cart could set arbitrary
+    // unit_amounts. Resolve every line from the same source the catalog renders
+    // from: gallery_items.printful_prices / digital_price_cents for gallery
+    // designs, marathons.printful_prices for marathon items. Any item we can't
+    // price is rejected rather than charged at the client's number.
+    const isMarathon = (it: CartItem) =>
+      it.type === 'marathon' && Boolean(it.customization?.marathon_slug);
+
+    const marathonSlugs = Array.from(
+      new Set(
+        items.filter(isMarathon).map((it) => it.customization!.marathon_slug as string),
+      ),
+    );
+    const gallerySlugs = Array.from(
+      new Set(items.filter((it) => !isMarathon(it)).map((it) => it.slug)),
+    );
+
+    const [galleryRes, marathonRes] = await Promise.all([
+      gallerySlugs.length
+        ? admin
+            .from('gallery_items')
+            .select('slug, printful_prices, digital_price_cents')
+            .in('slug', gallerySlugs)
+        : Promise.resolve({ data: [] as { slug: string; printful_prices: Record<string, number> | null; digital_price_cents: number | null }[] }),
+      marathonSlugs.length
+        ? admin.from('marathons').select('slug, printful_prices').in('slug', marathonSlugs)
+        : Promise.resolve({ data: [] as { slug: string; printful_prices: Record<string, number> | null }[] }),
+    ]);
+    const galleryBySlug = new Map((galleryRes.data ?? []).map((r) => [r.slug, r]));
+    const marathonBySlug = new Map((marathonRes.data ?? []).map((r) => [r.slug, r]));
+
+    const authoritativePriceCents = (it: CartItem): number | null => {
+      if (isMarathon(it)) {
+        const row = marathonBySlug.get(it.customization!.marathon_slug as string);
+        const cents = row?.printful_prices?.[it.size];
+        return typeof cents === 'number' && cents > 0 ? cents : null;
+      }
+      const row = galleryBySlug.get(it.slug);
+      if (!row) return null;
+      if (it.format === 'digital') {
+        return row.digital_price_cents ?? DEFAULT_DIGITAL_PRICE_CENTS;
+      }
+      const cents = row.printful_prices?.[it.size];
+      return typeof cents === 'number' && cents > 0 ? cents : null;
+    };
+
+    const serverItems: CartItem[] = [];
+    const unpriceable: string[] = [];
+    for (const it of items) {
+      const cents = authoritativePriceCents(it);
+      if (cents == null) unpriceable.push(it.name);
+      else serverItems.push({ ...it, priceCents: cents });
+    }
+    if (unpriceable.length > 0) {
+      return NextResponse.json(
+        {
+          error:
+            'Some items are no longer available at the listed price. Please refresh your cart and try again.',
+          detail: unpriceable,
+        },
+        { status: 409 },
+      );
+    }
+
     const stripe = getStripe();
 
-    const hasPhysical = items.some((it) => it.format === 'physical');
+    const hasPhysical = serverItems.some((it) => it.format === 'physical');
 
     // Stripe Tax codes:
     //   txcd_99999999 — General Tangible Personal Property (physical goods)
     //   txcd_10000000 — Electronically Supplied Services (digital downloads)
-    const line_items = items.map((it) => ({
+    const line_items = serverItems.map((it) => ({
       quantity: Math.max(1, it.quantity ?? 1),
       price_data: {
         currency: 'usd',
@@ -95,11 +162,11 @@ export async function POST(req: Request) {
       },
     }));
 
-    const totalCents = items.reduce(
+    const totalCents = serverItems.reduce(
       (acc, it) => acc + it.priceCents * (it.quantity ?? 1),
       0,
     );
-    const first = items[0];
+    const first = serverItems[0];
 
     // Per-item regional shipping with size-band surcharges (volumetric).
     // Each item gets a tube size — small / medium / large — based on its
@@ -107,7 +174,7 @@ export async function POST(req: Request) {
     // every additional item adds its own per-band per-item bump.
     // Multi-quantity items count each unit toward the bump tier so a
     // single "3 × 16x20" expands to three size bands for pricing.
-    const physicalItems = items.filter((it) => it.format === 'physical');
+    const physicalItems = serverItems.filter((it) => it.format === 'physical');
     const shippingSizes = physicalItems.flatMap((it) =>
       Array.from({ length: it.quantity ?? 1 }, () => it.size),
     );
@@ -142,7 +209,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const cartSnapshot = items.map((it) => ({
+    const cartSnapshot = serverItems.map((it) => ({
       slug: it.slug,
       type: it.type,
       format: it.format,
