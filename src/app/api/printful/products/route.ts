@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { listStoreProducts, getStoreProduct } from '@/lib/printful';
+import { requireAdmin } from '@/lib/require-admin';
 
 /**
  * GET /api/printful/products
@@ -12,9 +13,12 @@ import { listStoreProducts, getStoreProduct } from '@/lib/printful';
  * those into gallery_items.printful_variants like:
  *   { "8x10": 4011, "11x14": 4012, "16x20": 4013 }
  *
- * TODO before going live: gate this behind admin auth (currently public).
+ * Admin-only: gated by requireAdmin().
  */
 export async function GET(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get('id');

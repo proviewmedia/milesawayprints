@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/require-admin';
 import { listStoreProducts, getStoreProduct } from '@/lib/printful';
 import { PrintType } from '@/data/prints';
 
@@ -13,7 +14,7 @@ import { PrintType } from '@/data/prints';
  * Run this any time you add or change a product in Printful and want the
  * site to reflect it. Idempotent — re-run is safe.
  *
- * TODO: gate behind admin auth. For now it's open while we're setting up.
+ * Admin-only: uses the service-role client, so it's gated by requireAdmin().
  */
 
 interface PrintfulListItem {
@@ -94,6 +95,9 @@ function canonicalSize(variantName: string, rawSize?: string | null): string | n
 }
 
 export async function POST() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const admin = createAdminClient();
 
@@ -235,6 +239,9 @@ export async function POST() {
 }
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   // Allow GET for convenience during setup
   return POST();
 }
