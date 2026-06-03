@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase';
 import { SITE_URL as BASE } from '@/lib/site';
+import { GIFT_ORDER } from '@/data/gifts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -34,10 +35,14 @@ export async function GET() {
     { loc: `${BASE}/`, lastmod: now, changefreq: 'weekly', priority: 1.0 },
     { loc: `${BASE}/shop`, lastmod: now, changefreq: 'daily', priority: 0.9 },
     { loc: `${BASE}/gifts`, lastmod: now, changefreq: 'weekly', priority: 0.9 },
-    { loc: `${BASE}/gifts/fathers-day`, lastmod: now, changefreq: 'weekly', priority: 0.9 },
-    { loc: `${BASE}/gifts/birthday`, lastmod: now, changefreq: 'weekly', priority: 0.85 },
-    { loc: `${BASE}/gifts/anniversary`, lastmod: now, changefreq: 'weekly', priority: 0.85 },
-    { loc: `${BASE}/gifts/holiday`, lastmod: now, changefreq: 'weekly', priority: 0.85 },
+    // Gift occasion pages — driven by GIFT_ORDER so new occasions are
+    // indexed automatically.
+    ...GIFT_ORDER.map((occasion) => ({
+      loc: `${BASE}/gifts/${occasion}`,
+      lastmod: now,
+      changefreq: 'weekly' as const,
+      priority: 0.85,
+    })),
     { loc: `${BASE}/about`, lastmod: now, changefreq: 'monthly', priority: 0.6 },
     { loc: `${BASE}/faq`, lastmod: now, changefreq: 'monthly', priority: 0.5 },
     { loc: `${BASE}/shipping`, lastmod: now, changefreq: 'monthly', priority: 0.5 },

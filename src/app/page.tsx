@@ -210,13 +210,16 @@ export default async function HomePage() {
               city.find((d) => d.slug === 'miami-street-map-light') ??
               city.find((d) => d.slug.startsWith('miami-street-map')) ??
               city[0];
+            // Link to the /prints/[type] landing pages (not /shop?category=)
+            // so crawl + link authority concentrate on the rankable category
+            // pages with their own copy, FAQs, and structured data.
             const tiles = [
-              { name: 'Golf courses', image: golf[0]?.image_url, href: '/shop?category=golf', isMarathon: false },
-              { name: 'City skylines', image: laSkyline?.image_url, href: '/shop?category=skyline', isMarathon: false },
-              { name: 'Airports', image: denverAirport?.image_url, href: '/shop?category=airport', isMarathon: false },
-              { name: 'Marathons', image: giftMarathon?.thumbnail_path ?? null, href: '/shop?category=marathon', isMarathon: true },
-              { name: 'F1 circuits', image: miamiF1?.image_url, href: '/prints/f1', isMarathon: false },
-              { name: 'City maps', image: miamiCity?.image_url, href: '/prints/city', isMarathon: false },
+              { name: 'Golf course prints', image: golf[0]?.image_url, href: '/prints/golf', isMarathon: false },
+              { name: 'City skyline prints', image: laSkyline?.image_url, href: '/prints/skyline', isMarathon: false },
+              { name: 'Airport prints', image: denverAirport?.image_url, href: '/prints/airport', isMarathon: false },
+              { name: 'Marathon prints', image: giftMarathon?.thumbnail_path ?? null, href: '/prints/marathon', isMarathon: true },
+              { name: 'F1 circuit prints', image: miamiF1?.image_url, href: '/prints/f1', isMarathon: false },
+              { name: 'City map prints', image: miamiCity?.image_url, href: '/prints/city', isMarathon: false },
             ];
             return (
           <div className="grid grid-cols-2 md:grid-cols-6 gap-6">
@@ -305,21 +308,21 @@ export default async function HomePage() {
       {/* Airport prints — horizontal scroll row */}
       <CategoryRow
         heading="Airport prints"
-        viewAllHref="/shop?category=airport"
+        viewAllHref="/prints/airport"
         designs={airports}
       />
 
       {/* Skyline prints — horizontal scroll row */}
       <CategoryRow
         heading="City skylines"
-        viewAllHref="/shop?category=skyline"
+        viewAllHref="/prints/skyline"
         designs={skylines}
       />
 
       {/* Golf course prints — horizontal scroll row */}
       <CategoryRow
         heading="Golf course prints"
-        viewAllHref="/shop?category=golf"
+        viewAllHref="/prints/golf"
         designs={golf}
       />
 

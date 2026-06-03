@@ -62,10 +62,14 @@ export default function Footer() {
             <h4 className="text-[13px] font-medium text-ink mb-4">Gifts</h4>
             <ul className="space-y-3">
               <li><Link href="/gifts" className="text-sm text-mid hover:text-ink transition-colors">All Gift Guides</Link></li>
+              <li><Link href="/gifts/valentines-day" className="text-sm text-mid hover:text-ink transition-colors">Valentine&apos;s Day</Link></li>
+              <li><Link href="/gifts/mothers-day" className="text-sm text-mid hover:text-ink transition-colors">Mother&apos;s Day</Link></li>
               <li><Link href="/gifts/fathers-day" className="text-sm text-mid hover:text-ink transition-colors">Father&apos;s Day</Link></li>
+              <li><Link href="/gifts/graduation" className="text-sm text-mid hover:text-ink transition-colors">Graduation</Link></li>
+              <li><Link href="/gifts/wedding" className="text-sm text-mid hover:text-ink transition-colors">Weddings</Link></li>
               <li><Link href="/gifts/birthday" className="text-sm text-mid hover:text-ink transition-colors">Birthdays</Link></li>
               <li><Link href="/gifts/anniversary" className="text-sm text-mid hover:text-ink transition-colors">Anniversaries</Link></li>
-              <li><Link href="/gifts/holiday" className="text-sm text-mid hover:text-ink transition-colors">Holiday Gifts</Link></li>
+              <li><Link href="/gifts/christmas" className="text-sm text-mid hover:text-ink transition-colors">Christmas</Link></li>
             </ul>
           </div>
 

@@ -22,6 +22,17 @@ import CategoryFaq from './CategoryFaq';
 
 const VALID_TYPES: PrintType[] = ['golf', 'stadium', 'airport', 'marathon', 'city', 'skyline', 'f1'];
 
+// Keyword-rich anchor text for the cross-category "explore more" strip.
+const TYPE_NAV_LABEL: Record<PrintType, string> = {
+  golf: 'Golf course prints',
+  stadium: 'Stadium prints',
+  airport: 'Airport prints',
+  marathon: 'Marathon prints',
+  city: 'City map prints',
+  skyline: 'City skyline prints',
+  f1: 'F1 circuit prints',
+};
+
 function isValidType(t: string): t is PrintType {
   return VALID_TYPES.includes(t as PrintType);
 }
@@ -230,6 +241,33 @@ export default async function PrintPage({ params }: { params: { type: string } }
 
       {/* FAQ — rendered + matched by FAQPage JSON-LD above */}
       <CategoryFaq faqs={config.faqs} />
+
+      {/* Explore more — keyword-rich internal links across the category
+          landing pages + gift guides. Spreads crawl + authority sideways. */}
+      <section className="py-14 md:py-20 border-t border-border">
+        <div className="max-w-[1100px] mx-auto px-6">
+          <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight mb-6">
+            Explore more print collections
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {VALID_TYPES.filter((t) => t !== type).map((t) => (
+              <Link
+                key={t}
+                href={`/prints/${t}`}
+                className="px-4 py-2 rounded-full border border-border text-sm text-ink hover:bg-soft transition-colors"
+              >
+                {TYPE_NAV_LABEL[t]}
+              </Link>
+            ))}
+            <Link
+              href="/gifts"
+              className="px-4 py-2 rounded-full border border-border text-sm text-ink hover:bg-soft transition-colors"
+            >
+              Gift guides
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </>
