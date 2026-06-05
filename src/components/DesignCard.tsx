@@ -36,10 +36,12 @@ export default function DesignCard({ design }: Props) {
   const isMarathon = design.type === 'marathon';
 
   return (
-    <Link
-      href={href}
-      className="group block transition-shadow duration-300 rounded-sm hover:shadow-[0_12px_28px_-12px_rgba(14,14,14,0.14)]"
-    >
+    <Link href={href} className="group block">
+      {/* Hover surface wraps the WHOLE card — print + caption — with padding,
+          so the lift floats around everything rather than hugging the image.
+          The -m-3/p-3 pair keeps the resting layout identical (no inset) while
+          giving the hovered card breathing room inside a soft, rounded shadow. */}
+      <div className="-m-3 p-3 rounded-2xl transition-all duration-300 group-hover:shadow-[0_18px_44px_-20px_rgba(14,14,14,0.22)] group-hover:bg-paper">
       {/* Image tile.
           - Marathon items: render the supplied PNG poster contained inside
             a matted, drop-shadowed frame. Tile aspect matches the other
@@ -47,7 +49,7 @@ export default function DesignCard({ design }: Props) {
           - Printful product images: full-bleed `object-cover` over bg-soft.
           - SVG previews (no image_url): WallFrame + PrintPreview fallback. */}
       {isMarathon && design.image_url ? (
-        <div className="relative aspect-[4/5] overflow-hidden bg-white flex items-center justify-center">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-white flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={design.image_url}
@@ -56,7 +58,7 @@ export default function DesignCard({ design }: Props) {
           />
         </div>
       ) : (
-        <div className="relative aspect-[4/5] overflow-hidden bg-soft">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-soft">
           {design.image_url ? (
             <Image
               src={design.image_url}
@@ -85,6 +87,7 @@ export default function DesignCard({ design }: Props) {
         <div className="text-[13px] text-ink font-medium mt-1.5">
           <span className="text-mid font-normal">From</span> ${fromPrice}
         </div>
+      </div>
       </div>
     </Link>
   );
