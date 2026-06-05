@@ -5,6 +5,9 @@ export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
 
 export default function AppleIcon() {
+  // Clean "MAP" mark — identical to the favicon (icon.tsx), just scaled up.
+  // No subtitle: Google Search and iOS both use this, and it should match
+  // the browser-tab icon exactly.
   return new ImageResponse(
     (
       <div
@@ -12,35 +15,17 @@ export default function AppleIcon() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#0e0e0e',
           color: '#f5f3ef',
           fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize: 80,
+          fontWeight: 700,
+          letterSpacing: '-0.02em',
         }}
       >
-        <div
-          style={{
-            fontSize: 72,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            lineHeight: 1,
-          }}
-        >
-          MAP
-        </div>
-        <div
-          style={{
-            fontSize: 13,
-            color: '#9c9c9c',
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            marginTop: 12,
-          }}
-        >
-          Miles Away Prints
-        </div>
+        MAP
       </div>
     ),
     size,
