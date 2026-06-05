@@ -4,8 +4,7 @@ import Link from 'next/link';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import DesignCard from '@/components/DesignCard';
-import PrintCustomizer from './PrintCustomizer';
-import { PRINT_CONFIGS, PrintType, DEFAULT_GALLERY, GalleryItem } from '@/data/prints';
+import { PRINT_CONFIGS, PrintType } from '@/data/prints';
 import { createAdminClient } from '@/lib/supabase';
 import {
   type DesignSummary,
@@ -69,18 +68,6 @@ export async function generateStaticParams() {
   return VALID_TYPES.map((type) => ({ type }));
 }
 
-async function getGallery(type: PrintType): Promise<GalleryItem[]> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from('gallery_items')
-    .select('id, name, location, image_url, values')
-    .eq('print_type_slug', type)
-    .eq('active', true)
-    .order('sort_order', { ascending: true });
-  if (!data || data.length === 0) return DEFAULT_GALLERY[type];
-  return data as GalleryItem[];
-}
-
 async function getProductsOfType(type: PrintType): Promise<DesignSummary[]> {
   const admin = createAdminClient();
   const { data } = await admin
@@ -102,10 +89,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
   const type = params.type;
   const config = PRINT_CONFIGS[type];
 
-  const [gallery, products] = await Promise.all([
-    getGallery(type),
-    getProductsOfType(type),
-  ]);
+  const products = await getProductsOfType(type);
 
   const breadcrumbsLd = breadcrumbJsonLd([
     { name: 'Home', url: '/' },
@@ -210,19 +194,6 @@ export default async function PrintPage({ params }: { params: { type: string } }
         </section>
       )}
 
-      {/* Customizer — for visitors who want a location not already in stock */}
-      <section className="pb-14 md:pb-20 bg-soft py-12 md:py-16">
-        <div className="max-w-[1400px] mx-auto px-6 mb-10">
-          <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight">
-            Don&apos;t see yours? Build your own
-          </h2>
-          <p className="text-mid mt-2 max-w-xl">
-            Personalize a {config.detailsLabel.toLowerCase()} print of any location — live preview as you type.
-          </p>
-        </div>
-        <PrintCustomizer config={config} gallery={gallery} />
-      </section>
-
       {/* Why section — evergreen body copy for SEO */}
       <section className="py-14 md:py-20">
         <div className="max-w-[800px] mx-auto px-6">
@@ -243,7 +214,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
       <CategoryFaq faqs={config.faqs} />
 
       {/* Explore more — keyword-rich internal links across the category
-          landing pages + gift guides. Spreads crawl + authority sideways. */}
+          landing pages. Spreads crawl + authority sideways. */}
       <section className="py-14 md:py-20 border-t border-border">
         <div className="max-w-[1100px] mx-auto px-6">
           <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight mb-6">
@@ -259,12 +230,6 @@ export default async function PrintPage({ params }: { params: { type: string } }
                 {TYPE_NAV_LABEL[t]}
               </Link>
             ))}
-            <Link
-              href="/gifts"
-              className="px-4 py-2 rounded-full border border-border text-sm text-ink hover:bg-soft transition-colors"
-            >
-              Gift guides
-            </Link>
           </div>
         </div>
       </section>

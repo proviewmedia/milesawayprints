@@ -11,29 +11,6 @@ interface NavbarProps {
   defaultCountry?: string;
 }
 
-// Keyword-rich internal links to the rankable /prints/[type] landing pages.
-// Anchor text is the search phrase ("Airport Prints"), not the on-page H1.
-const CATEGORY_LINKS = [
-  { label: 'Airport Prints', href: '/prints/airport' },
-  { label: 'Golf Course Prints', href: '/prints/golf' },
-  { label: 'City Skyline Prints', href: '/prints/skyline' },
-  { label: 'City Street Map Prints', href: '/prints/city' },
-  { label: 'Stadium Prints', href: '/prints/stadium' },
-  { label: 'Marathon Prints', href: '/prints/marathon' },
-  { label: 'F1 Circuit Prints', href: '/prints/f1' },
-];
-
-const GIFT_LINKS = [
-  { label: "Father's Day Gifts", href: '/gifts/fathers-day' },
-  { label: "Mother's Day Gifts", href: '/gifts/mothers-day' },
-  { label: "Valentine's Day Gifts", href: '/gifts/valentines-day' },
-  { label: 'Birthday Gifts', href: '/gifts/birthday' },
-  { label: 'Anniversary Gifts', href: '/gifts/anniversary' },
-  { label: 'Wedding Gifts', href: '/gifts/wedding' },
-  { label: 'Graduation Gifts', href: '/gifts/graduation' },
-  { label: 'Christmas Gifts', href: '/gifts/christmas' },
-];
-
 export default function Navbar({ defaultCountry = 'United States' }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { count, open } = useCart();
@@ -65,39 +42,9 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
           </Link>
 
           <ul className="hidden md:flex items-center gap-8">
-            {/* Prints + Gifts open on hover (pointer) and focus-within
-                (keyboard) — no JS, links stay in the DOM for crawlers. */}
-            <li className="group relative">
-              <Link href="/shop" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                Prints
-              </Link>
-              <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full pt-3 z-10">
-                <div className="bg-paper border border-border rounded-xl shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] p-2 w-56">
-                  {CATEGORY_LINKS.map((l) => (
-                    <Link key={l.href} href={l.href} className="block px-3 py-2 rounded-lg text-sm text-ink hover:bg-soft transition-colors">
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </li>
-            <li className="group relative">
-              <Link href="/gifts" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                Gifts
-              </Link>
-              <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 top-full pt-3 z-10">
-                <div className="bg-paper border border-border rounded-xl shadow-[0_12px_40px_-12px_rgba(0,0,0,0.18)] p-2 w-56">
-                  {GIFT_LINKS.map((l) => (
-                    <Link key={l.href} href={l.href} className="block px-3 py-2 rounded-lg text-sm text-ink hover:bg-soft transition-colors">
-                      {l.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </li>
             <li>
               <Link href="/shop" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                Shop all
+                Shop
               </Link>
             </li>
           </ul>
@@ -154,33 +101,10 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
         </div>
 
         {mobileOpen && (
-          <div className="md:hidden bg-paper border-t border-border px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-            <Link href="/shop" className="block text-base font-medium text-ink" onClick={() => setMobileOpen(false)}>
-              Shop all prints
+          <div className="md:hidden bg-paper border-t border-border px-6 py-5 space-y-4">
+            <Link href="/shop" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
+              Shop
             </Link>
-
-            <div>
-              <div className="text-[11px] font-medium uppercase tracking-widest text-mid mb-2">Prints</div>
-              <div className="space-y-2">
-                {CATEGORY_LINKS.map((l) => (
-                  <Link key={l.href} href={l.href} className="block text-[15px] text-ink" onClick={() => setMobileOpen(false)}>
-                    {l.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-[11px] font-medium uppercase tracking-widest text-mid mb-2">Gifts</div>
-              <div className="space-y-2">
-                {GIFT_LINKS.map((l) => (
-                  <Link key={l.href} href={l.href} className="block text-[15px] text-ink" onClick={() => setMobileOpen(false)}>
-                    {l.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
             <Link href="/about" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
               About
             </Link>
