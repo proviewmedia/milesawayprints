@@ -64,7 +64,11 @@ export function productDescription(design: DesignSummary): string {
   if (design.description?.trim()) return design.description.trim();
 
   const v = design.values ?? {};
-  const where = design.location?.trim() ? ` of ${design.location.trim()}` : '';
+  // Synced products store an em-dash placeholder when there's no location;
+  // treat those (and empty) as "no location" so we never render "print of —".
+  const loc = (design.location ?? '').trim();
+  const hasLoc = loc.length > 0 && !['—', '–', '-', 'n/a'].includes(loc.toLowerCase());
+  const where = hasLoc ? ` of ${loc}` : '';
   const name = design.name.trim();
 
   switch (design.type) {
