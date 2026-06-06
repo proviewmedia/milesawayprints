@@ -192,16 +192,30 @@ export async function cancelOrder(orderId: number | string) {
  *  page at 100 (default 20), so for stores with >100 products we'd need
  *  multiple round-trips. Returns the standard {code, result, ...} envelope
  *  with the merged result array. */
+/** GET a Printful endpoint with retry/backoff on 429 (rate limit) and 5xx.
+ *  Printful throttles at ~120 req/min, so a full store sync (one call per
+ *  product) can trip it; without this, throttled products silently fail to
+ *  fetch their variants and get skipped. */
+async function pfGet(url: string, attempt = 0): Promise<any> {
+  const res = await fetch(url, { headers: authHeaders() });
+  if ((res.status === 429 || res.status >= 500) && attempt < 5) {
+    const retryAfter = Number(res.headers.get('retry-after'));
+    const waitSec = retryAfter > 0 ? retryAfter : Math.min(2 ** attempt, 20);
+    await new Promise((r) => setTimeout(r, waitSec * 1000));
+    return pfGet(url, attempt + 1);
+  }
+  return res.json();
+}
+
 export async function listStoreProducts() {
   const all: unknown[] = [];
   const limit = 100;
   let offset = 0;
   let lastCode = 200;
   for (;;) {
-    const res = await fetch(`${BASE}/store/products?limit=${limit}&offset=${offset}`, {
-      headers: authHeaders(),
-    });
-    const data = (await res.json()) as { code: number; result?: unknown[]; paging?: { total?: number } };
+    const data = (await pfGet(`${BASE}/store/products?limit=${limit}&offset=${offset}`)) as {
+      code: number; result?: unknown[]; paging?: { total?: number };
+    };
     lastCode = data.code;
     if (data.code >= 400 || !Array.isArray(data.result)) {
       return data;
@@ -215,10 +229,7 @@ export async function listStoreProducts() {
 
 /** Get a single store product with its variants */
 export async function getStoreProduct(productId: number | string) {
-  const res = await fetch(`${BASE}/store/products/${productId}`, {
-    headers: authHeaders(),
-  });
-  return await res.json();
+  return await pfGet(`${BASE}/store/products/${productId}`);
 }
 
 // ---------- Webhook helpers ----------

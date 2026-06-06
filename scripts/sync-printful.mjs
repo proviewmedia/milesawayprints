@@ -41,14 +41,23 @@ function pfHeaders() {
   if (PRINTFUL_STORE_ID) h['X-PF-Store-Id'] = PRINTFUL_STORE_ID;
   return h;
 }
+async function pfGet(url, attempt = 0) {
+  const res = await fetch(url, { headers: pfHeaders() });
+  if ((res.status === 429 || res.status >= 500) && attempt < 5) {
+    const ra = Number(res.headers.get('retry-after'));
+    const waitSec = ra > 0 ? ra : Math.min(2 ** attempt, 20);
+    await new Promise((r) => setTimeout(r, waitSec * 1000));
+    return pfGet(url, attempt + 1);
+  }
+  return res.json();
+}
 async function listStoreProducts() {
   const all = [];
   const limit = 100;
   let offset = 0;
   let lastCode = 200;
   for (;;) {
-    const res = await fetch(`${PF}/store/products?limit=${limit}&offset=${offset}`, { headers: pfHeaders() });
-    const data = await res.json();
+    const data = await pfGet(`${PF}/store/products?limit=${limit}&offset=${offset}`);
     lastCode = data.code;
     if (data.code >= 400 || !Array.isArray(data.result)) return data;
     all.push(...data.result);
@@ -58,8 +67,7 @@ async function listStoreProducts() {
   return { code: lastCode, result: all };
 }
 async function getStoreProduct(productId) {
-  const res = await fetch(`${PF}/store/products/${productId}`, { headers: pfHeaders() });
-  return await res.json();
+  return await pfGet(`${PF}/store/products/${productId}`);
 }
 
 // ---------- ported verbatim from the route ----------
