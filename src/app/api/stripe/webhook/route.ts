@@ -222,7 +222,11 @@ export async function POST(req: Request) {
             : undefined;
 
           const printfulRes = await createPrintfulOrder({
-            external_id: order.token,
+            // NB: do NOT send external_id = order.token here. Printful caps
+            // external_id at 32 chars and our token is 64 hex, so it rejects
+            // the whole order ("Invalid External ID specified") and nothing
+            // gets fulfilled. We store printful_order_id below instead, and
+            // the Printful shipping webhook matches on that.
             recipient: {
               name: shipping.name ?? customerName,
               address1: shipping.address.line1 ?? '',

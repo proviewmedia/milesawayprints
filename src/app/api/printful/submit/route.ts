@@ -96,7 +96,9 @@ export async function POST(req: Request) {
     }
 
     const payload: PrintfulOrderRequest = {
-      external_id: order.token,
+      // Omit external_id: Printful caps it at 32 chars but our token is 64 hex,
+      // so sending it makes Printful reject the order. printful_order_id is
+      // stored on the row below and is what the shipping webhook matches on.
       recipient: {
         name: order.shipping_name ?? order.customer_name,
         address1: order.shipping_address_line1,
