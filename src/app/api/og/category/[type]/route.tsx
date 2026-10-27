@@ -49,7 +49,7 @@ export async function GET(
             marginBottom: 24,
           }}
         >
-          Miles Away · Prints
+          The Inq · Press
         </div>
         <div
           style={{

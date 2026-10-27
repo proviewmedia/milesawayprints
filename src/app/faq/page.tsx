@@ -9,7 +9,7 @@ import { faqPageJsonLd } from '@/lib/seo';
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
   description:
-    'Common questions about Miles Away Prints — sizing, shipping, returns, digital downloads, and gifts.',
+    'Common questions about The Inq Press — sizing, shipping, returns, digital downloads, and gifts.',
   alternates: { canonical: '/faq' },
 };
 

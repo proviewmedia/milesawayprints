@@ -4,8 +4,8 @@ import Footer from '@/components/Footer';
 import ResetPasswordForm from './ResetPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Set a new password — Miles Away Prints',
-  description: 'Set a new password for your Miles Away Prints account.',
+  title: 'Set a new password — The Inq Press',
+  description: 'Set a new password for your The Inq Press account.',
   alternates: { canonical: '/reset-password' },
   robots: { index: false, follow: false },
 };

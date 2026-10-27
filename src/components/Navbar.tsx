@@ -6,6 +6,13 @@ import { Menu, X, ShoppingBag, Search, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useSearch } from '@/contexts/SearchContext';
 
+const NAV_LINKS = [
+  { href: '/custom', label: 'Custom orders' },
+  { href: '/shop', label: 'Shop prints' },
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/contact', label: 'Contact' },
+];
+
 interface NavbarProps {
   /** Visitor's country for the top-left utility-bar label. Defaults to United States. */
   defaultCountry?: string;
@@ -23,10 +30,10 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
       <div className="bg-ink text-paper text-xs">
         <div className="max-w-[1400px] mx-auto px-6 py-2 flex items-center justify-center">
           <Link
-            href="/gifts/fathers-day"
+            href="/custom"
             className="opacity-90 hover:opacity-100 text-center"
           >
-            Father&apos;s Day golf prints available — Pebble Beach, St. Andrews &amp; more →
+            Custom printing on shirts, hats, stickers, posters, and more. Get a free quote →
           </Link>
         </div>
       </div>
@@ -38,18 +45,23 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
             href="/"
             className="text-[19px] font-medium tracking-tight text-ink no-underline whitespace-nowrap"
           >
-            Miles Away <span className="font-normal text-mid">Prints</span>
+            The Inq <span className="font-normal text-mid">Press</span>
           </Link>
 
           <ul className="hidden md:flex items-center gap-8">
-            <li>
-              <Link href="/shop" className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
-                Shop
-              </Link>
-            </li>
+            {NAV_LINKS.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
           </ul>
 
           <div className="flex items-center gap-1">
+            <Link href="/custom" className="hidden lg:inline-flex btn-primary py-2.5 px-5 text-[13px] mr-2">
+              Get a quote
+            </Link>
             <button
               onClick={openSearch}
               aria-label="Search"
@@ -102,11 +114,13 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
 
         {mobileOpen && (
           <div className="md:hidden bg-paper border-t border-border px-6 py-5 space-y-4">
-            <Link href="/shop" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
-              Shop
-            </Link>
-            <Link href="/about" className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
-              About
+            {[...NAV_LINKS, { href: '/about', label: 'About' }].map((l) => (
+              <Link key={l.href} href={l.href} className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
+                {l.label}
+              </Link>
+            ))}
+            <Link href="/custom" className="btn-primary w-full" onClick={() => setMobileOpen(false)}>
+              Get a free quote
             </Link>
           </div>
         )}

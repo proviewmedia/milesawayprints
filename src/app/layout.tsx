@@ -18,12 +18,16 @@ import { SITE_URL } from '@/lib/site';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Miles Away Prints | Custom Location Art Prints',
-    template: '%s | Miles Away Prints',
+    default: 'The Inq Press | Custom Printing and Art Prints',
+    template: '%s | The Inq Press',
   },
   description:
-    'Custom art prints of stadiums, airports, marathon routes, city streets, and golf courses. Personalized with your location, name, and details. Digital downloads and museum-quality physical prints.',
+    'Custom printing on shirts, hats, stickers, posters, signs, and merch, with free quotes and a proof before anything is printed. Plus our collection of airport, golf course, skyline, and marathon art prints.',
   keywords: [
+    'custom printing',
+    'custom t-shirts',
+    'custom merch',
+    'custom stickers',
     'custom prints',
     'stadium art',
     'airport map print',
@@ -35,23 +39,23 @@ export const metadata: Metadata = {
     'personalized art',
     'custom wall art',
   ],
-  authors: [{ name: 'Miles Away Prints' }],
+  authors: [{ name: 'The Inq Press' }],
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: SITE_URL,
-    siteName: 'Miles Away Prints',
-    title: 'Miles Away Prints | Custom Location Art Prints',
+    siteName: 'The Inq Press',
+    title: 'The Inq Press | Custom Printing and Art Prints',
     description:
-      'Custom art prints of stadiums, airports, marathon routes, city streets, and golf courses. Personalized and delivered your way.',
+      'Custom printing on apparel, merch, posters, and more. Free quotes, proofs before print, and our own collection of art prints.',
     images: [
-      { url: '/api/og/home', width: 1200, height: 630, alt: 'Miles Away Prints' },
+      { url: '/api/og/home', width: 1200, height: 630, alt: 'The Inq Press' },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Miles Away Prints | Custom Location Art Prints',
-    description: 'Custom art prints of stadiums, airports, marathon routes, city streets, and golf courses.',
+    title: 'The Inq Press | Custom Printing and Art Prints',
+    description: 'Custom printing on apparel, merch, posters, and more. Free quotes.',
     images: ['/api/og/home'],
   },
   robots: {

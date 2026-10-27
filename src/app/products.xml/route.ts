@@ -67,7 +67,7 @@ function emitItemsForDesign(d: DesignSummary): string[] {
   const typeLabel = PRINT_CONFIGS[d.type]?.detailsLabel ?? 'Art Print';
   const description =
     d.description ??
-    `${d.name} — ${typeLabel.toLowerCase()} from Miles Away Prints. Made-to-order, archival fine-art paper, shipped worldwide.`;
+    `${d.name} — ${typeLabel.toLowerCase()} from The Inq Press. Made-to-order, archival fine-art paper, shipped worldwide.`;
   const productType = `Home & Garden > Decor > Artwork > ${typeLabel}`;
 
   const items: string[] = [];

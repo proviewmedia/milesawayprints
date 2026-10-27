@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import SignInForm from './SignInForm';
 
 export const metadata: Metadata = {
-  title: 'Sign in — Miles Away Prints',
+  title: 'Sign in — The Inq Press',
   description: 'Sign in to view your orders, track shipments, and download digital files.',
 };
 

@@ -8,4 +8,7 @@
  * imports SITE_URL from here rather than hardcoding a host.
  */
 export const SITE_URL = 'https://www.milesawayprints.com';
-export const SITE_NAME = 'Miles Away Prints';
+export const SITE_NAME = 'The Inq Press';
+// TODO(domain cutover): switch SITE_URL to https://www.theinqpress.com only
+// after theinqpress.com serves this deployment on Vercel and milesawayprints.com
+// 301-redirects to it. Switching early points every canonical at a parked page.

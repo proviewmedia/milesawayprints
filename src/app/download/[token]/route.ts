@@ -101,7 +101,7 @@ function gone(message: string) {
 }
 
 function htmlMessage(title: string, message: string) {
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#0e0e0e}h1{font-weight:500;letter-spacing:-.02em}p{color:#6b6b6b;line-height:1.5}a{color:#0e0e0e}</style></head><body><h1>${title}</h1><p>${message}</p><p><a href="/">Back to Miles Away Prints</a></p></body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:480px;margin:80px auto;padding:0 24px;color:#0e0e0e}h1{font-weight:500;letter-spacing:-.02em}p{color:#6b6b6b;line-height:1.5}a{color:#0e0e0e}</style></head><body><h1>${title}</h1><p>${message}</p><p><a href="/">Back to The Inq Press</a></p></body></html>`;
 }
 
 function guessExt(path: string): string {

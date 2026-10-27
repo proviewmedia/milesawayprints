@@ -1,18 +1,27 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Star } from 'lucide-react';
+import { Star, ArrowRight, Shirt, HardHat, ShoppingBag, Coffee, Sticker, Image as ImageIcon, Signpost, Gift, Sparkles, type LucideIcon } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
-import DesignCardWrapper from './DesignCardWrapper';
-import MarathonCard from '@/components/MarathonCard';
 import { PrintType } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
+import { CUSTOM_PRODUCTS, type CustomProduct } from '@/data/custom';
 import { supabase, createAdminClient } from '@/lib/supabase';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { unstable_noStore as noStore } from 'next/cache';
 
-const CATEGORY_ORDER: PrintType[] = ['golf', 'skyline', 'airport', 'marathon', 'city'];
+const PRODUCT_ICONS: Record<CustomProduct['icon'], LucideIcon> = {
+  shirt: Shirt,
+  hardHat: HardHat,
+  shoppingBag: ShoppingBag,
+  coffee: Coffee,
+  sticker: Sticker,
+  frame: ImageIcon,
+  signpost: Signpost,
+  gift: Gift,
+  sparkles: Sparkles,
+};
 
 async function getReviews() {
   // Bust Next.js fetch cache so DB edits to reviews show up immediately
@@ -90,47 +99,36 @@ export default async function HomePage() {
     <>
       <NavbarShell />
 
-      {/* Hero — split-screen, content aligned with the navbar gutters
-          (max-w-1400 + mx-auto + px-6) so the left edge of the headline
-          matches the wordmark and the right edge of the image matches the
-          cart icon. */}
+      {/* Hero: split-screen, content aligned with the navbar gutters
+          (max-w-1400 + mx-auto + px-6). */}
       <section className="pt-28 md:pt-32 pb-10 md:pb-14">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="grid md:grid-cols-[1.1fr_1fr] gap-8 md:gap-12 items-center">
             <div className="flex flex-col justify-between py-6 md:py-2 gap-10">
               <div>
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-                  Custom location art · Est. 2020
+                  Custom print studio · Est. 2020
                 </p>
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight text-ink leading-[0.95] mb-6">
-                  The places you love,<br />printed.
+                  Your design,<br />printed on anything.
                 </h1>
                 <p className="text-base md:text-lg text-mid max-w-xl leading-relaxed">
-                  Custom airport, marathon, golf course, and skyline prints —
-                  drawn from scratch in our Mojave studio, produced on archival
-                  fine-art paper through our American production partner, and
-                  shipped worldwide within a week.
+                  Shirts, hats, stickers, posters, signs, and merch for brands, teams,
+                  events, and gifts. Send us your idea, get a free quote, and we handle
+                  the printing and shipping.
                 </p>
               </div>
 
               <div>
-                <ul className="flex flex-wrap gap-x-3 gap-y-2 text-[13px] text-mid mb-7">
-                  {['Airports', 'Marathons', 'Golf courses', 'City skylines', 'F1 circuits'].map((c, i, arr) => (
-                    <li key={c} className="flex items-center gap-3">
-                      <span>{c}</span>
-                      {i < arr.length - 1 && <span className="text-light-mid">·</span>}
-                    </li>
-                  ))}
-                </ul>
                 <div className="flex flex-wrap items-center gap-4 mb-7">
-                  <Link href="/shop" className="btn-primary">
-                    Shop the collection
+                  <Link href="/custom" className="btn-primary">
+                    Get a free quote
                   </Link>
                   <Link
-                    href="/marathons/las-vegas"
+                    href="/shop"
                     className="text-sm font-medium text-ink underline underline-offset-4 decoration-1 hover:opacity-70 transition-opacity"
                   >
-                    Or start a custom print →
+                    Or shop ready-made prints →
                   </Link>
                 </div>
                 <div className="flex items-center gap-2">
@@ -148,7 +146,7 @@ export default async function HomePage() {
               {heroSrc ? (
                 <Image
                   src={heroSrc}
-                  alt="Custom location art prints — skylines, airports, marathons, golf, stadiums, and F1 circuits by Miles Away Prints"
+                  alt="Custom prints by The Inq Press"
                   fill
                   priority
                   sizes="(min-width: 768px) 50vw, 100vw"
@@ -164,14 +162,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Trust bar — flat row, no colored chips */}
+      {/* Trust bar: flat row, no colored chips */}
       <section className="border-y border-border bg-paper">
         <div className="max-w-[1400px] mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 text-center md:text-left">
           {[
-            { title: 'Museum-quality finish', desc: 'Archival giclée, fine-art paper' },
-            { title: 'Made-to-order', desc: 'Printed and shipped within 5 days' },
-            { title: 'Ready to hang', desc: 'Frames arrive professionally assembled' },
-            { title: 'Worldwide shipping', desc: 'Tracked, insured, and packed flat' },
+            { title: 'Free quotes', desc: 'A price within 1 to 2 business days' },
+            { title: 'Proof before print', desc: 'Nothing is made until you approve' },
+            { title: 'One piece or hundreds', desc: 'Small runs and bulk orders' },
+            { title: 'No design? No problem', desc: 'We can design it with you' },
           ].map((item) => (
             <div key={item.title}>
               <div className="text-sm font-medium text-ink">{item.title}</div>
@@ -181,15 +179,102 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured categories — one tile per print type, not individual SKUs */}
+      {/* What we print: each card deep-links to the quote form with that
+          product preselected, so the first step is already done. */}
       <section className="py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-            <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
-              Shop by category
+            <div>
+              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">What we print</h2>
+              <p className="text-mid text-sm md:text-base mt-1">Pick a product to start your quote.</p>
+            </div>
+            <Link href="/how-it-works#methods" className="btn-secondary py-2.5 px-5 text-[13px]">
+              Print methods
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            {CUSTOM_PRODUCTS.filter((p) => p.slug !== 'other').map((p) => {
+              const Icon = PRODUCT_ICONS[p.icon];
+              return (
+                <Link
+                  key={p.slug}
+                  href={`/custom?product=${p.slug}`}
+                  className="group flex items-center gap-4 rounded-xl border border-border bg-paper p-5 hover:border-ink transition-colors"
+                >
+                  <div className="w-11 h-11 shrink-0 rounded-full bg-soft flex items-center justify-center">
+                    <Icon size={18} strokeWidth={1.75} className="text-ink" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[15px] font-medium text-ink">{p.name}</div>
+                    <div className="text-[13px] text-mid mt-0.5 leading-snug">{p.examples}</div>
+                  </div>
+                  <ArrowRight size={16} strokeWidth={1.75} className="text-mid shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </Link>
+              );
+            })}
+            <Link
+              href="/custom?product=other"
+              className="group flex items-center gap-4 rounded-xl bg-ink text-paper p-5 hover:bg-black transition-colors"
+            >
+              <div className="w-11 h-11 shrink-0 rounded-full bg-paper/10 flex items-center justify-center">
+                <Sparkles size={18} strokeWidth={1.75} aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[15px] font-medium">Something else?</div>
+                <div className="text-[13px] text-paper/70 mt-0.5 leading-snug">If it can be printed, ask us.</div>
+              </div>
+              <ArrowRight size={16} strokeWidth={1.75} className="shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works: minimal numbered steps */}
+      <section id="how" className="py-12 md:py-16 bg-soft scroll-mt-40">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <div className="text-center mb-10 max-w-xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink mb-3">
+              Four steps. Done.
             </h2>
+            <p className="text-mid">Everything happens online. You approve before we print.</p>
+          </div>
+          <div className="grid md:grid-cols-4 gap-10 md:gap-6">
+            {[
+              { n: '01', title: 'Tell us what you need', desc: 'Pick a product, a quantity, and share your design or idea.' },
+              { n: '02', title: 'Get a quote and proof', desc: 'We email a price and a preview within 1 to 2 business days.' },
+              { n: '03', title: 'Approve it', desc: 'Ask for changes until it is right. Then it goes to print.' },
+              { n: '04', title: 'We print and ship', desc: 'Your order arrives at your door with tracking.' },
+            ].map((step) => (
+              <div key={step.n} className="text-left">
+                <div className="text-xs font-medium text-mid mb-3">{step.n}</div>
+                <h3 className="text-[18px] font-medium text-ink mb-2">{step.title}</h3>
+                <p className="text-sm text-mid leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link href="/how-it-works" className="btn-secondary">
+              See how it works
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Print collection: our own work, one tile per print type. Links to
+          the /prints/[type] landing pages so their SEO authority is kept. */}
+      <section className="py-12 md:py-16">
+        <div className="max-w-[1400px] mx-auto px-6">
+          <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
+                Our print collection
+              </h2>
+              <p className="text-mid text-sm md:text-base mt-1">
+                Ready-made art prints we design in house. Order online and ship worldwide.
+              </p>
+            </div>
             <Link href="/shop" className="btn-secondary py-2.5 px-5 text-[13px]">
-              Shop all
+              Shop all prints
             </Link>
           </div>
 
@@ -260,72 +345,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Marathon prints — personalized posters from a separate table */}
-      {marathons.length > 0 && (
-        <section id="marathons" className="py-10 md:py-14 scroll-mt-32">
-          <div className="max-w-[1400px] mx-auto px-6">
-            <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-              <div>
-                <div
-                  className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase mb-2"
-                  style={{ background: '#fee2e2', color: '#dc2626' }}
-                >
-                  For Runners
-                </div>
-                <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
-                  Marathon prints
-                </h2>
-                <p className="text-mid text-sm md:text-base mt-1">
-                  Personalize with your bib, finish time, and race date.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex gap-6 px-6 max-w-[1400px] mx-auto">
-              {marathons.map((m) => {
-                const prices = (m.printful_prices ?? {}) as Record<string, number>;
-                const fromCents = Object.values(prices)
-                  .filter((n) => typeof n === 'number')
-                  .sort((a, b) => a - b)[0];
-                return (
-                  <div key={m.slug} className="flex-shrink-0 w-56 md:w-64">
-                    <MarathonCard
-                      slug={m.slug}
-                      city={m.city}
-                      thumbnailPath={m.thumbnail_path}
-                      fromCents={fromCents}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Airport prints — horizontal scroll row */}
-      <CategoryRow
-        heading="Airport prints"
-        viewAllHref="/prints/airport"
-        designs={airports}
-      />
-
-      {/* Skyline prints — horizontal scroll row */}
-      <CategoryRow
-        heading="City skylines"
-        viewAllHref="/prints/skyline"
-        designs={skylines}
-      />
-
-      {/* Golf course prints — horizontal scroll row */}
-      <CategoryRow
-        heading="Golf course prints"
-        viewAllHref="/prints/golf"
-        designs={golf}
-      />
-
       {/* Lifestyle photography section */}
       <section className="py-10 md:py-14 border-y border-border">
         <div className="max-w-[1400px] mx-auto px-6">
@@ -349,33 +368,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* How It Works — minimal numbered steps */}
-      <section id="how" className="py-12 md:py-16 bg-soft scroll-mt-40">
-        <div className="max-w-[1280px] mx-auto px-6">
-          <div className="text-center mb-10 max-w-xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-ink mb-3">
-              Four steps. Done.
-            </h2>
-            <p className="text-mid">From idea to wall in under a week.</p>
-          </div>
-          <div className="grid md:grid-cols-4 gap-10 md:gap-6">
-            {[
-              { n: '01', title: 'Pick your print', desc: 'Browse ready-made designs or start a custom print.' },
-              { n: '02', title: 'Add your details', desc: 'Customize required info. Optional fields are filled for you.' },
-              { n: '03', title: 'Preview live', desc: 'See your print render in real time before checkout.' },
-              { n: '04', title: 'Enjoy', desc: 'Digital download or museum-quality print delivered.' },
-            ].map((step) => (
-              <div key={step.n} className="text-left">
-                <div className="text-xs font-medium text-mid mb-3">{step.n}</div>
-                <h3 className="text-[18px] font-medium text-ink mb-2">{step.title}</h3>
-                <p className="text-sm text-mid leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
 
       {/* Reviews */}
       {reviews.length > 0 && (
@@ -410,66 +402,21 @@ export default async function HomePage() {
       <section className="py-16 md:py-20 bg-ink text-paper">
         <div className="max-w-[900px] mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.05] mb-5">
-            Ready to make yours?
+            Have something in mind?
           </h2>
           <p className="text-paper/70 mb-9 max-w-md mx-auto">
-            Shop ready-to-ship designs printed on archival paper.
+            Tell us about it. Quotes are free, and you approve a proof before anything is printed.
           </p>
           <Link
-            href="/shop"
+            href="/custom"
             className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
           >
-            Shop the collection
+            Get a free quote
           </Link>
         </div>
       </section>
 
       <Footer />
     </>
-  );
-}
-
-/**
- * Heading row + horizontal-scroll strip of DesignCards. Used for the
- * homepage's per-category sections (airports, golf, etc.). Cards are
- * 256px wide; the strip side-scrolls past the right edge of the
- * container. Renders nothing if `designs` is empty.
- */
-function CategoryRow({
-  heading,
-  viewAllHref,
-  designs,
-}: {
-  heading: string;
-  viewAllHref: string;
-  designs: DesignSummary[];
-}) {
-  if (designs.length === 0) return null;
-
-  return (
-    <section className="py-10 md:py-14">
-      <div className="max-w-[1400px] mx-auto px-6">
-        <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-          <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
-            {heading}
-          </h2>
-          <Link href={viewAllHref} className="btn-secondary py-2.5 px-5 text-[13px]">
-            Show all
-          </Link>
-        </div>
-      </div>
-
-      {/* Scroll strip — overflows the container so cards bleed
-          comfortably to the viewport edge. */}
-      <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex gap-6 px-6 max-w-[1400px] mx-auto">
-          {designs.map((d) => (
-            <div key={d.slug} className="flex-shrink-0 w-56 md:w-64">
-              <DesignCardWrapper design={d} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import AdminSignInForm from './AdminSignInForm';
 
 export const metadata: Metadata = {
-  title: 'Admin sign in — Miles Away Prints',
+  title: 'Admin sign in — The Inq Press',
   robots: { index: false, follow: false },
 };
 
@@ -18,7 +18,7 @@ export default function AdminSignInPage({ searchParams }: PageProps) {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="text-xs font-medium tracking-widest uppercase text-mid mb-2">
-            Miles Away
+            Inq Press
           </div>
           <h1 className="text-2xl font-medium tracking-tight text-ink">Admin</h1>
         </div>

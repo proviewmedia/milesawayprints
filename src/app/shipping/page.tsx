@@ -8,7 +8,7 @@ import PolicyCTA from '@/components/PolicyCTA';
 export const metadata: Metadata = {
   title: 'Shipping',
   description:
-    'How Miles Away Prints ships your order — production times, delivery windows, tracking, packaging, and international rules.',
+    'How The Inq Press ships your order — production times, delivery windows, tracking, packaging, and international rules.',
 };
 
 export default function ShippingPage() {

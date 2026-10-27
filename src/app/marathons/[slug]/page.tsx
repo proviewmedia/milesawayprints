@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('slug', params.slug)
     .eq('active', true)
     .maybeSingle();
-  if (!data) return { title: 'Marathon — Miles Away Prints' };
-  const title = `${data.city} Marathon Print | Miles Away Prints`;
+  if (!data) return { title: 'Marathon — The Inq Press' };
+  const title = `${data.city} Marathon Print | The Inq Press`;
   const description = `Custom ${data.city} Marathon and Half Marathon prints — personalized with your name, bib, finish time, and race date.`;
   const ogImageUrl = `/api/og/marathon/${params.slug}`;
   return {

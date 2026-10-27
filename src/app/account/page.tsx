@@ -49,7 +49,7 @@ function statusDot(s: string | null | undefined): string {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Your account — Miles Away Prints',
+  title: 'Your account — The Inq Press',
 };
 
 export default async function AccountPage() {

@@ -32,7 +32,7 @@ export default async function ProtectedAdminLayout({
         <div className="max-w-[1400px] mx-auto px-6 h-14 flex items-center justify-between gap-6">
           <div className="flex items-center gap-8">
             <Link href="/admin/orders" className="text-sm font-medium text-ink tracking-tight">
-              Miles Away · Admin
+              Inq Press · Admin
             </Link>
             <nav className="flex items-center gap-1 text-sm">
               <NavLink href="/admin/orders">Orders</NavLink>

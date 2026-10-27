@@ -12,11 +12,11 @@ export default function Footer() {
               href="/"
               className="text-[18px] font-medium tracking-tight text-ink no-underline"
             >
-              Miles Away{' '}
-              <span className="font-normal text-mid">Prints</span>
+              The Inq{' '}
+              <span className="font-normal text-mid">Press</span>
             </Link>
             <p className="text-sm text-mid mt-4 max-w-[320px] leading-relaxed">
-              Custom location art prints. Stadiums, airports, marathons, golf courses, city streets — printed on archival paper, delivered worldwide.
+              Custom printing on apparel, merch, posters, and more, plus our own collection of art prints. Quotes are free.
             </p>
 
             {/* Google Customer Reviews badge — platform.js (loaded in
@@ -43,9 +43,20 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10">
           <div>
-            <h4 className="text-[13px] font-medium text-ink mb-4">Shop</h4>
+            <h4 className="text-[13px] font-medium text-ink mb-4">Custom orders</h4>
+            <ul className="space-y-3">
+              <li><Link href="/custom" className="text-sm text-mid hover:text-ink transition-colors">Get a free quote</Link></li>
+              <li><Link href="/how-it-works" className="text-sm text-mid hover:text-ink transition-colors">How it works</Link></li>
+              <li><Link href="/how-it-works#methods" className="text-sm text-mid hover:text-ink transition-colors">Print methods</Link></li>
+              <li><Link href="/how-it-works#artwork" className="text-sm text-mid hover:text-ink transition-colors">Sending artwork</Link></li>
+              <li><Link href="/how-it-works#faq" className="text-sm text-mid hover:text-ink transition-colors">Custom order FAQ</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-[13px] font-medium text-ink mb-4">Shop prints</h4>
             <ul className="space-y-3">
               <li><Link href="/shop" className="text-sm text-mid hover:text-ink transition-colors">All Prints</Link></li>
               <li><Link href="/prints/skyline" className="text-sm text-mid hover:text-ink transition-colors">City Skyline Prints</Link></li>
@@ -93,7 +104,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-mid">
-          <p>&copy; {new Date().getFullYear()} Miles Away Prints. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} The Inq Press. All rights reserved.</p>
           <div className="flex gap-5">
             <Link href="/privacy" className="hover:text-ink transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-ink transition-colors">Terms</Link>

@@ -8,7 +8,7 @@ import ContactForm from './ContactForm';
 export const metadata: Metadata = {
   title: 'Contact',
   description:
-    'Reach Miles Away Prints by email or contact form. We respond within 24–48 hours, M–F.',
+    'Reach The Inq Press by email or contact form. We respond within 24–48 hours, M–F.',
 };
 
 export default function ContactPage() {

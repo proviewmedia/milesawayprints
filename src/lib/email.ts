@@ -10,7 +10,8 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-const FROM = 'Miles Away Prints <orders@milesawayprints.com>';
+// Sender stays on milesawayprints.com until theinqpress.com is verified in Resend.
+const FROM = 'The Inq Press <orders@milesawayprints.com>';
 const REPLY_TO = 'milesawayprintsllc@gmail.com';
 const SUPPORT_INBOX = 'milesawayprintsllc@gmail.com';
 
@@ -44,7 +45,7 @@ function wrapEmail({ preheader, heading, bodyHtml, cta }: WrapArgs): string {
   </head>
   <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #0e0e0e; background: #ffffff;">
     <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 24px; letter-spacing: 0.06em; text-transform: uppercase;">
-      Miles Away Prints
+      The Inq Press
     </p>
     <h1 style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 16px; line-height: 1.15;">
       ${escapeHtml(heading)}
@@ -61,7 +62,7 @@ function wrapEmail({ preheader, heading, bodyHtml, cta }: WrapArgs): string {
     }
     <hr style="border: none; border-top: 1px solid #e8e6e0; margin: 32px 0;" />
     <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 8px;">
-      Miles Away Prints · <a href="${SITE_URL}" style="color: #6b6b6b;">milesawayprints.com</a>
+      The Inq Press · <a href="${SITE_URL}" style="color: #6b6b6b;">${SITE_URL.replace(/^https:\/\/(www\.)?/, '')}</a>
     </p>
     <p style="font-size: 12px; color: #9c9c9c; margin: 0;">
       Questions? Reply to this email or reach <a href="mailto:${REPLY_TO}" style="color: #6b6b6b;">${REPLY_TO}</a>.
@@ -393,6 +394,99 @@ export async function sendContactEmail(args: ContactArgs) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Custom quote request: internal notification (with artwork attached) plus a
+// confirmation to the customer. Resend returns { error } instead of throwing,
+// so both sends are checked and surfaced as thrown errors to the route.
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface QuoteRequestArgs {
+  name: string;
+  email: string;
+  phone?: string;
+  organization?: string;
+  products: string[];
+  quantity: string;
+  neededBy?: string;
+  artwork: string;
+  artworkLink?: string;
+  details?: string;
+  attachments: { filename: string; content: Buffer }[];
+}
+
+export async function sendQuoteRequestEmails(args: QuoteRequestArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY missing; skipping quote request send');
+    return { skipped: true };
+  }
+
+  const rows: [string, string | undefined][] = [
+    ['Name', args.name],
+    ['Email', args.email],
+    ['Phone', args.phone],
+    ['Organization', args.organization],
+    ['Products', args.products.join(', ')],
+    ['Quantity', args.quantity],
+    ['Needed by', args.neededBy || 'No deadline'],
+    ['Artwork', args.artwork],
+    ['Artwork link', args.artworkLink],
+    ['Files attached', args.attachments.length ? args.attachments.map((a) => a.filename).join(', ') : 'None'],
+  ];
+  const table = rows
+    .filter(([, v]) => v)
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:6px 12px 6px 0;font-size:14px;color:#6b6b6b;vertical-align:top;white-space:nowrap;">${k}</td><td style="padding:6px 0;font-size:14px;color:#0e0e0e;">${escapeHtml(v!)}</td></tr>`,
+    )
+    .join('');
+
+  const internalHtml = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0e0e0e;background:#fff;">
+<h2 style="font-size:18px;margin:0 0 16px;">New custom quote request</h2>
+<table style="border-collapse:collapse;margin:0 0 16px;">${table}</table>
+<hr style="border:none;border-top:1px solid #e8e6e0;margin:16px 0;" />
+<p style="font-size:13px;color:#6b6b6b;margin:0 0 6px;">Details</p>
+<pre style="font-family:-apple-system,sans-serif;font-size:14px;color:#0e0e0e;line-height:1.5;white-space:pre-wrap;margin:0;">${escapeHtml(args.details || 'None given')}</pre>
+</body></html>`.trim();
+
+  const internal = await resend.emails.send({
+    from: FROM,
+    to: SUPPORT_INBOX,
+    reply_to: args.email,
+    subject: `[Quote] ${args.products.join(', ')} · ${args.quantity} · ${args.name}`,
+    html: internalHtml,
+    attachments: args.attachments,
+  });
+  if (internal.error) throw new Error(internal.error.message);
+
+  const confirmationHtml = wrapEmail({
+    preheader: 'We got your quote request',
+    heading: 'We got your request.',
+    bodyHtml: `
+<p style="font-size: 15px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
+  Thanks, ${escapeHtml(args.name.split(' ')[0])}. We will review your request and email you a quote within 1 to 2 business days. Nothing is printed until you approve a proof.
+</p>
+<table style="border-collapse:collapse;margin:0 0 24px;">${table}</table>
+<p style="font-size: 14px; color: #6b6b6b; margin: 0; line-height: 1.6;">
+  Want to add something? Just reply to this email.
+</p>`,
+  });
+
+  const confirmation = await resend.emails.send({
+    from: FROM,
+    to: args.email,
+    reply_to: REPLY_TO,
+    subject: 'We got your quote request',
+    html: confirmationHtml,
+  });
+  // The request already reached us, so a failed confirmation is logged, not fatal.
+  if (confirmation.error) console.error('[email] quote confirmation failed', confirmation.error);
+
+  return { ok: true };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Marathon manual-fulfillment notification — sent to the admin inbox when
 // a marathon order is paid, since marathons aren't auto-submitted to Printful
 // (admin builds the print file by hand).
@@ -494,7 +588,7 @@ export async function sendNewsletterWelcomeEmail({
 
   const html = wrapEmail({
     preheader: `Welcome — your 10% off code is ${promoCode}`,
-    heading: 'Welcome to Miles Away.',
+    heading: 'Welcome to The Inq Press.',
     bodyHtml: `
 <p style="font-size: 15px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
   Thanks for signing up. As a thank-you, here's <strong style="color: #0e0e0e;">10% off your first print</strong> — apply this code at checkout:

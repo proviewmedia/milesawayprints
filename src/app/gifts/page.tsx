@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     'Personalized location art prints for Father\'s Day, holidays, birthdays, and anniversaries. Curated picks, made to order, shipped worldwide.',
   alternates: { canonical: '/gifts' },
   openGraph: {
-    title: 'Gift Prints for Every Occasion | Miles Away Prints',
+    title: 'Gift Prints for Every Occasion | The Inq Press',
     description:
       'Personalized prints curated for the occasion. Father\'s Day, holidays, birthdays, anniversaries.',
     url: '/gifts',

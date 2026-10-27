@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Reset your password — Miles Away Prints',
+  title: 'Reset your password — The Inq Press',
   description:
     'Forgot your password? Enter your email and we\'ll send a reset link.',
   alternates: { canonical: '/forgot-password' },

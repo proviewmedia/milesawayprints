@@ -12,6 +12,8 @@ export interface SitePage {
  * Only include pages that exist (don't list FAQ/Returns until built).
  */
 export const SITE_PAGES: SitePage[] = [
+  { title: 'Get a free quote', href: '/custom', keywords: 'custom order quote shirts hats stickers merch apparel bulk printing', description: 'Custom printing on almost anything.' },
+  { title: 'How custom orders work', href: '/how-it-works', keywords: 'process proof print methods screen printing embroidery dtg artwork', description: 'Quote, proof, print, ship.' },
   { title: 'Shop all prints', href: '/shop', keywords: 'browse catalog all prints', description: 'Browse the full collection.' },
   { title: 'Golf course prints', href: '/shop?category=golf', keywords: 'golf course tee box pebble augusta', description: 'Browse golf course prints.' },
   { title: 'Stadium prints', href: '/shop?category=stadium', keywords: 'baseball football arena park', description: 'Browse stadium prints.' },
@@ -19,7 +21,6 @@ export const SITE_PAGES: SitePage[] = [
   { title: 'Marathon prints', href: '/shop?category=marathon', keywords: 'running race route course finish line', description: 'Browse marathon route prints.' },
   { title: 'City street prints', href: '/shop?category=city', keywords: 'street map town home', description: 'Browse city street map prints.' },
   { title: 'About', href: '/about', keywords: 'story mission company', description: 'Why we make prints, and how.' },
-  { title: 'How it works', href: '/#how', keywords: 'process steps order delivery', description: 'From idea to wall in four steps.' },
   { title: 'Gifts', href: '/#gift', keywords: 'gift wrap message birthday wedding anniversary', description: 'Make a print into a gift.' },
   { title: 'My account', href: '/account', keywords: 'orders profile shipping address sign in', description: 'Sign in or view your orders.' },
   { title: 'FAQ', href: '/faq', keywords: 'questions help answers', description: 'Common questions answered.' },

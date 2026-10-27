@@ -4,9 +4,9 @@ import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'About — Miles Away Prints',
+  title: 'About — The Inq Press',
   description:
-    'Miles Away Prints is a designer-led print studio creating custom location art — airports, marathons, golf courses, skylines, and city streets — printed on archival paper through our American production partner in Detroit.',
+    'The Inq Press is a designer-led print studio creating custom location art — airports, marathons, golf courses, skylines, and city streets — printed on archival paper through our American production partner in Detroit.',
 };
 
 export default function AboutPage() {
@@ -26,7 +26,7 @@ export default function AboutPage() {
                 Designed for<br />the places that<br />stayed with you.
               </h1>
               <p className="text-base md:text-lg text-ink leading-relaxed max-w-md">
-                Miles Away Prints is a designer-led studio making custom
+                The Inq Press is a designer-led studio making custom
                 location art — finish lines, fairways, terminals, skylines,
                 circuits — printed on archival paper and shipped worldwide.
               </p>
@@ -71,7 +71,7 @@ export default function AboutPage() {
           </h2>
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-ink">
             <p>
-              Miles Away Prints began in 2020 with a single hand-drawn airport
+              The Inq Press began in 2020 with a single hand-drawn airport
               diagram and a hunch — that the places people travel to are the
               places they want to remember. Five years later, the studio has
               shipped more than 750 custom prints to runners, pilots, golfers,
@@ -112,7 +112,7 @@ export default function AboutPage() {
               </p>
               <p>
                 He works in user-interface and digital product design by day;
-                Miles Away Prints is the side of the practice where the lines
+                The Inq Press is the side of the practice where the lines
                 slow down. Every poster, frame layout, and color decision in
                 the catalog runs through him personally.
               </p>

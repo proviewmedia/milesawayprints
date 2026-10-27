@@ -33,6 +33,8 @@ export async function GET() {
 
   const staticUrls: UrlEntry[] = [
     { loc: `${BASE}/`, lastmod: now, changefreq: 'weekly', priority: 1.0 },
+    { loc: `${BASE}/custom`, lastmod: now, changefreq: 'monthly', priority: 0.95 },
+    { loc: `${BASE}/how-it-works`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE}/shop`, lastmod: now, changefreq: 'daily', priority: 0.9 },
     { loc: `${BASE}/gifts`, lastmod: now, changefreq: 'weekly', priority: 0.9 },
     // Gift occasion pages — driven by GIFT_ORDER so new occasions are

@@ -10,7 +10,7 @@ import { DesignSummary, Collection, toDesignSummary, GalleryItemWithMeta } from 
 export const metadata: Metadata = {
   title: 'Shop All Prints',
   description:
-    'Browse every design in the Miles Away Prints collection. Skylines, F1 circuits, golf courses, stadiums, airports, marathons, and cities — ready to ship.',
+    'Browse every design in the The Inq Press collection. Skylines, F1 circuits, golf courses, stadiums, airports, marathons, and cities — ready to ship.',
 };
 
 export const dynamic = 'force-dynamic';
