@@ -1,3 +1,5 @@
+import { GUIDES } from './resources';
+
 export interface SitePage {
   title: string;
   href: string;
@@ -15,6 +17,9 @@ export const SITE_PAGES: SitePage[] = [
   { title: 'Get a free quote', href: '/custom', keywords: 'custom order quote shirts hats stickers merch apparel bulk printing', description: 'Custom printing on almost anything.' },
   { title: 'What we print', href: '/services', keywords: 'services products apparel hats bags drinkware stickers posters signs promo', description: 'Every product we can print.' },
   { title: 'How custom orders work', href: '/how-it-works', keywords: 'process proof print methods screen printing embroidery dtg artwork', description: 'Quote, proof, print, ship.' },
+  { title: 'Printing guides and resources', href: '/resources', keywords: 'learn guide print methods where to print artwork dpi shirts paper glossary', description: 'Free guides for getting something printed.' },
+  { title: 'Print size calculator', href: '/resources/print-size-calculator', keywords: 'dpi resolution pixels how big can i print image size calculator', description: 'How large your image can print sharp.' },
+  ...GUIDES.map((g) => ({ title: g.title, href: `/resources/${g.slug}`, keywords: g.category.toLowerCase(), description: g.summary })),
   { title: 'Shop all prints', href: '/shop', keywords: 'browse catalog all prints', description: 'Browse the full collection.' },
   { title: 'Golf course prints', href: '/shop?category=golf', keywords: 'golf course tee box pebble augusta', description: 'Browse golf course prints.' },
   { title: 'Stadium prints', href: '/shop?category=stadium', keywords: 'baseball football arena park', description: 'Browse stadium prints.' },

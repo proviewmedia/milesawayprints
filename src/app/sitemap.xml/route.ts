@@ -1,3 +1,4 @@
+import { GUIDES } from '@/data/resources';
 import { createAdminClient } from '@/lib/supabase';
 import { SITE_URL as BASE } from '@/lib/site';
 import { GIFT_ORDER } from '@/data/gifts';
@@ -36,6 +37,9 @@ export async function GET() {
     { loc: `${BASE}/custom`, lastmod: now, changefreq: 'monthly', priority: 0.95 },
     { loc: `${BASE}/services`, lastmod: now, changefreq: 'monthly', priority: 0.9 },
     { loc: `${BASE}/how-it-works`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
+    { loc: `${BASE}/resources`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
+    { loc: `${BASE}/resources/print-size-calculator`, lastmod: now, changefreq: 'monthly', priority: 0.6 },
+    ...GUIDES.map((g): UrlEntry => ({ loc: `${BASE}/resources/${g.slug}`, lastmod: now, changefreq: 'monthly', priority: 0.6 })),
     { loc: `${BASE}/shop`, lastmod: now, changefreq: 'daily', priority: 0.9 },
     { loc: `${BASE}/gifts`, lastmod: now, changefreq: 'weekly', priority: 0.9 },
     // Gift occasion pages — driven by GIFT_ORDER so new occasions are

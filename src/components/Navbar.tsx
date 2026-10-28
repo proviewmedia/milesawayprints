@@ -9,6 +9,7 @@ import { useSearch } from '@/contexts/SearchContext';
 const NAV_LINKS = [
   { href: '/services', label: 'What we print' },
   { href: '/how-it-works', label: 'How it works' },
+  { href: '/resources', label: 'Resources' },
   { href: '/shop', label: 'Print shop' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },

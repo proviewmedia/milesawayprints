@@ -61,6 +61,8 @@ export default function Footer() {
           <div>
             <h4 className={HEADING}>Resources</h4>
             <ul className="space-y-3">
+              <li><Link href="/resources" className={LINK}>Printing guides</Link></li>
+              <li><Link href="/resources/print-size-calculator" className={LINK}>Print size calculator</Link></li>
               <li><Link href="/how-it-works" className={LINK}>How it works</Link></li>
               <li><Link href="/how-it-works#methods" className={LINK}>Print methods</Link></li>
               <li><Link href="/how-it-works#artwork" className={LINK}>Sending artwork</Link></li>
