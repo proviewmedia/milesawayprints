@@ -7,9 +7,10 @@ import { useCart } from '@/contexts/CartContext';
 import { useSearch } from '@/contexts/SearchContext';
 
 const NAV_LINKS = [
-  { href: '/custom', label: 'Custom orders' },
-  { href: '/shop', label: 'Shop prints' },
+  { href: '/services', label: 'What we print' },
   { href: '/how-it-works', label: 'How it works' },
+  { href: '/shop', label: 'Print shop' },
+  { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
 
@@ -33,7 +34,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
             href="/custom"
             className="opacity-90 hover:opacity-100 text-center"
           >
-            Custom printing on shirts, hats, stickers, posters, and more. Get a free quote →
+            Free quotes on custom shirts, hats, stickers, signs, and more →
           </Link>
         </div>
       </div>
@@ -41,17 +42,15 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
       {/* Main nav */}
       <nav className="bg-paper border-b border-border">
         <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center justify-between gap-6">
-          <Link
-            href="/"
-            className="text-[19px] font-medium tracking-tight text-ink no-underline whitespace-nowrap"
-          >
-            The Inq <span className="font-normal text-mid">Press</span>
+          <Link href="/" className="shrink-0" aria-label="The Inq Press home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/inq-logo-black.png" alt="INQ Press" width={951} height={303} className="h-8 md:h-9 w-auto" />
           </Link>
 
-          <ul className="hidden md:flex items-center gap-8">
+          <ul className="hidden lg:flex items-center gap-7">
             {NAV_LINKS.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="text-[15px] font-normal text-ink hover:opacity-60 transition-opacity">
+                <Link href={l.href} className="text-[15px] font-semibold text-ink hover:opacity-60 transition-opacity">
                   {l.label}
                 </Link>
               </li>
@@ -59,7 +58,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
           </ul>
 
           <div className="flex items-center gap-1">
-            <Link href="/custom" className="hidden lg:inline-flex btn-primary py-2.5 px-5 text-[13px] mr-2">
+            <Link href="/custom" className="hidden md:inline-flex btn-primary font-bold py-2.5 px-5 text-[13px] mr-2">
               Get a quote
             </Link>
             <button
@@ -103,7 +102,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
             </button>
 
             <button
-              className="md:hidden w-10 h-10 flex items-center justify-center"
+              className="lg:hidden w-10 h-10 flex items-center justify-center"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
             >
@@ -113,13 +112,13 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
         </div>
 
         {mobileOpen && (
-          <div className="md:hidden bg-paper border-t border-border px-6 py-5 space-y-4">
-            {[...NAV_LINKS, { href: '/about', label: 'About' }].map((l) => (
-              <Link key={l.href} href={l.href} className="block text-base font-normal text-ink" onClick={() => setMobileOpen(false)}>
+          <div className="lg:hidden bg-paper border-t border-border px-6 py-5 space-y-4">
+            {NAV_LINKS.map((l) => (
+              <Link key={l.href} href={l.href} className="block font-display font-black uppercase text-2xl tracking-tight text-ink" onClick={() => setMobileOpen(false)}>
                 {l.label}
               </Link>
             ))}
-            <Link href="/custom" className="btn-primary w-full" onClick={() => setMobileOpen(false)}>
+            <Link href="/custom" className="btn-primary font-bold w-full" onClick={() => setMobileOpen(false)}>
               Get a free quote
             </Link>
           </div>

@@ -20,20 +20,22 @@ export interface CustomProduct {
   name: string;
   /** Short examples shown under the name. */
   examples: string;
+  /** Print methods we usually recommend for this product. */
+  methods: string;
   /** lucide-react icon name, resolved in the component. */
   icon: 'shirt' | 'hardHat' | 'shoppingBag' | 'coffee' | 'sticker' | 'frame' | 'signpost' | 'gift' | 'sparkles';
 }
 
 export const CUSTOM_PRODUCTS: CustomProduct[] = [
-  { slug: 'apparel', name: 'Apparel', examples: 'T-shirts, hoodies, crewnecks, polos', icon: 'shirt' },
-  { slug: 'headwear', name: 'Hats', examples: 'Caps, trucker hats, beanies', icon: 'hardHat' },
-  { slug: 'bags', name: 'Bags and totes', examples: 'Totes, backpacks, pouches', icon: 'shoppingBag' },
-  { slug: 'drinkware', name: 'Drinkware', examples: 'Mugs, tumblers, water bottles', icon: 'coffee' },
-  { slug: 'stickers', name: 'Stickers and labels', examples: 'Die-cut stickers, labels, decals', icon: 'sticker' },
-  { slug: 'posters', name: 'Posters and wall art', examples: 'Posters, fine-art prints, framed art', icon: 'frame' },
-  { slug: 'signs', name: 'Signs and banners', examples: 'Banners, yard signs, event signage', icon: 'signpost' },
-  { slug: 'promo', name: 'Promo items', examples: 'Keychains, pens, patches, giveaways', icon: 'gift' },
-  { slug: 'other', name: 'Something else', examples: 'Tell us what it is and we will find a way', icon: 'sparkles' },
+  { slug: 'apparel', methods: 'Screen printing, DTG, DTF, embroidery', name: 'Apparel', examples: 'T-shirts, hoodies, crewnecks, polos', icon: 'shirt' },
+  { slug: 'headwear', methods: 'Embroidery, patches, DTF', name: 'Hats', examples: 'Caps, trucker hats, beanies', icon: 'hardHat' },
+  { slug: 'bags', methods: 'Screen printing, DTF, embroidery', name: 'Bags and totes', examples: 'Totes, backpacks, pouches', icon: 'shoppingBag' },
+  { slug: 'drinkware', methods: 'Sublimation, UV printing, engraving', name: 'Drinkware', examples: 'Mugs, tumblers, water bottles', icon: 'coffee' },
+  { slug: 'stickers', methods: 'Digital print, die-cut, vinyl', name: 'Stickers and labels', examples: 'Die-cut stickers, labels, decals', icon: 'sticker' },
+  { slug: 'posters', methods: 'Fine-art giclee, digital print', name: 'Posters and wall art', examples: 'Posters, fine-art prints, framed art', icon: 'frame' },
+  { slug: 'signs', methods: 'Large-format digital print', name: 'Signs and banners', examples: 'Banners, yard signs, event signage', icon: 'signpost' },
+  { slug: 'promo', methods: 'UV printing, pad printing, engraving', name: 'Promo items', examples: 'Keychains, pens, patches, giveaways', icon: 'gift' },
+  { slug: 'other', methods: 'We will recommend one', name: 'Something else', examples: 'Tell us what it is and we will find a way', icon: 'sparkles' },
 ];
 
 // Vercel caps request bodies at 4.5 MB, so uploads are held under that with
@@ -134,4 +136,13 @@ export const CUSTOM_FAQS = [
     q: 'Do you have a store I can visit?',
     a: 'We are an online studio, so everything happens by email, and your finished order ships to you.',
   },
+];
+
+/** Who we print for. Shown on the homepage so visitors see themselves. */
+export const AUDIENCES = [
+  { name: 'Brands and creators', desc: 'Merch drops, launches, and packaging extras.' },
+  { name: 'Businesses', desc: 'Staff uniforms, signage, and client gifts.' },
+  { name: 'Teams and clubs', desc: 'Jerseys, hats, and fan gear.' },
+  { name: 'Events', desc: 'Weddings, reunions, races, and conferences.' },
+  { name: 'Gifts', desc: 'One-of-a-kind pieces for someone special.' },
 ];

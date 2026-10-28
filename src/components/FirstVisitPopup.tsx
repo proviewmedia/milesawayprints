@@ -24,8 +24,10 @@ export default function FirstVisitPopup() {
   const cardRef = useRef<HTMLDivElement>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
 
-  const skipPaths = ['/checkout', '/account', '/sign-in', '/forgot-password', '/reset-password'];
-  const shouldSkip = skipPaths.some((p) => pathname.startsWith(p));
+  // The offer is for the print shop, so it only appears on shop pages. It
+  // would interrupt the custom-quote flow everywhere else.
+  const shopPaths = ['/shop', '/prints', '/gifts', '/marathons'];
+  const shouldSkip = !shopPaths.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
     if (shouldSkip) return;

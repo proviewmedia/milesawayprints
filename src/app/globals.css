@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -43,6 +43,16 @@
     @apply w-full px-4 py-3 border border-border rounded-lg font-sans text-base font-normal text-ink
            outline-none transition-colors duration-200 placeholder:text-light-mid
            focus:border-ink;
+  }
+
+  /* Bold display headline: heavy uppercase type that matches the logo */
+  .display {
+    @apply font-display font-black uppercase tracking-[-0.02em] leading-[0.9];
+  }
+
+  /* Small uppercase label above a section headline */
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.2em];
   }
 
   .section-label {

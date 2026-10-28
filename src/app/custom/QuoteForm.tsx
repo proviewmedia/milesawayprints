@@ -29,10 +29,10 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
     <fieldset className="border border-border rounded-xl p-5 md:p-7 bg-paper">
       <legend className="sr-only">{title}</legend>
       <div className="flex items-baseline gap-3 mb-1">
-        <span className="text-xs font-medium text-mid tabular-nums">0{n}</span>
-        <h2 className="text-lg md:text-xl font-medium text-ink tracking-tight">{title}</h2>
+        <span className="font-display font-black text-lg text-mid tabular-nums">0{n}</span>
+        <h2 className="font-display font-black uppercase text-xl md:text-2xl text-ink tracking-tight">{title}</h2>
       </div>
-      {hint && <p className="text-sm text-mid mb-5 ml-7">{hint}</p>}
+      {hint && <p className="text-sm text-mid mb-5 ml-9">{hint}</p>}
       <div className={hint ? '' : 'mt-5'}>{children}</div>
     </fieldset>
   );
@@ -353,7 +353,7 @@ export default function QuoteForm({ initialProduct }: { initialProduct?: Product
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-1">
-        <button type="submit" disabled={status === 'sending'} className="btn-primary disabled:opacity-60">
+        <button type="submit" disabled={status === 'sending'} className="btn-primary font-bold px-9 py-4 text-[15px] disabled:opacity-60">
           {status === 'sending' ? 'Sending...' : 'Send quote request'}
         </button>
         <p className="text-[13px] text-mid">Free, with no commitment. You approve a proof before anything is printed.</p>

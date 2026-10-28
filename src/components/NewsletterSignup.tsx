@@ -7,11 +7,13 @@ interface Props {
   source: 'footer' | 'gift-page' | 'checkout-success' | 'home';
   /** Render variant. Compact = single inline row; banner = larger card. */
   variant?: 'compact' | 'banner';
+  /** Compact variant on a dark surface: inverts the submit button. */
+  onDark?: boolean;
 }
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
-export default function NewsletterSignup({ source, variant = 'compact' }: Props) {
+export default function NewsletterSignup({ source, variant = 'compact', onDark = false }: Props) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState<string | null>(null);
@@ -106,14 +108,16 @@ export default function NewsletterSignup({ source, variant = 'compact' }: Props)
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="bg-paper border border-border rounded-full px-4 py-2.5 text-sm flex-1 focus:outline-none focus:border-ink"
+          className="bg-paper text-ink border border-border rounded-full px-4 py-2.5 text-base md:text-sm flex-1 focus:outline-none focus:border-ink"
           disabled={status === 'submitting'}
         />
         <button
           type="submit"
           disabled={status === 'submitting'}
           aria-label={status === 'submitting' ? 'Submitting…' : 'Subscribe to newsletter'}
-          className="bg-ink text-paper w-10 h-10 rounded-full flex items-center justify-center hover:bg-black transition-colors disabled:opacity-50 flex-shrink-0"
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors disabled:opacity-50 flex-shrink-0 ${
+            onDark ? 'bg-paper text-ink hover:bg-soft' : 'bg-ink text-paper hover:bg-black'
+          }`}
         >
           {status === 'submitting' ? (
             <span className="text-[10px]" aria-hidden="true">…</span>

@@ -41,13 +41,11 @@ export default function HowItWorksPage() {
       <NavbarShell />
       <script {...jsonLdScript(faqPageJsonLd(CUSTOM_FAQS))} />
 
-      <section className="pt-28 md:pt-32 pb-12 md:pb-16 bg-soft">
-        <div className="max-w-[1100px] mx-auto px-6 pt-8 md:pt-12">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">How it works</p>
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.02] mb-5 max-w-3xl">
-            From idea to finished product in four steps.
-          </h1>
-          <p className="text-base md:text-lg text-mid max-w-xl leading-relaxed">
+      <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
+        <div className="max-w-[1100px] mx-auto px-6">
+          <p className="eyebrow text-paper/60 mb-6">How it works</p>
+          <h1 className="display text-[12vw] md:text-8xl mb-6 max-w-4xl">Idea to finished product</h1>
+          <p className="text-base md:text-lg text-paper/75 max-w-xl leading-relaxed">
             Everything happens online and by email. You see the price and a proof before anything is printed.
           </p>
         </div>
@@ -58,14 +56,14 @@ export default function HowItWorksPage() {
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {PROCESS.map((s) => (
               <li key={s.n} className="rounded-xl border border-border p-6">
-                <div className="text-xs font-medium text-mid mb-3">{s.n}</div>
-                <h2 className="text-[17px] font-medium text-ink mb-2">{s.title}</h2>
+                <div className="display text-5xl text-ink/20 mb-4">{s.n}</div>
+                <h2 className="text-[17px] font-bold text-ink mb-2">{s.title}</h2>
                 <p className="text-sm text-mid leading-relaxed">{s.desc}</p>
               </li>
             ))}
           </ol>
           <div className="mt-8">
-            <Link href="/custom" className="btn-primary">
+            <Link href="/custom" className="btn-primary font-bold">
               Get a free quote
             </Link>
           </div>
@@ -74,14 +72,14 @@ export default function HowItWorksPage() {
 
       <section id="methods" className="py-12 md:py-16 bg-soft scroll-mt-32">
         <div className="max-w-[1100px] mx-auto px-6">
-          <h2 className="text-2xl md:text-4xl font-medium tracking-tight text-ink mb-2">Print methods</h2>
+          <h2 className="display text-4xl md:text-6xl mb-4">Print methods</h2>
           <p className="text-mid mb-8 max-w-xl">
             You do not need to choose one. We recommend the best method for your product, design, and quantity.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {DECORATION_METHODS.map((m) => (
               <div key={m.name} className="rounded-xl bg-paper border border-border p-6">
-                <h3 className="text-[17px] font-medium text-ink">{m.name}</h3>
+                <h3 className="font-display font-black uppercase text-xl tracking-tight">{m.name}</h3>
                 <p className="text-[13px] font-medium text-mid mt-1 mb-3">Best for: {m.bestFor}</p>
                 <p className="text-sm text-mid leading-relaxed">{m.description}</p>
               </div>
@@ -92,7 +90,7 @@ export default function HowItWorksPage() {
 
       <section id="artwork" className="py-12 md:py-16 scroll-mt-32">
         <div className="max-w-[1100px] mx-auto px-6">
-          <h2 className="text-2xl md:text-4xl font-medium tracking-tight text-ink mb-2">Sending artwork</h2>
+          <h2 className="display text-4xl md:text-6xl mb-4">Sending artwork</h2>
           <p className="text-mid mb-8 max-w-xl">Any of these work. If you are unsure, send what you have.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ARTWORK_GUIDELINES.map((g) => (
@@ -107,7 +105,7 @@ export default function HowItWorksPage() {
 
       <section id="faq" className="py-12 md:py-16 bg-soft scroll-mt-32">
         <div className="max-w-[800px] mx-auto px-6">
-          <h2 className="text-2xl md:text-4xl font-medium tracking-tight text-ink mb-8">Common questions</h2>
+          <h2 className="display text-4xl md:text-6xl mb-8">Common questions</h2>
           <div className="space-y-3">
             {CUSTOM_FAQS.map((f) => (
               <details key={f.q} className="group rounded-xl bg-paper border border-border">
@@ -133,7 +131,7 @@ export default function HowItWorksPage() {
 
       <section className="py-16 md:py-20 bg-ink text-paper">
         <div className="max-w-[900px] mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.05] mb-5">Ready when you are.</h2>
+          <h2 className="display text-5xl md:text-8xl mb-6">Ready when you are</h2>
           <p className="text-paper/70 mb-9 max-w-md mx-auto">Free quotes. No commitment until you approve a proof.</p>
           <Link
             href="/custom"

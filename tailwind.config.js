@@ -9,6 +9,9 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        // Heavy geometric display face, chosen to sit next to the INQ PRESS
+        // logo's black-weight letterforms. Headlines only, never body copy.
+        display: ['"Archivo"', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Core ink (near-black, slightly warm)

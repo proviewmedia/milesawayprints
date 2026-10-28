@@ -13,6 +13,7 @@ export interface SitePage {
  */
 export const SITE_PAGES: SitePage[] = [
   { title: 'Get a free quote', href: '/custom', keywords: 'custom order quote shirts hats stickers merch apparel bulk printing', description: 'Custom printing on almost anything.' },
+  { title: 'What we print', href: '/services', keywords: 'services products apparel hats bags drinkware stickers posters signs promo', description: 'Every product we can print.' },
   { title: 'How custom orders work', href: '/how-it-works', keywords: 'process proof print methods screen printing embroidery dtg artwork', description: 'Quote, proof, print, ship.' },
   { title: 'Shop all prints', href: '/shop', keywords: 'browse catalog all prints', description: 'Browse the full collection.' },
   { title: 'Golf course prints', href: '/shop?category=golf', keywords: 'golf course tee box pebble augusta', description: 'Browse golf course prints.' },
