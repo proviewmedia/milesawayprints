@@ -35,9 +35,9 @@ export function organizationJsonLd() {
     logo: `${SITE_URL}/icon`,
     image: `${SITE_URL}/apple-icon`,
     description:
-      'Custom location art prints — airports, city skylines, marathon routes, golf courses, stadiums, and F1 circuits. Personalized and shipped worldwide.',
+      'Custom printing on apparel, merch, stickers, posters, and signs, with free quotes and a proof before anything prints. Plus art prints of airports, city skylines, marathon routes, golf courses, stadiums, and F1 circuits.',
     sameAs: [
-      'https://www.etsy.com/shop/MilesAwayPrintsLLC',
+      'https://www.etsy.com/shop/TheInqPress',
     ],
     contactPoint: {
       '@type': 'ContactPoint',

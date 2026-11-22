@@ -87,7 +87,7 @@ export async function GET(
               marginBottom: 24,
             }}
           >
-            The Inq · Press
+            The INQ · Press
           </div>
           <div
             style={{
@@ -108,11 +108,12 @@ export async function GET(
               letterSpacing: '-0.02em',
               fontWeight: 500,
               marginBottom: 16,
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            {row.city} Marathon
-            <br />
-            Print
+            <div style={{ display: 'flex' }}>{`${row.city} Marathon`}</div>
+            <div style={{ display: 'flex' }}>Print</div>
           </div>
           <div
             style={{

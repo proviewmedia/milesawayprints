@@ -70,7 +70,7 @@ export default async function HomePage() {
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-16 md:pb-24">
         <div className="max-w-[1400px] mx-auto px-6">
           <p className="eyebrow text-paper/60 mb-6">Custom print studio</p>
-          <h1 className="display text-[15vw] md:text-[9.5vw] xl:text-[150px]">
+          <h1 className="display text-[13.5vw] md:text-[9.5vw] xl:text-[150px]">
             Your idea.
             <br />
             Printed on
@@ -278,12 +278,12 @@ export default async function HomePage() {
                 <h2 className="display text-5xl md:text-7xl">Customers say</h2>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex gap-0.5 text-ink" aria-label="4.9 out of 5 stars">
+                <div className="flex gap-0.5 text-ink" aria-label="4.7 out of 5 stars">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} size={16} fill="currentColor" strokeWidth={0} aria-hidden="true" />
                   ))}
                 </div>
-                <span className="text-sm font-bold">4.9 / 5 from 500+ customers</span>
+                <span className="text-sm font-bold">4.7 / 5 from 100+ Etsy reviews</span>
               </div>
             </div>
             <div className="grid md:grid-cols-3 gap-8">

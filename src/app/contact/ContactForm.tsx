@@ -45,9 +45,9 @@ export default function ContactForm() {
   if (status === 'sent') {
     return (
       <div className="border border-border p-6">
-        <p className="text-sm text-ink mb-1">Thanks — message received.</p>
+        <p className="text-sm text-ink mb-1">Thanks, message received.</p>
         <p className="text-[13px] text-mid leading-relaxed">
-          We&apos;ll reply to <strong className="text-ink">{email}</strong> within 24–48 hours.
+          We&apos;ll reply to <strong className="text-ink">{email}</strong> within 1 to 2 business days.
         </p>
       </div>
     );

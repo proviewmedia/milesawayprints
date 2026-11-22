@@ -105,7 +105,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: url },
     openGraph: {
-      title: `${design.name} | The Inq Press`,
+      title: `${design.name} | The INQ Press`,
       description,
       url,
       type: 'website',
@@ -113,7 +113,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${design.name} | The Inq Press`,
+      title: `${design.name} | The INQ Press`,
       description,
       images: [ogImageUrl],
     },
@@ -125,7 +125,7 @@ export async function generateMetadata({
       'product:price:currency': 'USD',
       'product:availability': 'in stock',
       'product:condition': 'new',
-      'product:brand': 'The Inq Press',
+      'product:brand': 'The INQ Press',
       'product:retailer_item_id': design.slug,
     },
   };

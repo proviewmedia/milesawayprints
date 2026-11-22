@@ -118,7 +118,7 @@ export default function ShopClient({ designs, collections }: Props) {
           can dock immediately under it without an empty band in between. */}
       <section className="pt-28 md:pt-32 pb-4 md:pb-6">
         <div className="max-w-[800px] mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.05] mb-3">
+          <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-3">
             Shop
           </h1>
           <p className="text-mid text-base md:text-lg">

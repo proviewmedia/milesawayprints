@@ -8,7 +8,7 @@ import PolicyCTA from '@/components/PolicyCTA';
 export const metadata: Metadata = {
   title: 'Shipping',
   description:
-    'How The Inq Press ships your order — production times, delivery windows, tracking, packaging, and international rules.',
+    'How The INQ Press ships your order — production times, delivery windows, tracking, packaging, and international rules.',
 };
 
 export default function ShippingPage() {
@@ -18,7 +18,7 @@ export default function ShippingPage() {
 
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.05] mb-4">
+          <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
             Shipping.
           </h1>
           <p className="text-mid text-base md:text-lg leading-relaxed max-w-xl">

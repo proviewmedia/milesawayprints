@@ -195,7 +195,7 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
                     <Star key={i} size={12} fill="currentColor" strokeWidth={0} />
                   ))}
                 </div>
-                <span className="text-[13px] text-mid">4.9 / 5</span>
+                <span className="text-[13px] text-mid">4.7 / 5 on Etsy</span>
               </div>
 
               {/* Size */}

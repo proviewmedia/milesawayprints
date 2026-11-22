@@ -18,8 +18,8 @@ import { SITE_URL } from '@/lib/site';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'The Inq Press | Custom Printing and Art Prints',
-    template: '%s | The Inq Press',
+    default: 'The INQ Press | Custom Printing and Art Prints',
+    template: '%s | The INQ Press',
   },
   description:
     'Custom printing on shirts, hats, stickers, posters, signs, and merch, with free quotes and a proof before anything is printed. Plus our collection of airport, golf course, skyline, and marathon art prints.',
@@ -39,22 +39,22 @@ export const metadata: Metadata = {
     'personalized art',
     'custom wall art',
   ],
-  authors: [{ name: 'The Inq Press' }],
+  authors: [{ name: 'The INQ Press' }],
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: SITE_URL,
-    siteName: 'The Inq Press',
-    title: 'The Inq Press | Custom Printing and Art Prints',
+    siteName: 'The INQ Press',
+    title: 'The INQ Press | Custom Printing and Art Prints',
     description:
       'Custom printing on apparel, merch, posters, and more. Free quotes, proofs before print, and our own collection of art prints.',
     images: [
-      { url: '/api/og/home', width: 1200, height: 630, alt: 'The Inq Press' },
+      { url: '/api/og/home', width: 1200, height: 630, alt: 'The INQ Press' },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'The Inq Press | Custom Printing and Art Prints',
+    title: 'The INQ Press | Custom Printing and Art Prints',
     description: 'Custom printing on apparel, merch, posters, and more. Free quotes.',
     images: ['/api/og/home'],
   },

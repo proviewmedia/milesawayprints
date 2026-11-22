@@ -43,7 +43,7 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
       {/* Main nav */}
       <nav className="bg-paper border-b border-border">
         <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center justify-between gap-6">
-          <Link href="/" className="shrink-0" aria-label="The Inq Press home">
+          <Link href="/" className="shrink-0" aria-label="The INQ Press home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/inq-logo-black.png" alt="INQ Press" width={951} height={303} className="h-8 md:h-9 w-auto" />
           </Link>

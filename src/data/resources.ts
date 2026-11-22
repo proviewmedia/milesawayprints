@@ -157,7 +157,7 @@ export const GUIDES: Guide[] = [
       { type: 'h2', text: 'Full-service studio' },
       {
         type: 'p',
-        text: 'A studio handles the whole project: helping with the design, choosing the right product and method, sending a proof, and managing production. This is the best fit when you need several kinds of items, are not sure what you need yet, or do not have print-ready artwork. The Inq Press works this way.',
+        text: 'A studio handles the whole project: helping with the design, choosing the right product and method, sending a proof, and managing production. This is the best fit when you need several kinds of items, are not sure what you need yet, or do not have print-ready artwork. The INQ Press works this way.',
       },
       { type: 'h2', text: 'Questions to ask any printer' },
       {

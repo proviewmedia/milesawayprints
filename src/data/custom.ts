@@ -1,5 +1,5 @@
 /**
- * Custom-order content for The Inq Press: what we print, how, and the
+ * Custom-order content for The INQ Press: what we print, how, and the
  * choices shown on the quote form. Single source of truth so the homepage
  * grid, /how-it-works, and /custom never drift apart.
  */

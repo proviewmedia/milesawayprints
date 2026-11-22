@@ -117,7 +117,7 @@ export default async function CheckoutSuccessPage({
       <NavbarShell />
       <section className="pt-32 md:pt-40 pb-24 min-h-[70vh]">
         <div className="max-w-[520px] mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-4">
+          <h1 className="display text-4xl md:text-6xl text-ink mb-4">
             Your order<br />is in.
           </h1>
           <p className="text-mid leading-relaxed mb-10">

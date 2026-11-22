@@ -136,7 +136,7 @@ export default function CheckoutClient({
       <Navbar defaultCountry={navbarCountry} />
 
       <section className="max-w-[1200px] mx-auto px-6 pt-28 md:pt-32 pb-16">
-        <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink leading-[1.05] py-6 md:py-7">
+        <h1 className="display text-4xl md:text-5xl text-ink pt-3 py-6 md:py-7">
           Checkout
         </h1>
 

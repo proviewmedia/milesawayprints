@@ -12,7 +12,7 @@ export default function Footer() {
         {/* Brand + quote CTA on the left, newsletter on the right */}
         <div className="grid md:grid-cols-[1.4fr_1.6fr] gap-10 pb-12 border-b border-paper/15 mb-12">
           <div>
-            <Link href="/" aria-label="The Inq Press home" className="inline-block">
+            <Link href="/" aria-label="The INQ Press home" className="inline-block">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/inq-logo-white.png" alt="INQ Press" width={951} height={303} className="h-12 w-auto" />
             </Link>
@@ -95,7 +95,7 @@ export default function Footer() {
               <li><Link href="/shipping" className={LINK}>Shipping</Link></li>
               <li><Link href="/returns" className={LINK}>Damage policy</Link></li>
               <li>
-                <a href="https://www.etsy.com/shop/MilesAwayPrintsLLC" target="_blank" rel="noopener noreferrer" className={LINK}>
+                <a href="https://www.etsy.com/shop/TheInqPress" target="_blank" rel="noopener noreferrer" className={LINK}>
                   Etsy shop
                 </a>
               </li>
@@ -104,7 +104,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 pt-6 border-t border-paper/15 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-paper/50">
-          <p>&copy; {new Date().getFullYear()} The Inq Press. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} The INQ Press. All rights reserved.</p>
           <div className="flex gap-5">
             <Link href="/privacy" className="hover:text-paper transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-paper transition-colors">Terms</Link>

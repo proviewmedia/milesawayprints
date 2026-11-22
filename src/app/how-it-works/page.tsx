@@ -8,7 +8,7 @@ import { faqPageJsonLd, jsonLdScript } from '@/lib/seo';
 export const metadata: Metadata = {
   title: 'How Custom Orders Work',
   description:
-    'How custom printing works at The Inq Press: send a request, get a free quote and proof, approve it, and we print and ship. Print methods, artwork tips, and FAQs.',
+    'How custom printing works at The INQ Press: send a request, get a free quote and proof, approve it, and we print and ship. Print methods, artwork tips, and FAQs.',
   alternates: { canonical: '/how-it-works' },
 };
 

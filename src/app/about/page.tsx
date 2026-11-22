@@ -1,198 +1,180 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'About — The Inq Press',
+  title: 'About',
   description:
-    'The Inq Press is a designer-led print studio creating custom location art — airports, marathons, golf courses, skylines, and city streets — printed on archival paper through our American production partner in Detroit.',
+    'The INQ Press is a designer-led print studio in Las Vegas. Custom printing on apparel, merch, stickers, signs, and posters, plus our own collection of art prints. Started on Etsy in 2020.',
+  alternates: { canonical: '/about' },
 };
+
+const STATS = [
+  { stat: '2020', label: 'Started on Etsy' },
+  { stat: '800+', label: 'Orders shipped on Etsy alone' },
+  { stat: '4.7 / 5', label: 'Across 100+ Etsy reviews' },
+  { stat: 'Las Vegas', label: 'Where the studio is based' },
+];
+
+const PRINCIPLES = [
+  {
+    n: '01',
+    title: 'Designer-led',
+    desc: 'A designer looks at every job. If your file needs work, we fix it or tell you before anything prints.',
+  },
+  {
+    n: '02',
+    title: 'Proof first',
+    desc: 'You see a price and a proof before you pay. Nothing goes to print until you approve it.',
+  },
+  {
+    n: '03',
+    title: 'The right method',
+    desc: 'Screen printing, embroidery, DTF, sublimation, or fine-art print. We pick what looks best for your product and budget.',
+  },
+  {
+    n: '04',
+    title: 'One piece or a hundred',
+    desc: 'A single gift or a full run of team shirts. Same care either way.',
+  },
+];
 
 export default function AboutPage() {
   return (
     <>
       <NavbarShell />
 
-      {/* Hero */}
-      <section className="pt-28 md:pt-32">
-        <div className="bg-soft">
-          <div className="max-w-[1400px] mx-auto px-6 py-14 md:py-20 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-                About the studio
-              </p>
-              <h1 className="text-5xl md:text-7xl font-medium tracking-tight text-ink leading-[1.02] mb-6">
-                Designed for<br />the places that<br />stayed with you.
-              </h1>
-              <p className="text-base md:text-lg text-ink leading-relaxed max-w-md">
-                The Inq Press is a designer-led studio making custom
-                location art — finish lines, fairways, terminals, skylines,
-                circuits — printed on archival paper and shipped worldwide.
-              </p>
-            </div>
-
-            <div className="bg-paper aspect-[5/4] flex items-center justify-center">
-              <span className="text-[11px] uppercase tracking-wider text-mid">
-                Studio photo placeholder
-              </span>
-            </div>
+      {/* Hero: full-bleed black, same voice as the homepage */}
+      <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
+        <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-16 items-end">
+          <div>
+            <p className="eyebrow text-paper/60 mb-6">About the studio</p>
+            <h1 className="display text-[14vw] md:text-[7vw] xl:text-[112px] mb-8">
+              Designed here.
+              <br />
+              Printed right.
+            </h1>
+            <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
+              The INQ Press is a designer-led print studio in Las Vegas. We print your ideas on
+              shirts, hats, stickers, signs, posters, and merch, and we design our own collection of
+              art prints.
+            </p>
+          </div>
+          <div className="relative aspect-[4/5] md:aspect-[4/5] overflow-hidden">
+            <Image
+              src="/lifestyle/maui-wall.jpg"
+              alt="A framed INQ Press art print hanging on a wall"
+              fill
+              sizes="(min-width: 768px) 40vw, 100vw"
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
       </section>
 
-      {/* Stats strip */}
-      <section className="border-y border-border bg-paper">
-        <div className="max-w-[1400px] mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-          {[
-            { stat: 'Est. 2020', label: 'Founded on Etsy, now shipping direct' },
-            { stat: '750+', label: 'Custom prints delivered worldwide' },
-            { stat: '4.9 / 5', label: 'Across 90+ verified reviews' },
-            { stat: 'Detroit', label: 'Made in America by our production partner' },
-          ].map((v) => (
-            <div key={v.label}>
-              <div className="text-2xl md:text-3xl font-medium text-ink tracking-tight">
-                {v.stat}
-              </div>
-              <div className="text-[13px] text-mid mt-1.5 leading-snug">{v.label}</div>
+      {/* Stats: ink-rule grid */}
+      <section className="bg-ink border-b border-ink">
+        {/* 1px gaps on an ink background draw the rules between cells */}
+        <div className="max-w-[1400px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-px">
+          {STATS.map((s) => (
+            <div key={s.label} className="bg-paper px-6 py-8 md:py-10">
+              <div className="display text-3xl md:text-5xl">{s.stat}</div>
+              <div className="text-[13px] text-mid mt-2 leading-snug">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Story */}
-      <section className="py-14 md:py-20">
-        <div className="max-w-[800px] mx-auto px-6">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-            Our story
-          </p>
-          <h2 className="text-3xl md:text-5xl font-medium text-ink tracking-tight leading-[1.05] mb-8">
-            From a side passion to a print studio.
-          </h2>
-          <div className="space-y-5 text-base md:text-lg leading-relaxed text-ink">
-            <p>
-              The Inq Press began in 2020 with a single hand-drawn airport
-              diagram and a hunch — that the places people travel to are the
-              places they want to remember. Five years later, the studio has
-              shipped more than 750 custom prints to runners, pilots, golfers,
-              and travelers across the world.
-            </p>
-            <p>
-              The catalog has grown beyond airports — into golf courses,
-              marathon routes, F1 circuits, city skylines, and stadium maps —
-              but the design language hasn&apos;t. Every print is built to feel
-              like art, not data: minimalist, well-spaced, quietly typographic,
-              and made to live on a wall for a long time.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Founder */}
-      <section className="py-14 md:py-20 bg-soft">
-        <div className="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1fr_1.4fr] gap-10 md:gap-16 items-start">
-          <div className="aspect-[4/5] bg-paper flex items-center justify-center">
-            <span className="text-[11px] uppercase tracking-wider text-mid">
-              Founder portrait placeholder
-            </span>
-          </div>
+      <section className="py-16 md:py-24">
+        <div className="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1fr_1.3fr] gap-8 md:gap-16">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-              Founder
+            <p className="eyebrow text-mid mb-5">Our story</p>
+            <h2 className="display text-5xl md:text-7xl">From one print to a print studio.</h2>
+          </div>
+          <div className="space-y-5 text-base md:text-lg leading-relaxed text-ink md:pt-10">
+            <p>
+              It started in 2020 with a single airport diagram on Etsy. People wanted prints of the
+              places that meant something to them, so the shop grew: golf courses, marathon routes,
+              F1 circuits, skylines, and stadiums. More than 800 Etsy orders later, the same
+              question kept coming in. Can you print this for me?
             </p>
-            <h2 className="text-3xl md:text-4xl font-medium text-ink tracking-tight leading-[1.1] mb-5">
-              Melvin Morales
-            </h2>
-            <div className="space-y-5 text-base leading-relaxed text-ink">
-              <p>
-                Melvin is a Puerto Rican-born industrial designer based in the
-                Mojave Desert. He studied design at Wentworth Institute of
-                Technology in Boston, where he discovered a passion for print
-                that has shaped the studio ever since.
-              </p>
-              <p>
-                He works in user-interface and digital product design by day;
-                The Inq Press is the side of the practice where the lines
-                slow down. Every poster, frame layout, and color decision in
-                the catalog runs through him personally.
-              </p>
-              <p>
-                He answers customer messages himself, takes on custom commissions
-                directly, and treats every order as a one-of-one. If you want a
-                print of a place that isn&apos;t in the shop yet — write in.
-              </p>
-            </div>
+            <p>
+              So we said yes. The INQ Press is the next step: a studio that brings the same design
+              care to anything you want printed. Team shirts, event banners, stickers for your
+              brand, a gift for one person. You bring the idea, we handle the rest.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* How we make it */}
-      <section className="py-14 md:py-20">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-            How it&apos;s made
-          </p>
-          <h2 className="text-3xl md:text-5xl font-medium text-ink tracking-tight leading-[1.05] mb-10 max-w-2xl">
-            Designed in the studio. Printed in Detroit.
-          </h2>
-          <div className="grid md:grid-cols-3 gap-10 md:gap-12">
-            {[
-              {
-                title: 'Designed in-house',
-                desc: 'Every print type — airports, courses, skylines, circuits, marathons — is drawn from scratch in a single visual system. No templates, no clip-art.',
-              },
-              {
-                title: 'Made-to-order',
-                desc: 'Nothing sits in a warehouse. Every poster is produced and packed when ordered, on archival fine-art paper our partner has been printing for nearly a decade.',
-              },
-              {
-                title: 'American production',
-                desc: 'Physical orders are fulfilled by an American production partner based in Detroit, dedicated to quality output and a domestic workforce. Frames arrive professionally assembled.',
-              },
-            ].map((v) => (
-              <div key={v.title}>
-                <h3 className="text-[18px] font-medium text-ink mb-2">{v.title}</h3>
-                <p className="text-sm text-mid leading-relaxed">{v.desc}</p>
+      {/* Principles */}
+      <section className="py-16 md:py-24 bg-ink text-paper">
+        <div className="max-w-[1400px] mx-auto px-6">
+          <p className="eyebrow text-paper/60 mb-5">How we work</p>
+          <h2 className="display text-5xl md:text-7xl mb-12">Care on every order.</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {PRINCIPLES.map((p) => (
+              <div key={p.n} className="border-t border-paper/25 pt-6">
+                <div className="display text-6xl text-paper/25 mb-5">{p.n}</div>
+                <h3 className="text-lg font-bold mb-2">{p.title}</h3>
+                <p className="text-sm text-paper/70 leading-relaxed">{p.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Custom commissions callout */}
-      <section className="py-14 md:py-20 bg-soft">
-        <div className="max-w-[900px] mx-auto px-6 text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-mid mb-5">
-            Custom commissions
-          </p>
-          <h2 className="text-3xl md:text-5xl font-medium text-ink tracking-tight leading-[1.05] mb-5">
-            A place we haven&apos;t made yet?
-          </h2>
-          <p className="text-mid text-base md:text-lg max-w-xl mx-auto leading-relaxed mb-8">
-            Almost every print in the catalog started as a custom request.
-            If you have a finish line, a tee box, a terminal, or a corner of
-            a city in mind, get in touch and we&apos;ll design it for you.
-          </p>
-          <Link href="/contact" className="btn-primary">
-            Start a commission
-          </Link>
+      {/* Founder */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-[1100px] mx-auto px-6 grid md:grid-cols-[1fr_1.3fr] gap-8 md:gap-16">
+          <div>
+            <p className="eyebrow text-mid mb-5">Founder</p>
+            <h2 className="display text-5xl md:text-7xl">Melvin Morales</h2>
+          </div>
+          <div className="space-y-5 text-base md:text-lg leading-relaxed text-ink md:pt-10">
+            <p>
+              Melvin is a Puerto Rican-born designer based in Las Vegas. He studied design at
+              Wentworth Institute of Technology in Boston, where he found a love for print that has
+              shaped the studio ever since.
+            </p>
+            <p>
+              By day he designs digital products. The INQ Press is where that eye for detail meets
+              ink and paper. He answers messages himself and treats every order as a one-of-one.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 md:py-20 bg-ink text-paper">
-        <div className="max-w-[900px] mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.05] mb-5">
-            Make your place.
-          </h2>
-          <p className="text-paper/70 mb-9 max-w-md mx-auto">
-            Browse the collection of ready-to-ship prints, or start your own.
-          </p>
+      {/* Two paths: custom work and the print shop */}
+      <section className="border-y border-ink">
+        <div className="max-w-[1400px] mx-auto grid md:grid-cols-2">
           <Link
-            href="/shop"
-            className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-7 py-3.5 rounded-full font-medium text-sm hover:bg-soft transition-colors"
+            href="/custom"
+            className="group px-6 py-12 md:py-16 md:border-r border-b md:border-b-0 border-ink hover:bg-soft transition-colors"
           >
-            Shop the collection
+            <p className="eyebrow text-mid mb-4">Custom printing</p>
+            <h3 className="display text-4xl md:text-6xl mb-4">Print your idea</h3>
+            <p className="text-mid max-w-md mb-6">Free quote within 1 to 2 business days. You approve a proof first.</p>
+            <span className="inline-flex items-center gap-2 font-bold">
+              Get a free quote
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
+            </span>
+          </Link>
+          <Link href="/shop" className="group px-6 py-12 md:py-16 hover:bg-soft transition-colors">
+            <p className="eyebrow text-mid mb-4">The print shop</p>
+            <h3 className="display text-4xl md:text-6xl mb-4">Shop art prints</h3>
+            <p className="text-mid max-w-md mb-6">
+              Golf courses, airports, skylines, marathons, and F1 circuits, made to order.
+            </p>
+            <span className="inline-flex items-center gap-2 font-bold">
+              Browse the collection
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
+            </span>
           </Link>
         </div>
       </section>

@@ -197,7 +197,7 @@ export default async function GiftOccasionPage({
               </li>
             </ol>
           </nav>
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.05] mb-4">
+          <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
             {cfg.title}
           </h1>
           <p className="text-mid text-base md:text-lg max-w-2xl leading-relaxed">

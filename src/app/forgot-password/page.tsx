@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Reset your password — The Inq Press',
+  title: 'Reset your password — The INQ Press',
   description:
     'Forgot your password? Enter your email and we\'ll send a reset link.',
   alternates: { canonical: '/forgot-password' },
@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
       <NavbarShell />
       <section className="pt-32 md:pt-40 pb-20 min-h-[70vh]">
         <div className="max-w-[440px] mx-auto px-6">
-          <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink leading-[1.05] mb-3 text-center">
+          <h1 className="display text-4xl md:text-5xl text-ink pt-3 mb-3 text-center">
             Reset your password
           </h1>
           <p className="text-mid text-center mb-10">

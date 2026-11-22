@@ -101,7 +101,7 @@ export async function GET(
               marginBottom: 24,
             }}
           >
-            The Inq · Press
+            The INQ · Press
           </div>
           <div
             style={{

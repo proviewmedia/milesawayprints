@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og';
+import { loadArchivoBlack } from '@/lib/og/archivo';
 
 export const runtime = 'edge';
 // 96×96 — a multiple of 48 so Google Search reliably uses this clean favicon
@@ -6,7 +7,8 @@ export const runtime = 'edge';
 export const size = { width: 96, height: 96 };
 export const contentType = 'image/png';
 
-export default function Icon() {
+export default async function Icon() {
+  const font = await loadArchivoBlack('INQ');
   return new ImageResponse(
     (
       <div
@@ -17,16 +19,15 @@ export default function Icon() {
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#0e0e0e',
-          color: '#f5f3ef',
+          color: '#ffffff',
           fontSize: 42,
-          fontWeight: 700,
-          letterSpacing: '-0.02em',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          letterSpacing: '-0.04em',
+          fontFamily: 'Archivo',
         }}
       >
-        MAP
+        INQ
       </div>
     ),
-    size,
+    { ...size, fonts: [{ name: 'Archivo', data: font, weight: 900, style: 'normal' }] },
   );
 }

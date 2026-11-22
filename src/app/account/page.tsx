@@ -49,7 +49,7 @@ function statusDot(s: string | null | undefined): string {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Your account — The Inq Press',
+  title: 'Your account — The INQ Press',
 };
 
 export default async function AccountPage() {
@@ -80,7 +80,7 @@ export default async function AccountPage() {
         <div className="max-w-[1100px] mx-auto px-6">
           <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl md:text-5xl font-medium tracking-tight text-ink leading-[1.05] mb-1">
+              <h1 className="display text-4xl md:text-6xl text-ink mb-1">
                 Your account
               </h1>
               <p className="text-mid text-sm">{user.email}</p>

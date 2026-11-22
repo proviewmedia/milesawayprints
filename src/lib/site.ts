@@ -8,7 +8,7 @@
  * imports SITE_URL from here rather than hardcoding a host.
  */
 export const SITE_URL = 'https://www.theinqpress.com';
-export const SITE_NAME = 'The Inq Press';
+export const SITE_NAME = 'The INQ Press';
 
 /**
  * Former domain. Every page request to these hosts 301-redirects path-for-path

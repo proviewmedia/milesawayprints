@@ -8,7 +8,7 @@ import PolicyCTA from '@/components/PolicyCTA';
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description:
-    'Terms of using Miles Away Prints — purchase license, intellectual property, liability, governing law.',
+    'Terms of using The INQ Press — purchase license, intellectual property, liability, governing law.',
 };
 
 const LAST_UPDATED = 'April 29, 2026';
@@ -20,11 +20,11 @@ export default function TermsPage() {
 
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">
-          <h1 className="text-4xl md:text-6xl font-medium tracking-tight text-ink leading-[1.05] mb-4">
+          <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
             Terms.
           </h1>
           <p className="text-mid text-base md:text-lg leading-relaxed max-w-xl">
-            The rules of using Miles Away Prints — written in plain English so
+            The rules of using The INQ Press — written in plain English so
             you can actually read them.
           </p>
           <p className="text-[12px] uppercase tracking-wider text-mid mt-6">
@@ -76,7 +76,7 @@ export default function TermsPage() {
           <PolicySection title="Intellectual property">
             <p>
               All artwork, designs, photography, and site content are owned by
-              Miles Away Prints (or its licensors) and protected by copyright
+              The INQ Press (or its licensors) and protected by copyright
               and trademark law.
             </p>
             <p>
@@ -138,7 +138,7 @@ export default function TermsPage() {
 
           <PolicySection title="Indemnification">
             <p>
-              You agree to defend and indemnify Miles Away Prints from any
+              You agree to defend and indemnify The INQ Press from any
               third-party claim arising out of content you supply for a custom
               print (for example, if you ask us to print someone else&apos;s
               trademarked name without permission).

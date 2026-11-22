@@ -11,7 +11,7 @@ function getResend(): Resend | null {
 }
 
 // Sender stays on milesawayprints.com until theinqpress.com is verified in Resend.
-const FROM = 'The Inq Press <orders@milesawayprints.com>';
+const FROM = 'The INQ Press <orders@milesawayprints.com>';
 const REPLY_TO = 'milesawayprintsllc@gmail.com';
 const SUPPORT_INBOX = 'milesawayprintsllc@gmail.com';
 
@@ -45,7 +45,7 @@ function wrapEmail({ preheader, heading, bodyHtml, cta }: WrapArgs): string {
   </head>
   <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #0e0e0e; background: #ffffff;">
     <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 24px; letter-spacing: 0.06em; text-transform: uppercase;">
-      The Inq Press
+      The INQ Press
     </p>
     <h1 style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0 0 16px; line-height: 1.15;">
       ${escapeHtml(heading)}
@@ -62,7 +62,7 @@ function wrapEmail({ preheader, heading, bodyHtml, cta }: WrapArgs): string {
     }
     <hr style="border: none; border-top: 1px solid #e8e6e0; margin: 32px 0;" />
     <p style="font-size: 12px; color: #9c9c9c; margin: 0 0 8px;">
-      The Inq Press · <a href="${SITE_URL}" style="color: #6b6b6b;">${SITE_URL.replace(/^https:\/\/(www\.)?/, '')}</a>
+      The INQ Press · <a href="${SITE_URL}" style="color: #6b6b6b;">${SITE_URL.replace(/^https:\/\/(www\.)?/, '')}</a>
     </p>
     <p style="font-size: 12px; color: #9c9c9c; margin: 0;">
       Questions? Reply to this email or reach <a href="mailto:${REPLY_TO}" style="color: #6b6b6b;">${REPLY_TO}</a>.
@@ -588,7 +588,7 @@ export async function sendNewsletterWelcomeEmail({
 
   const html = wrapEmail({
     preheader: `Welcome — your 10% off code is ${promoCode}`,
-    heading: 'Welcome to The Inq Press.',
+    heading: 'Welcome to The INQ Press.',
     bodyHtml: `
 <p style="font-size: 15px; color: #6b6b6b; margin: 0 0 24px; line-height: 1.6;">
   Thanks for signing up. As a thank-you, here's <strong style="color: #0e0e0e;">10% off your first print</strong> — apply this code at checkout:
