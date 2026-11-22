@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { DASHBOARD_HOSTNAME } from '@/lib/admin';
+import { DASHBOARD_HOSTNAME, LEGACY_DASHBOARD_HOSTNAME } from '@/lib/admin';
+import { LEGACY_HOSTS, SITE_URL } from '@/lib/site';
 
 // Paths that should NOT be rewritten under the dashboard subdomain.
 // API calls, Next internals, Supabase auth callback, and static assets all
@@ -12,7 +13,19 @@ function shouldPassThrough(pathname: string): boolean {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname, hostname } = req.nextUrl;
+  const { pathname, hostname, search } = req.nextUrl;
+
+  // Domain cutover: milesawayprints.com -> theinqpress.com, path-for-path.
+  // API routes stay put so webhooks registered on the old host keep working.
+  if (!pathname.startsWith('/api/')) {
+    if (LEGACY_HOSTS.includes(hostname)) {
+      return NextResponse.redirect(`${SITE_URL}${pathname}${search}`, 301);
+    }
+    if (hostname === LEGACY_DASHBOARD_HOSTNAME) {
+      return NextResponse.redirect(`https://${DASHBOARD_HOSTNAME}${pathname}${search}`, 301);
+    }
+  }
+
   const isDashboardHost = hostname === DASHBOARD_HOSTNAME;
   // Allow /admin on localhost and on raw Vercel deployment URLs (*.vercel.app)
   // so previews + local dev stay usable. The public www domain is the only

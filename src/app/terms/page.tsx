@@ -37,7 +37,7 @@ export default function TermsPage() {
         <div className="max-w-[800px] mx-auto px-6">
           <PolicySection title="Agreement">
             <p>
-              By using milesawayprints.com or placing an order, you accept these
+              By using theinqpress.com or placing an order, you accept these
               Terms and the{' '}
               <Link href="/privacy" className="text-ink underline underline-offset-2">
                 Privacy Policy

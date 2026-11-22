@@ -30,7 +30,7 @@ const pfHeaders = () => ({
 
 const SLUG = 'atlanta-national-golf-club';
 const SIZE = '8x10';
-const SITE = 'https://www.milesawayprints.com';
+const SITE = 'https://www.theinqpress.com';
 
 const { data: design } = await admin
   .from('gallery_items')

@@ -5,4 +5,6 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return ADMIN_EMAILS.includes(email.toLowerCase() as (typeof ADMIN_EMAILS)[number]);
 }
 
-export const DASHBOARD_HOSTNAME = 'dashboard.milesawayprints.com';
+export const DASHBOARD_HOSTNAME = 'dashboard.theinqpress.com';
+/** Old dashboard host; redirects to DASHBOARD_HOSTNAME. */
+export const LEGACY_DASHBOARD_HOSTNAME = 'dashboard.milesawayprints.com';

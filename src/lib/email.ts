@@ -638,7 +638,7 @@ export async function sendStripeBrokenAlertEmail({ errorMessage }: StripeAlertAr
   const timestamp = new Date().toUTCString();
 
   const html = wrapEmail({
-    preheader: 'Stripe API is failing on milesawayprints.com',
+    preheader: 'Stripe API is failing on theinqpress.com',
     heading: 'Stripe API check failed',
     bodyHtml: `
 <p style="font-size: 15px; color: #6b6b6b; margin: 0 0 16px; line-height: 1.6;">
@@ -671,7 +671,7 @@ export async function sendStripeBrokenAlertEmail({ errorMessage }: StripeAlertAr
   return resend.emails.send({
     from: FROM,
     to: SUPPORT_INBOX,
-    subject: '[Alert] Stripe API is failing on milesawayprints.com',
+    subject: '[Alert] Stripe API is failing on theinqpress.com',
     html,
   });
 }

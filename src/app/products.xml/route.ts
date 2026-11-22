@@ -24,7 +24,7 @@ export const dynamic = 'force-dynamic';
  *   2. Verify the website (reuses the Google Search Console verification
  *      meta tag in src/app/layout.tsx — already in place)
  *   3. Add a "Scheduled fetch" product source pointing to
- *      https://www.milesawayprints.com/products.xml
+ *      https://www.theinqpress.com/products.xml
  *   4. Set country to US, language to en
  *   5. First review approval typically takes 3 business days
  */
