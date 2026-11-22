@@ -4,6 +4,7 @@ import { ArrowRight, Ruler } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { GUIDES, RESOURCE_TOOLS } from '@/data/resources';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Free Printing Guides and Tools',
@@ -21,7 +22,7 @@ export default function ResourcesPage() {
 
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
         <div className="max-w-[1400px] mx-auto px-6">
-          <p className="eyebrow text-paper/60 mb-6">Resources</p>
+          <Breadcrumbs items={[{ name: 'Resources', href: '/resources' }]} />
           <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px]">Learn to print</h1>
           <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed mt-8">
             Free guides for anyone getting something printed. Print methods, where to print, artwork, and sizing, in
@@ -82,7 +83,7 @@ export default function ResourcesPage() {
               <p className="text-mid">Tell us what you need and we will recommend the method, the blank, and the price.</p>
             </div>
             <Link href="/custom" className="btn-primary font-bold shrink-0">
-              Get a free quote
+              Get started
             </Link>
           </div>
         </div>

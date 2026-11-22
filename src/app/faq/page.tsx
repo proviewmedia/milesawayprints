@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import PolicySection from '@/components/PolicySection';
 import PolicyCTA from '@/components/PolicyCTA';
 import { faqPageJsonLd } from '@/lib/seo';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
@@ -163,6 +164,7 @@ export default function FAQPage() {
 
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">
+          <Breadcrumbs tone="light" className="mb-2" items={[{ name: 'FAQ', href: '/faq' }]} />
           <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
             Frequently asked
             <br />

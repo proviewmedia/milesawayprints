@@ -133,6 +133,11 @@ export default function CartDrawer() {
                             : 'Marathon Print'}
                         </span>
                       </div>
+                    ) : it.type === 'artwork' ? (
+                      <div className="w-full h-full bg-ink text-paper flex flex-col items-center justify-center text-center px-1">
+                        <span className="text-[8px] tracking-widest uppercase opacity-60">Your</span>
+                        <span className="text-[10px] font-bold leading-tight mt-0.5">Artwork</span>
+                      </div>
                     ) : (
                       <div className="w-full p-2">
                         <WallFrame compact>

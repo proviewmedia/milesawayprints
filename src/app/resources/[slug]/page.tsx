@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import { GUIDES, type GuideBlock } from '@/data/resources';
 import { breadcrumbJsonLd, jsonLdScript, SITE_NAME } from '@/lib/seo';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
@@ -104,10 +105,11 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
 
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-12 md:pb-16">
         <div className="max-w-[820px] mx-auto px-6">
-          <Link href="/resources" className="inline-flex items-center gap-2 text-sm text-paper/60 hover:text-paper mb-8">
-            <ArrowLeft size={16} aria-hidden="true" />
-            All resources
-          </Link>
+          <Breadcrumbs
+            jsonLd={false}
+            className="mb-8"
+            items={[{ name: 'Resources', href: '/resources' }, { name: guide.title }]}
+          />
           <p className="eyebrow text-paper/60 mb-5">
             {guide.category} · {guide.readMinutes} min read
           </p>
@@ -137,7 +139,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
                 href="/custom"
                 className="inline-flex items-center justify-center bg-paper text-ink px-6 py-3 rounded-full font-bold text-sm hover:bg-soft transition-colors"
               >
-                Get a free quote
+                Get started
               </Link>
             </div>
           </div>

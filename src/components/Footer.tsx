@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import NewsletterSignup from './NewsletterSignup';
-import { CUSTOM_PRODUCTS } from '@/data/custom';
+import { QUOTE_PRODUCTS } from '@/data/custom';
 
 const LINK = 'text-sm text-paper/60 hover:text-paper transition-colors';
 const HEADING = 'eyebrow text-paper mb-5';
@@ -23,7 +23,7 @@ export default function Footer() {
               href="/custom"
               className="inline-flex items-center justify-center mt-6 bg-paper text-ink px-6 py-3 rounded-full font-bold text-sm hover:bg-soft transition-colors"
             >
-              Get a free quote
+              Get started
             </Link>
           </div>
           <div>
@@ -46,11 +46,21 @@ export default function Footer() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
           <div>
-            <h4 className={HEADING}>What we print</h4>
+            <h4 className={HEADING}>Custom printing</h4>
             <ul className="space-y-3">
-              {CUSTOM_PRODUCTS.filter((p) => p.slug !== 'other').map((p) => (
+              <li>
+                <Link href="/custom?start=map" className={LINK}>
+                  Map art prints
+                </Link>
+              </li>
+              <li>
+                <Link href="/custom?start=artwork" className={LINK}>
+                  Print your artwork
+                </Link>
+              </li>
+              {QUOTE_PRODUCTS.filter((p) => p.slug !== 'other').map((p) => (
                 <li key={p.slug}>
-                  <Link href={`/custom?product=${p.slug}`} className={LINK}>
+                  <Link href={`/custom?start=${p.slug}`} className={LINK}>
                     {p.name}
                   </Link>
                 </li>

@@ -35,7 +35,6 @@ export async function GET() {
   const staticUrls: UrlEntry[] = [
     { loc: `${BASE}/`, lastmod: now, changefreq: 'weekly', priority: 1.0 },
     { loc: `${BASE}/custom`, lastmod: now, changefreq: 'monthly', priority: 0.95 },
-    { loc: `${BASE}/services`, lastmod: now, changefreq: 'monthly', priority: 0.9 },
     { loc: `${BASE}/how-it-works`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE}/resources`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE}/resources/print-size-calculator`, lastmod: now, changefreq: 'monthly', priority: 0.6 },

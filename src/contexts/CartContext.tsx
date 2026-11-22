@@ -7,7 +7,7 @@ import { trackAddToCart } from '@/lib/track';
 export interface CartItem {
   id: string; // unique: slug + format + size + gift
   slug: string; // gallery item slug OR 'custom-{type}-{ts}' for custom orders
-  type: PrintType;
+  type: PrintType | 'artwork';
   name: string;
   location: string;
   format: 'digital' | 'physical';

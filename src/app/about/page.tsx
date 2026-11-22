@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -51,7 +52,7 @@ export default function AboutPage() {
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
         <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-16 items-end">
           <div>
-            <p className="eyebrow text-paper/60 mb-6">About the studio</p>
+            <Breadcrumbs items={[{ name: 'About', href: '/about' }]} />
             <h1 className="display text-[14vw] md:text-[7vw] xl:text-[112px] mb-8">
               Designed here.
               <br />
@@ -161,7 +162,7 @@ export default function AboutPage() {
             <h3 className="display text-4xl md:text-6xl mb-4">Print your idea</h3>
             <p className="text-mid max-w-md mb-6">Free quote within 1 to 2 business days. You approve a proof first.</p>
             <span className="inline-flex items-center gap-2 font-bold">
-              Get a free quote
+              Get started
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
             </span>
           </Link>

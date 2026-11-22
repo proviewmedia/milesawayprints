@@ -5,7 +5,8 @@ import Footer from '@/components/Footer';
 import ProductIcon from '@/components/ProductIcon';
 import { PrintType } from '@/data/prints';
 import { DesignSummary, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
-import { CUSTOM_PRODUCTS, AUDIENCES, DECORATION_METHODS } from '@/data/custom';
+import { QUOTE_PRODUCTS, AUDIENCES, DECORATION_METHODS } from '@/data/custom';
+import { ARTWORK_PRINT_PRICES, CUSTOM_PRINT_PRICES, fromPrice } from '@/data/custom-prints';
 import { supabase, createAdminClient } from '@/lib/supabase';
 import { unstable_noStore as noStore } from 'next/cache';
 
@@ -38,6 +39,21 @@ async function getCover(type: PrintType, prefer?: string): Promise<DesignSummary
 }
 
 export const dynamic = 'force-dynamic';
+
+const PRINT_TILES = [
+  {
+    href: '/custom?start=map',
+    name: 'Map art prints',
+    desc: 'Your course, race, airport, or city, designed by us',
+    from: Math.min(...Object.values(CUSTOM_PRINT_PRICES).map(fromPrice)),
+  },
+  {
+    href: '/custom?start=artwork',
+    name: 'Your artwork printed',
+    desc: 'Upload a photo or design, pick a size',
+    from: fromPrice(ARTWORK_PRINT_PRICES),
+  },
+];
 
 const STEPS = [
   { n: '01', title: 'Tell us what you need', desc: 'Pick a product and quantity, and share your design or idea.' },
@@ -79,22 +95,22 @@ export default async function HomePage() {
           </h1>
           <div className="mt-10 md:mt-14 grid md:grid-cols-[1fr_auto] gap-8 md:items-end">
             <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
-              Shirts, hats, stickers, signs, posters, and merch. Order just one for yourself or hundreds
-              for your team. Send us your idea, get a free quote, and we handle the rest.
+              Shirts, hats, stickers, signs, prints, and merch. Order just one for yourself or hundreds
+              for your team. Prints order online, everything else gets a free quote.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/custom"
                 className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-8 py-4 rounded-full font-bold text-[15px] hover:bg-soft transition-colors"
               >
-                Get a free quote
+                Get started
                 <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" />
               </Link>
               <Link
-                href="/services"
+                href="/shop"
                 className="inline-flex items-center justify-center px-8 py-4 rounded-full font-bold text-[15px] border border-paper/40 hover:border-paper transition-colors"
               >
-                What we print
+                Shop prints
               </Link>
             </div>
           </div>
@@ -118,7 +134,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* What we print: each tile opens the quote form with that product picked */}
+      {/* What we print: print tiles open the online order builders, the rest
+          open the quote form with that product picked (all on /custom) */}
       <section className="py-16 md:py-24">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-end justify-between gap-6 flex-wrap mb-10">
@@ -127,17 +144,35 @@ export default async function HomePage() {
               <h2 className="display text-5xl md:text-7xl">What we print</h2>
             </div>
             <p className="text-mid max-w-sm">
-              Pick a product to start your quote. Do not see it? Ask us. If it can be printed, we can do it.
+              Prints have prices and order online. Everything else starts with a free quote. If it can be printed, we can do it.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-ink">
-            {CUSTOM_PRODUCTS.map((p) => {
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 border-t border-l border-ink">
+            {PRINT_TILES.map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="group relative flex flex-col justify-between min-h-[170px] md:min-h-[200px] p-6 md:p-8 border-r border-b border-ink transition-colors hover:bg-ink hover:text-paper"
+              >
+                <div className="flex items-start justify-between">
+                  <ProductIcon icon="frame" size={26} />
+                  <span className="text-[13px] font-bold">From ${t.from}</span>
+                </div>
+                <div>
+                  <h3 className="font-display font-black uppercase text-2xl md:text-3xl lg:text-2xl tracking-tight leading-none">
+                    {t.name}
+                  </h3>
+                  <p className="text-sm mt-2 text-mid group-hover:text-paper/70">{t.desc}</p>
+                </div>
+              </Link>
+            ))}
+            {QUOTE_PRODUCTS.map((p) => {
               const isOther = p.slug === 'other';
               return (
                 <Link
                   key={p.slug}
-                  href={`/custom?product=${p.slug}`}
+                  href={`/custom?start=${p.slug}`}
                   className={`group relative flex flex-col justify-between min-h-[170px] md:min-h-[200px] p-6 md:p-8 border-r border-b border-ink transition-colors ${
                     isOther ? 'bg-ink text-paper hover:bg-black' : 'hover:bg-ink hover:text-paper'
                   }`}
@@ -152,7 +187,7 @@ export default async function HomePage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-display font-black uppercase text-2xl md:text-3xl tracking-tight leading-none">
+                    <h3 className="font-display font-black uppercase text-2xl md:text-3xl lg:text-2xl tracking-tight leading-none">
                       {isOther ? 'Something else' : p.name}
                     </h3>
                     <p className={`text-sm mt-2 ${isOther ? 'text-paper/70' : 'text-mid group-hover:text-paper/70'}`}>
@@ -319,7 +354,7 @@ export default async function HomePage() {
               href="/custom"
               className="inline-flex items-center justify-center gap-2 bg-paper text-ink px-8 py-4 rounded-full font-bold text-[15px] hover:bg-soft transition-colors"
             >
-              Get a free quote
+              Get started
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" />
             </Link>
             <p className="text-paper/70 text-sm">Free, no commitment. You approve a proof before anything is printed.</p>

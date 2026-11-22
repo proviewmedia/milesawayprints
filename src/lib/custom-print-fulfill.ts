@@ -1,5 +1,9 @@
 import { sendCustomPrintFulfillmentEmail, type OrderShippingAddress } from '@/lib/email';
-import { getCustomPrintType, isCustomPrintItem } from '@/data/custom-prints';
+import { ARTWORK_BUCKET, getCustomPrintType, isArtworkItem, isCustomPrintItem } from '@/data/custom-prints';
+import { createAdminClient } from '@/lib/supabase';
+
+/** How long the file link in the admin email works. */
+const FILE_LINK_SECONDS = 30 * 24 * 60 * 60;
 
 interface CustomPrintCartItem {
   size: string;
@@ -20,15 +24,25 @@ export async function notifyCustomPrintOrder(args: {
   const errors: string[] = [];
   for (const it of customItems) {
     const c = it.customization ?? {};
-    const typeLabel = getCustomPrintType(c.custom_type)?.label ?? 'Custom print';
+    const artwork = isArtworkItem(it);
+    const typeLabel = artwork ? 'Your artwork' : (getCustomPrintType(c.custom_type)?.label ?? 'Custom print');
     try {
+      let fileUrl: string | undefined;
+      if (artwork && c.file_path) {
+        const { data } = await createAdminClient()
+          .storage.from(ARTWORK_BUCKET)
+          .createSignedUrl(c.file_path, FILE_LINK_SECONDS, { download: c.file_name || true });
+        fileUrl = data?.signedUrl;
+        if (!fileUrl) errors.push(`Could not link artwork file ${c.file_path}`);
+      }
       const res = await sendCustomPrintFulfillmentEmail({
         orderNumber: args.orderNumber,
         orderToken: args.orderToken,
         customer: args.customer,
         shipping: args.shipping,
         typeLabel,
-        place: c.place ?? '',
+        place: artwork ? (c.file_name ?? 'Uploaded file') : (c.place ?? ''),
+        fileUrl,
         details: c.details ?? '',
         size: it.size,
         pricePaidCents: it.priceCents,

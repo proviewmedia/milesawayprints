@@ -5,7 +5,15 @@ import { CartItem } from '@/contexts/CartContext';
 import { STRIPE_ALLOWED_COUNTRIES } from '@/data/countries';
 import { DEFAULT_DIGITAL_PRICE_CENTS } from '@/data/shop';
 import { SITE_URL } from '@/lib/site';
-import { isCustomPrintItem, MAX_DETAILS_LENGTH, MAX_PLACE_LENGTH } from '@/data/custom-prints';
+import {
+  ARTWORK_BUCKET,
+  ARTWORK_PREFIX,
+  ARTWORK_PRINT_PRICES,
+  isArtworkItem,
+  isCustomPrintItem,
+  MAX_DETAILS_LENGTH,
+  MAX_PLACE_LENGTH,
+} from '@/data/custom-prints';
 import { getCustomPrintPricing } from '@/lib/custom-print-pricing';
 
 export const runtime = 'nodejs';
@@ -103,9 +111,31 @@ export async function POST(req: Request) {
       Promise.resolve(hasCustomPrint ? getCustomPrintPricing() : {}),
     ]);
     const galleryBySlug = new Map((galleryRes.data ?? []).map((r) => [r.slug, r]));
+
+    // "Your artwork" prints: the uploaded file must really be in the private
+    // bucket under artwork/ before we charge for printing it.
+    const artworkPaths = Array.from(
+      new Set(items.filter(isArtworkItem).map((it) => String(it.customization?.file_path ?? ''))),
+    );
+    const artworkOk = new Set<string>();
+    await Promise.all(
+      artworkPaths.map(async (path) => {
+        if (!path.startsWith(ARTWORK_PREFIX) || path.includes('..')) return;
+        const dir = path.slice(0, path.lastIndexOf('/'));
+        const name = path.slice(path.lastIndexOf('/') + 1);
+        const { data } = await admin.storage.from(ARTWORK_BUCKET).list(dir, { search: name, limit: 5 });
+        if ((data ?? []).some((o) => o.name === name)) artworkOk.add(path);
+      }),
+    );
     const marathonBySlug = new Map((marathonRes.data ?? []).map((r) => [r.slug, r]));
 
     const authoritativePriceCents = (it: CartItem): number | null => {
+      if (isArtworkItem(it)) {
+        if (it.format !== 'physical') return null;
+        if (!artworkOk.has(String(it.customization?.file_path ?? ''))) return null;
+        const cents = ARTWORK_PRINT_PRICES[it.size];
+        return typeof cents === 'number' && cents > 0 ? cents : null;
+      }
       if (isCustomPrint(it)) {
         if (it.format !== 'physical') return null;
         const type = it.customization?.custom_type as keyof typeof customPricing | undefined;
@@ -138,16 +168,21 @@ export async function POST(req: Request) {
         // and pin quantity to 1: every custom print is its own design.
         const c = it.customization ?? {};
         const place = String(c.place ?? '').trim().slice(0, MAX_PLACE_LENGTH);
+        const artwork = isArtworkItem(it);
+        const fileName = String(c.file_name ?? '').trim().slice(0, 120);
         serverItems.push({
           ...it,
+          type: artwork ? 'artwork' : it.type,
+          name: artwork ? 'Your artwork print' : it.name,
           priceCents: cents,
           quantity: 1,
-          location: place,
+          location: artwork ? fileName : place,
           customization: {
             custom_print: 'true',
             custom_type: String(c.custom_type),
             place,
             details: String(c.details ?? '').trim().slice(0, MAX_DETAILS_LENGTH),
+            ...(artwork && { file_path: String(c.file_path), file_name: fileName }),
           },
         });
       } else serverItems.push({ ...it, priceCents: cents });

@@ -38,7 +38,14 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
   );
 }
 
-export default function QuoteForm({ initialProduct }: { initialProduct?: ProductSlug }) {
+export default function QuoteForm({
+  initialProduct,
+  initialDetails = '',
+}: {
+  initialProduct?: ProductSlug;
+  /** Prefilled from a print builder's "Need 10 or more?" link. */
+  initialDetails?: string;
+}) {
   const openedAt = useRef<number>(Date.now());
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -48,7 +55,7 @@ export default function QuoteForm({ initialProduct }: { initialProduct?: Product
   const [artwork, setArtwork] = useState<ArtworkStatus | ''>('');
   const [files, setFiles] = useState<File[]>([]);
   const [artworkLink, setArtworkLink] = useState('');
-  const [details, setDetails] = useState('');
+  const [details, setDetails] = useState(initialDetails);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');

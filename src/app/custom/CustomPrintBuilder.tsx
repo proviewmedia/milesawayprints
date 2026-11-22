@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Check } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import {
+  BULK_PRINT_THRESHOLD,
   CUSTOM_PRINT_FLAG,
   MAX_DETAILS_LENGTH,
   MAX_PLACE_LENGTH,
@@ -20,9 +21,11 @@ interface Props {
   pricing: CustomPrintPricing;
   exampleImages: Partial<Record<CustomPrintType, string>>;
   initialType: CustomPrintType;
+  /** Switch to the quote form with these details prefilled. */
+  onBulkQuote: (details: string) => void;
 }
 
-export default function CustomPrintBuilder({ types, pricing, exampleImages, initialType }: Props) {
+export default function CustomPrintBuilder({ types, pricing, exampleImages, initialType, onBulkQuote }: Props) {
   const { addItem } = useCart();
   const [type, setType] = useState<CustomPrintType>(initialType);
   const [place, setPlace] = useState('');
@@ -37,11 +40,7 @@ export default function CustomPrintBuilder({ types, pricing, exampleImages, init
   const priceCents = size ? prices[size] : undefined;
 
   if (!cfg) {
-    return (
-      <section className="py-16">
-        <div className="max-w-[1400px] mx-auto px-6 text-mid">Custom prints are not available right now.</div>
-      </section>
-    );
+    return <p className="text-mid">Custom prints are not available right now.</p>;
   }
 
   const chooseType = (t: CustomPrintType) => {
@@ -84,8 +83,7 @@ export default function CustomPrintBuilder({ types, pricing, exampleImages, init
   const example = exampleImages[type];
 
   return (
-    <section className="py-12 md:py-16">
-      <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-[1fr_1.1fr] gap-10 md:gap-16 items-start">
+    <div className="grid md:grid-cols-[1fr_1.1fr] gap-10 md:gap-16 items-start">
         {/* Example of the style being ordered */}
         <div className="md:sticky md:top-28">
           <div className="relative aspect-[4/5] bg-soft border border-ink overflow-hidden">
@@ -210,8 +208,23 @@ export default function CustomPrintBuilder({ types, pricing, exampleImages, init
             Proof by email within 1 to 2 business days. Printing starts after you approve it, then it ships in
             3 to 5 business days.
           </p>
+          <p className="text-[13px] text-mid mt-2">
+            Need {BULK_PRINT_THRESHOLD} or more?{' '}
+            <button
+              type="button"
+              onClick={() =>
+                onBulkQuote(
+                  `Bulk custom ${cfg.label.toLowerCase()} prints${place.trim() ? ` of ${place.trim()}` : ''}${
+                    size ? `, ${size}` : ''
+                  }.${details.trim() ? ` ${details.trim()}` : ''}`,
+                )
+              }
+              className="text-ink underline underline-offset-2 font-medium"
+            >
+              Get a quote
+            </button>
+          </p>
         </div>
-      </div>
-    </section>
+    </div>
   );
 }

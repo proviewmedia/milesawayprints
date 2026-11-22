@@ -4,6 +4,7 @@ import { ArrowRight, Mail, Package, HelpCircle } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import ContactForm from './ContactForm';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -21,7 +22,7 @@ export default function ContactPage() {
 
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
         <div className="max-w-[1400px] mx-auto px-6">
-          <p className="eyebrow text-paper/60 mb-6">Contact</p>
+          <Breadcrumbs items={[{ name: 'Contact', href: '/contact' }]} />
           <h1 className="display text-[15vw] md:text-[9vw] xl:text-[140px] mb-8">Let&apos;s talk.</h1>
           <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
             A real person reads every message. We reply within 1 to 2 business days, Monday through
@@ -40,7 +41,7 @@ export default function ContactPage() {
               Shirts, hats, stickers, signs, and more. The quote form gets you a price fastest.
             </p>
             <span className="inline-flex items-center gap-2 text-sm font-bold">
-              Get a free quote
+              Get started
               <ArrowRight size={15} strokeWidth={2.25} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
             </span>
           </Link>

@@ -583,6 +583,8 @@ export interface CustomPrintFulfillmentArgs {
   details: string;
   size: string;
   pricePaidCents: number;
+  /** Signed download link for a customer's uploaded artwork. */
+  fileUrl?: string;
 }
 
 export async function sendCustomPrintFulfillmentEmail(args: CustomPrintFulfillmentArgs) {
@@ -611,6 +613,7 @@ export async function sendCustomPrintFulfillmentEmail(args: CustomPrintFulfillme
 <h2 style="font-size:20px;margin:0 0 16px;font-weight:600;">${escapeHtml(args.typeLabel)}: ${escapeHtml(args.place)}</h2>
 <table style="font-size:14px;color:#0e0e0e;border-collapse:collapse;margin:0 0 24px;">
   ${row('Order', `#${escapeHtml(String(args.orderNumber))} <span style="color:#9c9c9c;font-size:12px;">(${escapeHtml(args.orderToken)})</span>`)}
+  ${args.fileUrl ? row('File', `<a href="${escapeHtml(args.fileUrl)}" style="color:#0e0e0e;font-weight:600;">Download the customer's file</a> <span style="color:#9c9c9c;font-size:12px;">(link works for 30 days, also on the admin order page)</span>`) : ''}
   ${row('Size', escapeHtml(args.size))}
   ${row('Paid', `$${(args.pricePaidCents / 100).toFixed(2)}`)}
   ${row('Details', args.details ? escapeHtml(args.details).replace(/\n/g, '<br/>') : '<span style="color:#9c9c9c;">None given</span>')}
@@ -621,8 +624,7 @@ export async function sendCustomPrintFulfillmentEmail(args: CustomPrintFulfillme
 ${shippingHtml}
 <hr style="border:none;border-top:1px solid #e8e6e0;margin:24px 0;" />
 <p style="font-size:13px;color:#6b6b6b;margin:0;line-height:1.5;">
-  Reply to this email to reach the customer. Design the print, send them a
-  proof, and once they approve, place it in Printful and mark the order shipped.
+  Reply to this email to reach the customer. ${args.fileUrl ? 'Check the file (size, resolution, crop) and email them if anything needs fixing' : 'Design the print and send them a proof'}. Once it is approved, place it in Printful and mark the order shipped.
 </p>
 </body></html>`.trim();
 

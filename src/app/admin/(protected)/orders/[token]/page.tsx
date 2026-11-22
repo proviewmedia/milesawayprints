@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ExternalLink, Trophy } from 'lucide-react';
 import { createAdminClient } from '@/lib/supabase';
 import type { MarathonCustomization } from '@/data/marathons';
+import { ARTWORK_BUCKET, ARTWORK_TYPE, getCustomPrintType } from '@/data/custom-prints';
 import type { AdminOrder, CartSnapshotItem } from '../types';
 import { STATUS_STYLE, hasMarathonItem } from '../types';
 import OrderEditPanel from './OrderEditPanel';
@@ -39,6 +40,21 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
       'marathon_slug' in it.customization,
   );
   const isMarathon = hasMarathonItem(order);
+
+  // Custom prints (map art designed by hand, or the customer's own artwork).
+  const customItems = cart.filter(
+    (it) => !!it.customization && (it.customization as Record<string, string>).custom_print === 'true',
+  );
+  const fileLinks = await Promise.all(
+    customItems.map(async (it) => {
+      const c = it.customization as Record<string, string>;
+      if (c.custom_type !== ARTWORK_TYPE || !c.file_path) return null;
+      const { data } = await createAdminClient()
+        .storage.from(ARTWORK_BUCKET)
+        .createSignedUrl(c.file_path, 60 * 60, { download: c.file_name || true });
+      return data?.signedUrl ?? null;
+    }),
+  );
 
   const stripeUrl = order.stripe_payment_intent_id
     ? `https://dashboard.stripe.com/payments/${order.stripe_payment_intent_id}`
@@ -153,6 +169,44 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               )}
             </div>
           </Section>
+
+          {customItems.length > 0 && (
+            <Section title="Custom print" emphasis>
+              <div className="space-y-6">
+                {customItems.map((it, i) => {
+                  const c = it.customization as Record<string, string>;
+                  const artwork = c.custom_type === ARTWORK_TYPE;
+                  return (
+                    <div key={i} className="bg-soft rounded-xl p-5 space-y-4">
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div>
+                          <div className="text-[11px] font-medium tracking-widest uppercase text-mid">
+                            {artwork ? 'Your artwork' : (getCustomPrintType(c.custom_type)?.label ?? c.custom_type)}
+                          </div>
+                          <div className="text-base text-ink mt-0.5 break-all">
+                            {artwork ? c.file_name || 'Uploaded file' : c.place}
+                          </div>
+                        </div>
+                        {fileLinks[i] && (
+                          <a
+                            href={fileLinks[i]!}
+                            className="inline-flex items-center gap-1.5 bg-ink text-paper text-xs font-medium px-4 py-2 rounded-full hover:bg-black transition-colors"
+                          >
+                            Download file <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3 text-sm">
+                        <Field label="Size" value={it.size ?? '-'} />
+                        <Field label="Paid" value={`$${(it.priceCents / 100).toFixed(2)}`} />
+                      </div>
+                      <Field label="Details" value={c.details || 'None given'} />
+                    </div>
+                  );
+                })}
+              </div>
+            </Section>
+          )}
 
           {marathonItems.length > 0 && (
             <Section title="Marathon personalization" emphasis>

@@ -13,6 +13,7 @@ import {
   formatMarathonName,
   formatRaceDate,
 } from '@/data/marathons';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 interface Props {
   marathon: MarathonRow;
@@ -176,6 +177,15 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
   return (
     <section className="pt-32 md:pt-36 pb-16">
       <div className="max-w-[1280px] mx-auto px-6">
+        <Breadcrumbs
+          tone="light"
+          jsonLd={false}
+          items={[
+            { name: 'Print shop', href: '/shop' },
+            { name: 'Marathon prints', href: '/prints/marathon' },
+            { name: `${marathon.city} Marathon` },
+          ]}
+        />
         <div className="grid md:grid-cols-2 gap-12">
           {/* Live preview — white matted poster lifted off the page with a
               soft drop shadow. Capped at ~420px so the whole product page

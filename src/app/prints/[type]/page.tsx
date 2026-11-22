@@ -201,7 +201,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
       {customType && (
         <section className="border-y border-ink">
           <Link
-            href={`/shop/custom-print?type=${customType.type}`}
+            href={`/custom?start=map&type=${customType.type}`}
             className="group block bg-ink text-paper hover:bg-black transition-colors"
           >
             <div className="max-w-[1400px] mx-auto px-6 py-12 md:py-16 grid md:grid-cols-[1fr_auto] gap-6 md:items-center">

@@ -133,3 +133,44 @@ export const CUSTOM_PRINT_PRICES: Record<CustomPrintType, Record<string, number>
 
 export const MAX_PLACE_LENGTH = 120;
 export const MAX_DETAILS_LENGTH = 600;
+
+// ────────────────────────────────────────────────────────────────────────────
+// Your own artwork or photo, printed. Same flag and fulfillment path as map
+// art (manual, never auto-sent to Printful) so the file can be checked first.
+// ────────────────────────────────────────────────────────────────────────────
+
+export const ARTWORK_TYPE = 'artwork';
+
+/** Shop print prices (cents): no design work, so the ready-made shop ladder. */
+export const ARTWORK_PRINT_PRICES: Record<string, number> = {
+  '5x7': 2800,
+  '8x10': 3000,
+  '11x14': 3200,
+  '12x16': 3400,
+  '12x18': 3600,
+  '16x20': 3800,
+  '18x24': 4000,
+  '24x36': 4200,
+};
+
+export const ARTWORK_MAX_BYTES = 50 * 1024 * 1024;
+export const ARTWORK_ACCEPT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/tiff': 'tif',
+  'application/pdf': 'pdf',
+};
+export const ARTWORK_BUCKET = 'customer-uploads';
+export const ARTWORK_PREFIX = 'artwork/';
+
+/** Orders of this many prints or more go to a quote instead. */
+export const BULK_PRINT_THRESHOLD = 10;
+
+export function isArtworkItem(item: { customization?: Record<string, unknown> | null }): boolean {
+  return isCustomPrintItem(item) && item.customization?.custom_type === ARTWORK_TYPE;
+}
+
+/** Lowest price in a ladder, in whole dollars, for "From $X" labels. */
+export function fromPrice(ladder: Record<string, number>): number {
+  return Math.round(Math.min(...Object.values(ladder)) / 100);
+}

@@ -4,6 +4,7 @@ import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
 import PolicySection from '@/components/PolicySection';
 import PolicyCTA from '@/components/PolicyCTA';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Damage & replacement policy',
@@ -19,6 +20,7 @@ export default function ReturnsPage() {
 
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">
+          <Breadcrumbs tone="light" className="mb-2" items={[{ name: 'Damage policy', href: '/returns' }]} />
           <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
             Damage &amp; replacement policy.
           </h1>

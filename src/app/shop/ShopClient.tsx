@@ -8,6 +8,7 @@ import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
 import { Collection, DesignSummary } from '@/data/shop';
 import { PRINT_CONFIGS, PrintType } from '@/data/prints';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 /**
  * Measures the fixed <header> (the navbar) at runtime and returns its
@@ -120,7 +121,7 @@ export default function ShopClient({ designs, collections }: Props) {
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-12 md:pb-16">
         <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-[1fr_auto] gap-8 md:items-end">
           <div>
-            <p className="eyebrow text-paper/60 mb-6">The print shop</p>
+            <Breadcrumbs items={[{ name: 'Print shop', href: '/shop' }]} />
             <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px] mb-6">Art prints</h1>
             <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
               Golf courses, airports, skylines, cities, marathons, and F1 circuits, designed in house and
@@ -128,7 +129,7 @@ export default function ShopClient({ designs, collections }: Props) {
             </p>
           </div>
           <Link
-            href="/shop/custom-print"
+            href="/custom?start=map"
             className="group inline-flex items-center justify-between gap-6 border-2 border-paper px-6 py-5 hover:bg-paper hover:text-ink transition-colors md:max-w-xs"
           >
             <span>
@@ -260,7 +261,7 @@ export default function ShopClient({ designs, collections }: Props) {
               <h3 className="font-display font-black uppercase text-2xl tracking-tight text-ink mb-2">No designs match</h3>
               <p className="text-sm text-mid mb-6">
                 Try a different category, or{' '}
-                <Link href="/shop/custom-print" className="text-ink underline underline-offset-2">
+                <Link href="/custom?start=map" className="text-ink underline underline-offset-2">
                   order a custom print
                 </Link>{' '}
                 of the place you are looking for.

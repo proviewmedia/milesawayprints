@@ -148,3 +148,8 @@ export const AUDIENCES = [
   { name: 'Events', desc: 'Weddings, reunions, races, and conferences.' },
   { name: 'Gifts', desc: 'One-of-a-kind pieces for someone special.' },
 ];
+
+/** Products that go to the free quote form on /custom. Posters are left out
+ *  of the picker because prints are ordered online with prices; the posters
+ *  slug stays valid for bulk print quotes and old links. */
+export const QUOTE_PRODUCTS = CUSTOM_PRODUCTS.filter((p) => p.slug !== 'posters');
