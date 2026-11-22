@@ -44,7 +44,8 @@ export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 export const MAX_FILES = 5;
 
 export const QUANTITY_OPTIONS = [
-  '1 to 11',
+  'Just 1',
+  '2 to 11',
   '12 to 49',
   '50 to 99',
   '100 to 249',
@@ -113,8 +114,8 @@ export const ARTWORK_GUIDELINES = [
 
 export const CUSTOM_FAQS = [
   {
-    q: 'Is there a minimum order?',
-    a: 'It depends on the product and the print method. Many items can be made as a single piece. Tell us your quantity and we will recommend the best option for it.',
+    q: 'Can I order just one?',
+    a: 'Yes. One custom shirt, one mug, or one framed print is as welcome as an order of hundreds. Tell us your quantity and we will recommend the print method that looks best and costs least for it.',
   },
   {
     q: 'How much does it cost?',
@@ -140,6 +141,7 @@ export const CUSTOM_FAQS = [
 
 /** Who we print for. Shown on the homepage so visitors see themselves. */
 export const AUDIENCES = [
+  { name: 'Just for you', desc: 'One shirt, one hat, one print. Made exactly how you want it.' },
   { name: 'Brands and creators', desc: 'Merch drops, launches, and packaging extras.' },
   { name: 'Businesses', desc: 'Staff uniforms, signage, and client gifts.' },
   { name: 'Teams and clubs', desc: 'Jerseys, hats, and fan gear.' },

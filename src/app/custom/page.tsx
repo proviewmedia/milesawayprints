@@ -32,8 +32,8 @@ export default function CustomPage({ searchParams }: { searchParams: { product?:
           <p className="eyebrow text-paper/60 mb-6">Custom orders</p>
           <h1 className="display text-[13vw] md:text-8xl mb-6">Get a free quote</h1>
           <p className="text-base md:text-lg text-paper/75 max-w-xl leading-relaxed">
-            Tell us what you want printed. We reply with a price and a proof, and nothing is printed until you
-            approve it.
+            Tell us what you want printed, whether it is one piece or a few hundred. We reply with a price and a
+            proof, and nothing is printed until you approve it.
           </p>
 
           <ol className="grid sm:grid-cols-3 gap-6 mt-12">

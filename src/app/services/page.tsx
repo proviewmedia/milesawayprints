@@ -23,8 +23,8 @@ export default function ServicesPage() {
           <p className="eyebrow text-paper/60 mb-6">Services</p>
           <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px]">What we print</h1>
           <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed mt-8">
-            If it can hold a design, we can print it. Pick a product to start a free quote, or tell us about something
-            that is not listed.
+            If it can hold a design, we can print it, one piece or hundreds. Pick a product to start a free quote, or
+            tell us about something that is not listed.
           </p>
         </div>
       </section>

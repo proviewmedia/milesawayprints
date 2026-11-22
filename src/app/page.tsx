@@ -79,8 +79,8 @@ export default async function HomePage() {
           </h1>
           <div className="mt-10 md:mt-14 grid md:grid-cols-[1fr_auto] gap-8 md:items-end">
             <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
-              Shirts, hats, stickers, signs, posters, and merch for brands, businesses, teams, and
-              events. Send us your idea, get a free quote, and we handle the rest.
+              Shirts, hats, stickers, signs, posters, and merch. Order just one for yourself or hundreds
+              for your team. Send us your idea, get a free quote, and we handle the rest.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -107,7 +107,7 @@ export default async function HomePage() {
           {[
             { title: 'Free quotes', desc: 'A price within 1 to 2 business days' },
             { title: 'Proof first', desc: 'Nothing prints until you approve' },
-            { title: 'Any quantity', desc: 'One piece or a bulk run' },
+            { title: 'Order just one', desc: 'Or hundreds. No order is too small' },
             { title: 'Design help', desc: 'No file? We design it with you' },
           ].map((item) => (
             <div key={item.title} className="bg-paper px-6 py-7 md:py-9">
@@ -171,7 +171,7 @@ export default async function HomePage() {
         <div className="max-w-[1400px] mx-auto px-6">
           <p className="eyebrow text-mid mb-4">Who we print for</p>
           <h2 className="display text-5xl md:text-7xl mb-10">Made for</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {AUDIENCES.map((a) => (
               <div key={a.name} className="rounded-xl bg-paper border border-border p-6">
                 <h3 className="font-display font-black uppercase text-xl tracking-tight leading-tight">{a.name}</h3>

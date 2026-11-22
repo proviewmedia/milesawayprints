@@ -14,7 +14,7 @@ export interface SitePage {
  * Only include pages that exist (don't list FAQ/Returns until built).
  */
 export const SITE_PAGES: SitePage[] = [
-  { title: 'Get a free quote', href: '/custom', keywords: 'custom order quote shirts hats stickers merch apparel bulk printing', description: 'Custom printing on almost anything.' },
+  { title: 'Get a free quote', href: '/custom', keywords: 'custom order quote shirts hats stickers merch apparel bulk one-off single item printing', description: 'Custom printing on almost anything.' },
   { title: 'What we print', href: '/services', keywords: 'services products apparel hats bags drinkware stickers posters signs promo', description: 'Every product we can print.' },
   { title: 'How custom orders work', href: '/how-it-works', keywords: 'process proof print methods screen printing embroidery dtg artwork', description: 'Quote, proof, print, ship.' },
   { title: 'Printing guides and resources', href: '/resources', keywords: 'learn guide print methods where to print artwork dpi shirts paper glossary', description: 'Free guides for getting something printed.' },
