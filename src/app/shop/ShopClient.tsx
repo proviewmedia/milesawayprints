@@ -121,7 +121,7 @@ export default function ShopClient({ designs, collections }: Props) {
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-12 md:pb-16">
         <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-[1fr_auto] gap-8 md:items-end">
           <div>
-            <Breadcrumbs items={[{ name: 'Print shop', href: '/shop' }]} />
+            <Breadcrumbs items={[{ name: 'Shop', href: '/shop' }]} />
             <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px] mb-6">Art prints</h1>
             <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
               Golf courses, airports, skylines, cities, marathons, and F1 circuits, designed in house and

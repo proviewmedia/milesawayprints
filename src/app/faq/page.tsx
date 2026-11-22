@@ -34,7 +34,7 @@ const GROUPS: FaqGroup[] = [
     items: [
       {
         q: 'How long does my order take?',
-        a: 'Made-to-order prints leave the printer within 3–5 business days. Add 3–10 days of shipping depending on where you are. Digital downloads are delivered immediately by email after payment.',
+        a: 'Digital downloads are delivered immediately by email after payment.\n\nMade-to-order prints leave the printer within 3–5 business days. Add 3–10 days of shipping depending on where you are.',
       },
       {
         q: 'Can I change my order after placing it?',
@@ -143,7 +143,9 @@ function QAList({ items }: { items: Faq[] }) {
       {items.map((item, i) => (
         <div key={i}>
           <p className="text-[15px] font-medium text-ink mb-1.5">{item.q}</p>
-          <p className="text-mid leading-relaxed">{item.a}</p>
+          {item.a.split('\n\n').map((para, j) => (
+            <p key={j} className={`text-mid leading-relaxed${j > 0 ? ' mt-3' : ''}`}>{para}</p>
+          ))}
         </div>
       ))}
     </div>
@@ -164,7 +166,7 @@ export default function FAQPage() {
 
       <section className="pt-28 md:pt-32 pb-12">
         <div className="max-w-[800px] mx-auto px-6">
-          <Breadcrumbs tone="light" className="mb-2" items={[{ name: 'FAQ', href: '/faq' }]} />
+          <Breadcrumbs tone="light" className="mb-2" items={[{ name: 'Learn', href: '/resources' }, { name: 'FAQ', href: '/faq' }]} />
           <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
             Frequently asked
             <br />

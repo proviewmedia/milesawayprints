@@ -97,7 +97,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
       <script
         {...jsonLdScript(
           breadcrumbJsonLd([
-            { name: 'Resources', url: '/resources' },
+            { name: 'Learn', url: '/resources' },
             { name: guide.title, url: `/resources/${guide.slug}` },
           ]),
         )}
@@ -108,7 +108,7 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           <Breadcrumbs
             jsonLd={false}
             className="mb-8"
-            items={[{ name: 'Resources', href: '/resources' }, { name: guide.title }]}
+            items={[{ name: 'Learn', href: '/resources' }, { name: guide.title }]}
           />
           <p className="eyebrow text-paper/60 mb-5">
             {guide.category} · {guide.readMinutes} min read

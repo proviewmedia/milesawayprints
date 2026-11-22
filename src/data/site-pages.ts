@@ -15,7 +15,7 @@ export interface SitePage {
  */
 export const SITE_PAGES: SitePage[] = [
   { title: 'Custom printing', href: '/custom', keywords: 'get started order custom quote free quote shirts hats stickers merch apparel bags drinkware signs promo bulk one-off single item printing services what we print', description: 'Order prints online or get a free quote on anything else.' },
-  { title: 'Custom map art print', href: '/custom?start=map', keywords: 'custom golf course airport marathon city stadium skyline f1 map print personalized my place', description: 'We design a print of your place. From $32.' },
+  { title: 'Custom print designed for you', href: '/custom?start=map', keywords: 'custom golf course airport marathon city stadium skyline f1 map print personalized my place', description: 'We design a print of your place. From $32.' },
   { title: 'Print your own artwork or photo', href: '/custom?start=artwork', keywords: 'upload photo picture artwork design poster print my own file', description: 'Upload a file, pick a size, and order. From $28.' },
   { title: 'How custom orders work', href: '/how-it-works', keywords: 'process proof print methods screen printing embroidery dtg artwork', description: 'Quote, proof, print, ship.' },
   { title: 'Printing guides and resources', href: '/resources', keywords: 'learn guide print methods where to print artwork dpi shirts paper glossary', description: 'Free guides for getting something printed.' },

@@ -23,12 +23,12 @@ export interface CustomProduct {
   /** Print methods we usually recommend for this product. */
   methods: string;
   /** lucide-react icon name, resolved in the component. */
-  icon: 'shirt' | 'hardHat' | 'shoppingBag' | 'coffee' | 'sticker' | 'frame' | 'signpost' | 'gift' | 'sparkles';
+  icon: 'shirt' | 'cap' | 'shoppingBag' | 'coffee' | 'sticker' | 'frame' | 'signpost' | 'gift' | 'sparkles';
 }
 
 export const CUSTOM_PRODUCTS: CustomProduct[] = [
   { slug: 'apparel', methods: 'Screen printing, DTG, DTF, embroidery', name: 'Apparel', examples: 'T-shirts, hoodies, crewnecks, polos', icon: 'shirt' },
-  { slug: 'headwear', methods: 'Embroidery, patches, DTF', name: 'Hats', examples: 'Caps, trucker hats, beanies', icon: 'hardHat' },
+  { slug: 'headwear', methods: 'Embroidery, patches, DTF', name: 'Hats', examples: 'Caps, trucker hats, beanies', icon: 'cap' },
   { slug: 'bags', methods: 'Screen printing, DTF, embroidery', name: 'Bags and totes', examples: 'Totes, backpacks, pouches', icon: 'shoppingBag' },
   { slug: 'drinkware', methods: 'Sublimation, UV printing, engraving', name: 'Drinkware', examples: 'Mugs, tumblers, water bottles', icon: 'coffee' },
   { slug: 'stickers', methods: 'Digital print, die-cut, vinyl', name: 'Stickers and labels', examples: 'Die-cut stickers, labels, decals', icon: 'sticker' },

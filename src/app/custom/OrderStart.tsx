@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Check, FileUp, Map as MapIcon } from 'lucide-react';
+import { ArrowRight, Check, FileUp, PenTool } from 'lucide-react';
 import ProductIcon from '@/components/ProductIcon';
 import { QUOTE_PRODUCTS, type ProductSlug } from '@/data/custom';
 import {
@@ -17,8 +17,14 @@ import CustomPrintBuilder from './CustomPrintBuilder';
 import ArtworkPrintBuilder from './ArtworkPrintBuilder';
 import QuoteForm from './QuoteForm';
 
-/** What the customer picked in "What are we making?". */
-export type Start = 'map' | 'artwork' | ProductSlug;
+/**
+ * What the customer picked. Kept as the `?start=` URL value:
+ *   prints  -> Prints, how-to-make not chosen yet
+ *   artwork -> Prints, print my file or photo
+ *   map     -> Prints, design one for me
+ *   <product slug> -> that product's free quote
+ */
+export type Start = 'prints' | 'map' | 'artwork' | ProductSlug;
 
 interface Props {
   initialStart: Start | null;
@@ -28,6 +34,8 @@ interface Props {
   exampleImages: Partial<Record<CustomPrintType, string>>;
 }
 
+const isPrints = (s: Start | null) => s === 'prints' || s === 'map' || s === 'artwork';
+
 export default function OrderStart({ initialStart, initialType, mapTypes, mapPricing, exampleImages }: Props) {
   const router = useRouter();
   const pathname = usePathname();
@@ -35,118 +43,103 @@ export default function OrderStart({ initialStart, initialType, mapTypes, mapPri
   const [bulkDetails, setBulkDetails] = useState('');
   const step2 = useRef<HTMLDivElement>(null);
 
-  const mapFrom = Math.min(
-    ...mapTypes.map((t) => fromPrice(mapPricing[t.type] ?? { x: 99900 })),
-  );
-  const artworkFrom = fromPrice(ARTWORK_PRINT_PRICES);
+  const fileFrom = fromPrice(ARTWORK_PRINT_PRICES);
+  const designFrom = Math.min(...mapTypes.map((t) => fromPrice(mapPricing[t.type] ?? { x: 99900 })));
+  const printsFrom = Math.min(fileFrom, designFrom);
 
-  const choose = (next: Start, details = '') => {
+  const choose = (next: Start, details = '', scroll = true) => {
     setStart(next);
     setBulkDetails(details);
     // Keep the choice in the URL so back, refresh, and shared links work.
     router.replace(`${pathname}?start=${next}`, { scroll: false });
-    requestAnimationFrame(() => step2.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    if (scroll) requestAnimationFrame(() => step2.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   };
 
   const bulkQuote = (details: string) => choose('posters', details);
-  const isQuote = start && start !== 'map' && start !== 'artwork';
   const quoteProduct = QUOTE_PRODUCTS.find((p) => p.slug === start);
+  const isQuote = !!start && !isPrints(start);
 
-  const printTile = (
-    key: 'map' | 'artwork',
-    Icon: typeof MapIcon,
-    title: string,
-    desc: string,
-    from: number,
-  ) => {
+  const tileClass = (active: boolean) =>
+    `group text-left flex flex-col justify-between gap-6 min-h-[150px] md:min-h-[170px] p-5 md:p-6 border-2 transition-colors ${
+      active ? 'bg-ink text-paper border-ink' : 'border-ink/15 hover:border-ink'
+    }`;
+
+  const howOption = (key: 'artwork' | 'map', Icon: typeof FileUp, title: string, desc: string, from: number) => {
     const active = start === key;
     return (
       <button
         type="button"
-        onClick={() => choose(key)}
-        aria-pressed={active}
-        className={`group text-left flex flex-col justify-between min-h-[180px] p-6 border-2 transition-colors ${
-          active ? 'bg-ink text-paper border-ink' : 'border-ink hover:bg-soft'
+        role="radio"
+        aria-checked={active}
+        onClick={() => choose(key, '', false)}
+        className={`text-left flex items-start gap-4 p-5 border-2 transition-colors ${
+          active ? 'border-ink bg-ink text-paper' : 'border-ink/15 hover:border-ink'
         }`}
       >
-        <div className="flex items-start justify-between">
-          <Icon size={26} strokeWidth={1.75} aria-hidden="true" />
-          {active ? (
-            <Check size={22} strokeWidth={2.25} aria-hidden="true" />
-          ) : (
-            <span className="text-[13px] font-bold">From ${from}</span>
-          )}
-        </div>
-        <div>
-          <h3 className="font-display font-black uppercase text-2xl tracking-tight leading-none">{title}</h3>
-          <p className={`text-sm mt-2 ${active ? 'text-paper/70' : 'text-mid'}`}>{desc}</p>
-        </div>
+        <Icon size={22} strokeWidth={1.75} className="shrink-0 mt-0.5" aria-hidden="true" />
+        <span className="flex-1">
+          <span className="flex items-baseline justify-between gap-3">
+            <span className="font-bold text-[16px]">{title}</span>
+            <span className={`text-[13px] font-bold shrink-0 ${active ? 'text-paper/80' : 'text-ink'}`}>From ${from}</span>
+          </span>
+          <span className={`block text-[13px] mt-1 leading-snug ${active ? 'text-paper/70' : 'text-mid'}`}>{desc}</span>
+        </span>
       </button>
     );
   };
 
   return (
     <>
-      {/* What are we making? */}
+      {/* Step 1: one choice, every product equal */}
       <section className="py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-6">
-          <h2 className="display text-4xl md:text-6xl mb-10">What are we making?</h2>
+          <h2 className="display text-4xl md:text-6xl mb-3">What are we making?</h2>
+          <p className="text-mid mb-8 max-w-2xl">
+            Prints order online with set prices. Everything else gets a free quote. One piece or hundreds.
+          </p>
 
-          <div className="mb-10">
-            <div className="flex items-baseline justify-between gap-4 flex-wrap mb-4">
-              <h3 className="eyebrow text-ink">Prints</h3>
-              <p className="text-[13px] text-mid">See the price, pick a size, and order online.</p>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-3">
-              {printTile('map', MapIcon, 'Map art print', 'Golf courses, marathons, airports, cities, stadiums, and more. We design it.', mapFrom)}
-              {printTile('artwork', FileUp, 'Your artwork or photo', 'Upload your own photo or design and we print it.', artworkFrom)}
-              <Link
-                href="/shop"
-                className="group flex flex-col justify-between min-h-[180px] p-6 border-2 border-ink hover:bg-soft transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <ProductIcon icon="frame" size={26} />
-                  <ArrowUpRight size={22} strokeWidth={2} className="opacity-40 group-hover:opacity-100" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="font-display font-black uppercase text-2xl tracking-tight leading-none">Ready-made designs</h3>
-                  <p className="text-sm mt-2 text-mid">Browse finished prints in the print shop.</p>
-                </div>
-              </Link>
-            </div>
-          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => choose('prints')}
+              aria-pressed={isPrints(start)}
+              className={`${tileClass(isPrints(start))} col-span-2 lg:col-span-1`}
+            >
+              <div className="flex items-start justify-between">
+                <ProductIcon icon="frame" size={24} />
+                {isPrints(start) && <Check size={20} strokeWidth={2.25} aria-hidden="true" />}
+              </div>
+              <div>
+                <h3 className="font-bold text-[17px] leading-tight">Prints</h3>
+                <p className={`text-[13px] mt-1 leading-snug ${isPrints(start) ? 'text-paper/70' : 'text-mid'}`}>
+                  Photos, art, posters, and custom designs
+                </p>
+                <p className="text-[13px] font-bold mt-3">Order online · from ${printsFrom}</p>
+              </div>
+            </button>
 
-          <div>
-            <div className="flex items-baseline justify-between gap-4 flex-wrap mb-4">
-              <h3 className="eyebrow text-ink">Everything else</h3>
-              <p className="text-[13px] text-mid">Free quote and proof. No commitment, one piece or hundreds.</p>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              {QUOTE_PRODUCTS.map((p) => {
-                const active = start === p.slug;
-                return (
-                  <button
-                    key={p.slug}
-                    type="button"
-                    onClick={() => choose(p.slug)}
-                    aria-pressed={active}
-                    className={`text-left flex flex-col gap-3 p-4 md:p-5 border-2 transition-colors ${
-                      active ? 'bg-ink text-paper border-ink' : 'border-ink/15 hover:border-ink'
-                    }`}
-                  >
-                    <ProductIcon icon={p.icon} size={22} />
-                    <span>
-                      <span className="block font-bold text-[15px] leading-tight">
-                        {p.slug === 'other' ? 'Something else' : p.name}
-                      </span>
-                      <span className={`block text-[13px] mt-1 leading-snug ${active ? 'text-paper/70' : 'text-mid'}`}>
-                        {p.examples}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            {QUOTE_PRODUCTS.map((p) => {
+              const active = start === p.slug;
+              return (
+                <button
+                  key={p.slug}
+                  type="button"
+                  onClick={() => choose(p.slug)}
+                  aria-pressed={active}
+                  className={tileClass(active)}
+                >
+                  <div className="flex items-start justify-between">
+                    <ProductIcon icon={p.icon} size={24} />
+                    {active && <Check size={20} strokeWidth={2.25} aria-hidden="true" />}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-[17px] leading-tight">{p.slug === 'other' ? 'Something else' : p.name}</h3>
+                    <p className={`text-[13px] mt-1 leading-snug ${active ? 'text-paper/70' : 'text-mid'}`}>{p.examples}</p>
+                    <p className={`text-[13px] font-bold mt-3 ${active ? 'text-paper' : 'text-mid'}`}>Free quote</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -157,45 +150,62 @@ export default function OrderStart({ initialStart, initialType, mapTypes, mapPri
           {!start && (
             <p className="flex items-center gap-2 text-mid">
               <ArrowRight size={16} className="-rotate-90" aria-hidden="true" />
-              Pick one above to see sizes and prices, or to start a free quote.
+              Pick what you want made to see your options.
             </p>
           )}
 
-          {start === 'map' && (
+          {isPrints(start) && (
             <>
-              <h2 className="display text-3xl md:text-5xl mb-8">Your map print</h2>
-              <CustomPrintBuilder
-                types={mapTypes}
-                pricing={mapPricing}
-                exampleImages={exampleImages}
-                initialType={initialType}
-                onBulkQuote={bulkQuote}
-              />
-            </>
-          )}
+              <h2 className="display text-3xl md:text-5xl mb-6">How do you want it made?</h2>
+              <div className="grid md:grid-cols-2 gap-3 max-w-4xl" role="radiogroup" aria-label="How do you want it made?">
+                {howOption('artwork', FileUp, 'Print my photo or file', 'Upload a photo, artwork, or design and pick a size.', fileFrom)}
+                {howOption(
+                  'map',
+                  PenTool,
+                  'Design one for me',
+                  'A print of your golf course, race, airport, city, or stadium, drawn by us.',
+                  designFrom,
+                )}
+              </div>
+              <p className="text-[13px] text-mid mt-4">
+                Want something already made?{' '}
+                <Link href="/shop" className="text-ink font-medium underline underline-offset-2">
+                  Browse the print shop
+                </Link>
+              </p>
 
-          {start === 'artwork' && (
-            <>
-              <h2 className="display text-3xl md:text-5xl mb-8">Your artwork, printed</h2>
-              <ArtworkPrintBuilder onBulkQuote={bulkQuote} />
+              {start === 'artwork' && (
+                <div className="mt-12">
+                  <ArtworkPrintBuilder onBulkQuote={bulkQuote} />
+                </div>
+              )}
+              {start === 'map' && (
+                <div className="mt-12">
+                  <CustomPrintBuilder
+                    types={mapTypes}
+                    pricing={mapPricing}
+                    exampleImages={exampleImages}
+                    initialType={initialType}
+                    onBulkQuote={bulkQuote}
+                  />
+                </div>
+              )}
             </>
           )}
 
           {isQuote && (
             <>
               <h2 className="display text-3xl md:text-5xl mb-2">
-                {quoteProduct ? `Free quote: ${quoteProduct.slug === 'other' ? 'something else' : quoteProduct.name}` : 'Free quote: bulk prints'}
+                {quoteProduct
+                  ? `Free quote: ${quoteProduct.slug === 'other' ? 'something else' : quoteProduct.name}`
+                  : 'Free quote: bulk prints'}
               </h2>
               <p className="text-mid mb-8 max-w-2xl">
                 Tell us what you need. We reply with a price and a proof within 1 to 2 business days, and nothing is
                 printed until you approve it.
               </p>
               <div className="grid lg:grid-cols-[1fr_300px] gap-10 items-start">
-                <QuoteForm
-                  key={`${start}-${bulkDetails}`}
-                  initialProduct={start as ProductSlug}
-                  initialDetails={bulkDetails}
-                />
+                <QuoteForm key={`${start}-${bulkDetails}`} initialProduct={start as ProductSlug} initialDetails={bulkDetails} />
                 <aside className="space-y-4 lg:sticky lg:top-32">
                   <div className="border-2 border-ink p-5">
                     <h3 className="text-[15px] font-bold text-ink mb-2">Not sure what you need?</h3>

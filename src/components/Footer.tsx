@@ -49,13 +49,8 @@ export default function Footer() {
             <h4 className={HEADING}>Custom printing</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/custom?start=map" className={LINK}>
-                  Map art prints
-                </Link>
-              </li>
-              <li>
-                <Link href="/custom?start=artwork" className={LINK}>
-                  Print your artwork
+                <Link href="/custom?start=prints" className={LINK}>
+                  Prints
                 </Link>
               </li>
               {QUOTE_PRODUCTS.filter((p) => p.slug !== 'other').map((p) => (
@@ -69,7 +64,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className={HEADING}>Resources</h4>
+            <h4 className={HEADING}>Learn</h4>
             <ul className="space-y-3">
               <li><Link href="/resources" className={LINK}>Printing guides</Link></li>
               <li><Link href="/resources/print-size-calculator" className={LINK}>Print size calculator</Link></li>
@@ -83,7 +78,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className={HEADING}>Print shop</h4>
+            <h4 className={HEADING}>Shop</h4>
             <ul className="space-y-3">
               <li><Link href="/shop" className={LINK}>All prints</Link></li>
               <li><Link href="/prints/golf" className={LINK}>Golf courses</Link></li>

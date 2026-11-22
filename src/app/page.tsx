@@ -42,16 +42,10 @@ export const dynamic = 'force-dynamic';
 
 const PRINT_TILES = [
   {
-    href: '/custom?start=map',
-    name: 'Map art prints',
-    desc: 'Your course, race, airport, or city, designed by us',
-    from: Math.min(...Object.values(CUSTOM_PRINT_PRICES).map(fromPrice)),
-  },
-  {
-    href: '/custom?start=artwork',
-    name: 'Your artwork printed',
-    desc: 'Upload a photo or design, pick a size',
-    from: fromPrice(ARTWORK_PRINT_PRICES),
+    href: '/custom?start=prints',
+    name: 'Prints',
+    desc: 'Photos, art, posters, and custom designs',
+    from: Math.min(fromPrice(ARTWORK_PRINT_PRICES), ...Object.values(CUSTOM_PRINT_PRICES).map(fromPrice)),
   },
 ];
 
@@ -148,7 +142,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 border-t border-l border-ink">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-ink">
             {PRINT_TILES.map((t) => (
               <Link
                 key={t.href}
@@ -160,7 +154,7 @@ export default async function HomePage() {
                   <span className="text-[13px] font-bold">From ${t.from}</span>
                 </div>
                 <div>
-                  <h3 className="font-display font-black uppercase text-2xl md:text-3xl lg:text-2xl tracking-tight leading-none">
+                  <h3 className="font-display font-black uppercase text-2xl md:text-3xl tracking-tight leading-none">
                     {t.name}
                   </h3>
                   <p className="text-sm mt-2 text-mid group-hover:text-paper/70">{t.desc}</p>
@@ -187,7 +181,7 @@ export default async function HomePage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-display font-black uppercase text-2xl md:text-3xl lg:text-2xl tracking-tight leading-none">
+                    <h3 className="font-display font-black uppercase text-2xl md:text-3xl tracking-tight leading-none">
                       {isOther ? 'Something else' : p.name}
                     </h3>
                     <p className={`text-sm mt-2 ${isOther ? 'text-paper/70' : 'text-mid group-hover:text-paper/70'}`}>

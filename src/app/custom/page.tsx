@@ -18,19 +18,9 @@ export const metadata: Metadata = {
 // Example images come from the live shop, so re-read them regularly.
 export const revalidate = 300;
 
-const HOW = [
-  {
-    title: 'Prints',
-    steps: ['Pick a size and pay online.', 'We design your print or check your file, and email a proof.', 'Approve it and it ships in 3 to 5 business days.'],
-  },
-  {
-    title: 'Everything else',
-    steps: ['Tell us what you need. Takes about 2 minutes.', 'We reply with a price and a proof in 1 to 2 business days.', 'Approve it and we print and ship it.'],
-  },
-];
 
 function parseStart(start?: string, product?: string): Start | null {
-  if (start === 'map' || start === 'artwork') return start;
+  if (start === 'prints' || start === 'map' || start === 'artwork') return start;
   // Old /custom?product=posters links were about printing wall art.
   const slug = start ?? product;
   if (slug === 'posters' && !start) return 'artwork';
@@ -86,27 +76,6 @@ export default async function CustomPage({
         mapPricing={mapPricing}
         exampleImages={exampleImages}
       />
-
-      <section className="bg-ink text-paper">
-        <div className="max-w-[1400px] mx-auto px-6 py-14 md:py-20">
-          <h2 className="display text-4xl md:text-6xl mb-10">How ordering works</h2>
-          <div className="grid md:grid-cols-2 gap-10">
-            {HOW.map((h) => (
-              <div key={h.title}>
-                <h3 className="eyebrow text-paper/60 mb-5">{h.title}</h3>
-                <ol className="space-y-4">
-                  {h.steps.map((s, i) => (
-                    <li key={s} className="flex gap-4 border-t border-paper/20 pt-4">
-                      <span className="font-display font-black text-xl text-paper/40 tabular-nums">0{i + 1}</span>
-                      <span className="text-[15px] text-paper/85 leading-relaxed">{s}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </>

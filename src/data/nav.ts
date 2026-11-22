@@ -15,11 +15,12 @@ export interface NavLink {
   match: string[];
 }
 
+/** Ready-made prints live under Shop; anything made to order starts from
+ *  the Get started button (/custom). Learn gathers how-it-works, guides,
+ *  tools, and FAQs. */
 export const NAV_LINKS: NavLink[] = [
-  { href: '/shop', label: 'Print shop', match: ['/shop', '/prints', '/marathons', '/gifts'] },
-  { href: '/custom', label: 'Custom printing', match: ['/custom'] },
-  { href: '/how-it-works', label: 'How it works', match: ['/how-it-works'] },
-  { href: '/resources', label: 'Resources', match: ['/resources'] },
+  { href: '/shop', label: 'Shop', match: ['/shop', '/prints', '/marathons', '/gifts'] },
+  { href: '/resources', label: 'Learn', match: ['/resources', '/how-it-works', '/faq'] },
   { href: '/about', label: 'About', match: ['/about'] },
   { href: '/contact', label: 'Contact', match: ['/contact'] },
 ];

@@ -131,6 +131,29 @@ export const CUSTOM_PRINT_PRICES: Record<CustomPrintType, Record<string, number>
   f1: BASE_LADDER,
 };
 
+/** Digital file prices in cents: one flat price for any size, matching the
+ *  Digital option on the Etsy custom listings (Nov 2026: golf $30, airport,
+ *  marathon, city and stadium $25). Skyline and F1 follow the $25 listings.
+ *  The file is designed by hand like a print, so it is emailed after the
+ *  customer approves the proof (never an instant download). */
+export const CUSTOM_DIGITAL_PRICES: Record<CustomPrintType, number> = {
+  golf: 3000,
+  airport: 2500,
+  marathon: 2500,
+  city: 2500,
+  stadium: 2500,
+  skyline: 2500,
+  f1: 2500,
+};
+
+/** A custom map print bought as a digital file (not "your artwork"). */
+export function isCustomDigitalItem(item: {
+  format?: string;
+  customization?: Record<string, unknown> | null;
+}): boolean {
+  return item.format === 'digital' && isCustomPrintItem(item) && item.customization?.custom_type !== ARTWORK_TYPE;
+}
+
 export const MAX_PLACE_LENGTH = 120;
 export const MAX_DETAILS_LENGTH = 600;
 

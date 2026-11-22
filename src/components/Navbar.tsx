@@ -62,7 +62,13 @@ export default function Navbar({ defaultCountry = 'United States' }: NavbarProps
           </ul>
 
           <div className="flex items-center gap-1">
-            <Link href={START_HREF} className="hidden md:inline-flex btn-primary font-bold py-2.5 px-5 text-[13px] mr-2">
+            <Link
+              href={START_HREF}
+              aria-current={pathname?.startsWith(START_HREF) ? 'page' : undefined}
+              className={`hidden md:inline-flex btn-primary font-bold py-2.5 px-5 text-[13px] mr-2 ${
+                pathname?.startsWith(START_HREF) ? 'ring-2 ring-ink ring-offset-2 ring-offset-paper' : ''
+              }`}
+            >
               {START_LABEL}
             </Link>
             <button

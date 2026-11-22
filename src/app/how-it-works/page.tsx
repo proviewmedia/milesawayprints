@@ -44,7 +44,7 @@ export default function HowItWorksPage() {
 
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
         <div className="max-w-[1100px] mx-auto px-6">
-          <Breadcrumbs items={[{ name: 'How it works', href: '/how-it-works' }]} />
+          <Breadcrumbs items={[{ name: 'Learn', href: '/resources' }, { name: 'How it works', href: '/how-it-works' }]} />
           <h1 className="display text-[12vw] md:text-8xl mb-6 max-w-4xl">Idea to finished product</h1>
           <p className="text-base md:text-lg text-paper/75 max-w-xl leading-relaxed">
             Everything happens online and by email. You see the price and a proof before anything is printed.

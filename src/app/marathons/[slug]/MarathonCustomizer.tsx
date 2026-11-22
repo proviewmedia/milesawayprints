@@ -181,7 +181,7 @@ export default function MarathonCustomizer({ marathon, fullSvg, halfSvg }: Props
           tone="light"
           jsonLd={false}
           items={[
-            { name: 'Print shop', href: '/shop' },
+            { name: 'Shop', href: '/shop' },
             { name: 'Marathon prints', href: '/prints/marathon' },
             { name: `${marathon.city} Marathon` },
           ]}

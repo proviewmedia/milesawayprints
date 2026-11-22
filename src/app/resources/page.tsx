@@ -7,11 +7,18 @@ import { GUIDES, RESOURCE_TOOLS } from '@/data/resources';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Free Printing Guides and Tools',
+  title: 'Learn: How It Works, Printing Guides, and FAQs',
   description:
     'Free guides on print methods, where to get something printed, preparing artwork, choosing shirts, paper and poster sizes, plus a print size calculator.',
   alternates: { canonical: '/resources' },
 };
+
+const START_HERE = [
+  { href: '/how-it-works', title: 'How it works', desc: 'From idea to your door: quotes, proofs, print methods, and artwork.' },
+  { href: '/faq', title: 'FAQ', desc: 'Orders, sizes, frames, shipping, and returns.' },
+  { href: '/shipping', title: 'Shipping', desc: 'Costs, timing, and tracking.' },
+  { href: '/contact', title: 'Still stuck?', desc: 'Send us a message. We reply within 1 to 2 business days.' },
+];
 
 export default function ResourcesPage() {
   const tool = RESOURCE_TOOLS[0];
@@ -22,17 +29,32 @@ export default function ResourcesPage() {
 
       <section className="bg-ink text-paper pt-32 md:pt-40 pb-14 md:pb-20">
         <div className="max-w-[1400px] mx-auto px-6">
-          <Breadcrumbs items={[{ name: 'Resources', href: '/resources' }]} />
-          <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px]">Learn to print</h1>
+          <Breadcrumbs items={[{ name: 'Learn', href: '/resources' }]} />
+          <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px]">Learn</h1>
           <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed mt-8">
-            Free guides for anyone getting something printed. Print methods, where to print, artwork, and sizing, in
-            plain language.
+            How ordering works, answers to common questions, and free guides for getting anything printed.
           </p>
         </div>
       </section>
 
       <section className="py-14 md:py-20">
         <div className="max-w-[1400px] mx-auto px-6">
+          <h2 className="eyebrow text-mid mb-6">Start here</h2>
+          <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-ink border border-ink mb-14">
+            {START_HERE.map((s) => (
+              <li key={s.href} className="bg-paper">
+                <Link
+                  href={s.href}
+                  className="group flex flex-col h-full min-h-[150px] p-6 hover:bg-ink hover:text-paper transition-colors"
+                >
+                  <span className="font-bold text-[17px] mb-2">{s.title}</span>
+                  <span className="text-sm text-mid group-hover:text-paper/70 leading-relaxed">{s.desc}</span>
+                  <ArrowRight size={16} strokeWidth={2.25} className="mt-auto pt-4 box-content transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+
           <h2 className="eyebrow text-mid mb-6">Guides</h2>
           <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-ink border border-ink">
             {GUIDES.map((g) => (
