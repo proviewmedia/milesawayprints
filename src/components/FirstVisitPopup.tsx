@@ -106,8 +106,8 @@ export default function FirstVisitPopup() {
       setStatus('success');
       setMessage(
         data.alreadySubscribed
-          ? "You're already on the list — we re-sent your code."
-          : 'Check your inbox — your 10% off code is on the way.',
+          ? "You're already on the list. We re-sent your code."
+          : 'Check your inbox. Your 10% off code is on the way.',
       );
       try {
         sessionStorage.setItem(DISMISS_KEY, '1');
@@ -135,44 +135,39 @@ export default function FirstVisitPopup() {
         type="button"
         aria-label="Close offer"
         onClick={dismiss}
-        className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink/60"
       />
 
-      {/* Card — bottom-sheet on mobile, centered modal on desktop */}
-      <div ref={cardRef} className="relative bg-paper w-full md:w-[420px] md:rounded-2xl rounded-t-2xl border border-border shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.15)] md:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)] p-6 md:p-7 mb-0 md:mb-0 animate-[slideUp_280ms_ease-out]">
+      {/* Card: bottom sheet on mobile, centered modal on desktop. Square, ink-bordered, like the rest of the INQ site */}
+      <div ref={cardRef} className="relative bg-paper w-full md:w-[440px] border-2 border-ink animate-[slideUp_280ms_ease-out]">
         <button
           type="button"
           onClick={dismiss}
           aria-label="Close"
-          className="absolute top-3 right-3 w-9 h-9 rounded-full hover:bg-soft flex items-center justify-center text-mid hover:text-ink transition-colors"
+          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full hover:bg-paper/15 flex items-center justify-center text-paper/70 hover:text-paper transition-colors"
         >
           <X size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
 
         {status === 'success' ? (
-          <div className="text-center py-6">
-            <div className="w-12 h-12 mx-auto rounded-full bg-mint/15 flex items-center justify-center mb-4">
-              <Check size={20} strokeWidth={1.75} className="text-mint" aria-hidden="true" />
-            </div>
-            <h2
-              id="first-visit-popup-title"
-              className="text-lg font-medium text-ink mb-2"
-            >
+          <div className="bg-ink text-paper px-6 md:px-8 pt-12 pb-10">
+            <Check size={28} strokeWidth={2.25} className="mb-5" aria-hidden="true" />
+            <h2 id="first-visit-popup-title" className="display text-5xl mb-3">
               You&apos;re in.
             </h2>
-            <p className="text-sm text-mid">{message}</p>
+            <p className="text-sm text-paper/75 leading-relaxed">{message}</p>
           </div>
         ) : (
           <>
-            <div className="text-[11px] font-medium tracking-widest uppercase text-mid mb-2">
-              Welcome offer
+            <div className="bg-ink text-paper px-6 md:px-8 pt-10 pb-8">
+              <p className="eyebrow text-paper/60 mb-4">Welcome offer</p>
+              <h2 id="first-visit-popup-title" className="display text-5xl">
+                10% off
+                <br />
+                your first print
+              </h2>
             </div>
-            <h2
-              id="first-visit-popup-title"
-              className="text-2xl md:text-[26px] font-medium tracking-tight text-ink leading-[1.15] mb-3"
-            >
-              10% off your first print.
-            </h2>
+            <div className="px-6 md:px-8 pt-6 pb-6">
             <p className="text-sm text-mid leading-relaxed mb-5">
               Drop your email and we&apos;ll send a code, plus first looks at new releases.
             </p>
@@ -191,7 +186,7 @@ export default function FirstVisitPopup() {
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                className="w-full bg-ink text-paper py-3 rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                className="w-full bg-ink text-paper py-3.5 rounded-full text-sm font-bold hover:bg-black transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >
                 {status === 'submitting' ? (
                   'Sending…'
@@ -215,6 +210,7 @@ export default function FirstVisitPopup() {
             >
               No thanks
             </button>
+            </div>
           </>
         )}
       </div>
