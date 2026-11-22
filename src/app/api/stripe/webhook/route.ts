@@ -268,7 +268,13 @@ export async function POST(req: Request) {
             update.printful_order_id = printfulOrderId;
             update.status = 'in_production';
           } else {
-            update.printful_error = printfulRes.error?.message ?? 'unknown printful error';
+            // Keep any earlier notify errors (marathon or custom print emails).
+            update.printful_error = [
+              update.printful_error,
+              `Printful: ${printfulRes.error?.message ?? 'unknown printful error'}`,
+            ]
+              .filter(Boolean)
+              .join('; ');
           }
         }
       }
