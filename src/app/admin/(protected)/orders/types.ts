@@ -50,6 +50,13 @@ export function hasMarathonItem(order: Pick<AdminOrder, 'cart_snapshot'>): boole
   );
 }
 
+/** Custom prints (src/data/custom-prints.ts) are designed by hand. */
+export function hasCustomPrintItem(order: Pick<AdminOrder, 'cart_snapshot'>): boolean {
+  return (order.cart_snapshot ?? []).some(
+    (it) => !!it.customization && (it.customization as Record<string, string>).custom_print === 'true',
+  );
+}
+
 export function hasPhysicalItem(order: Pick<AdminOrder, 'cart_snapshot' | 'format'>): boolean {
   const cart = order.cart_snapshot ?? [];
   if (cart.length > 0) return cart.some((it) => it.format === 'physical');
@@ -64,8 +71,11 @@ export function hasPhysicalItem(order: Pick<AdminOrder, 'cart_snapshot' | 'forma
  * (which sets `printful_error` and leaves `printful_order_id` empty).
  */
 export function needsAction(order: AdminOrder): boolean {
-  if (order.printful_order_id) return false;
   if (['cancelled', 'shipped', 'fulfilled', 'delivered'].includes(order.status)) return false;
+  // Custom prints need design and a proof, even when the rest of the cart
+  // went to Printful, until the order is marked shipped or done.
+  if (hasCustomPrintItem(order)) return true;
+  if (order.printful_order_id) return false;
   // Marathon: always needs admin action until printful_order_id is set
   if (hasMarathonItem(order)) return true;
   // Gallery: only needs action if the auto-submit failed (printful_error set)

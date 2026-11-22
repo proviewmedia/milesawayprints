@@ -9,6 +9,8 @@ import {
   type OrderConfirmationItem,
 } from '@/lib/email';
 import { notifyMarathonOrder, isMarathonCartItem } from '@/lib/marathon-fulfill';
+import { notifyCustomPrintOrder } from '@/lib/custom-print-fulfill';
+import { isCustomPrintItem } from '@/data/custom-prints';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -161,7 +163,9 @@ export async function POST(req: Request) {
       let printfulOrderId: string | null = null;
 
       if (physicalItems.length > 0 && shipping?.address) {
-        const galleryPhysical = physicalItems.filter((it) => !isMarathonCartItem(it));
+        const galleryPhysical = physicalItems.filter(
+          (it) => !isMarathonCartItem(it) && !isCustomPrintItem(it),
+        );
         const slugs = Array.from(new Set(galleryPhysical.map((it) => it.slug)));
         const { data: designs } = slugs.length
           ? await admin
@@ -208,8 +212,25 @@ export async function POST(req: Request) {
               }
             : undefined,
         });
-        if (marathonNotify.errors.length > 0) {
-          update.printful_error = marathonNotify.errors.join('; ');
+        // Custom prints are designed by hand: email the admin, never Printful.
+        const customNotify = await notifyCustomPrintOrder({
+          items: physicalItems,
+          orderNumber: order.order_number ?? order.token,
+          orderToken: order.token as string,
+          customer: { name: customerName, email: customerEmail },
+          shipping: {
+            name: shipping.name ?? customerName,
+            line1: shipping.address.line1 ?? '',
+            line2: shipping.address.line2 ?? null,
+            city: shipping.address.city ?? '',
+            state: shipping.address.state ?? null,
+            postalCode: shipping.address.postal_code ?? '',
+            country: shipping.address.country ?? 'US',
+          },
+        });
+        const notifyErrors = [...marathonNotify.errors, ...customNotify.errors];
+        if (notifyErrors.length > 0) {
+          update.printful_error = notifyErrors.join('; ');
         }
 
         if (printfulItems.length > 0) {

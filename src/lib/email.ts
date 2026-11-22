@@ -568,6 +568,74 @@ ${shippingHtml}
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Custom print notification: sent to the admin inbox when a custom print
+// (src/data/custom-prints.ts) is paid for. These are designed by hand, so
+// they are never auto-submitted to Printful.
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface CustomPrintFulfillmentArgs {
+  orderNumber: string | number;
+  orderToken: string;
+  customer: { name: string; email: string };
+  shipping?: OrderShippingAddress;
+  typeLabel: string;
+  place: string;
+  details: string;
+  size: string;
+  pricePaidCents: number;
+}
+
+export async function sendCustomPrintFulfillmentEmail(args: CustomPrintFulfillmentArgs) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY missing; skipping custom print notification');
+    return { skipped: true };
+  }
+
+  const subject = `[Custom print] ${args.typeLabel}: ${args.place} #${args.orderNumber}`;
+  const row = (k: string, v: string) =>
+    `<tr><td style="padding:4px 16px 4px 0;color:#6b6b6b;vertical-align:top;">${k}</td><td>${v}</td></tr>`;
+  const shippingHtml = args.shipping
+    ? `<p style="font-size:13px;color:#0e0e0e;margin:0 0 4px;line-height:1.5;">
+         ${escapeHtml(args.shipping.name)}<br/>
+         ${escapeHtml(args.shipping.line1)}${args.shipping.line2 ? `<br/>${escapeHtml(args.shipping.line2)}` : ''}<br/>
+         ${escapeHtml(args.shipping.city)}${args.shipping.state ? `, ${escapeHtml(args.shipping.state)}` : ''} ${escapeHtml(args.shipping.postalCode)}<br/>
+         ${escapeHtml(args.shipping.country)}
+       </p>`
+    : '<p style="font-size:13px;color:#9c9c9c;margin:0;">No shipping address on file.</p>';
+
+  const html = `
+<!DOCTYPE html>
+<html><body style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0e0e0e;background:#fff;">
+<p style="font-size:12px;color:#9c9c9c;margin:0 0 16px;letter-spacing:0.06em;text-transform:uppercase;">Custom print order, design needed</p>
+<h2 style="font-size:20px;margin:0 0 16px;font-weight:600;">${escapeHtml(args.typeLabel)}: ${escapeHtml(args.place)}</h2>
+<table style="font-size:14px;color:#0e0e0e;border-collapse:collapse;margin:0 0 24px;">
+  ${row('Order', `#${escapeHtml(String(args.orderNumber))} <span style="color:#9c9c9c;font-size:12px;">(${escapeHtml(args.orderToken)})</span>`)}
+  ${row('Size', escapeHtml(args.size))}
+  ${row('Paid', `$${(args.pricePaidCents / 100).toFixed(2)}`)}
+  ${row('Details', args.details ? escapeHtml(args.details).replace(/\n/g, '<br/>') : '<span style="color:#9c9c9c;">None given</span>')}
+</table>
+<h3 style="font-size:14px;margin:16px 0 8px;font-weight:600;">Customer</h3>
+<p style="font-size:13px;margin:0 0 4px;">${escapeHtml(args.customer.name)} &lt;${escapeHtml(args.customer.email)}&gt;</p>
+<h3 style="font-size:14px;margin:16px 0 8px;font-weight:600;">Ship to</h3>
+${shippingHtml}
+<hr style="border:none;border-top:1px solid #e8e6e0;margin:24px 0;" />
+<p style="font-size:13px;color:#6b6b6b;margin:0;line-height:1.5;">
+  Reply to this email to reach the customer. Design the print, send them a
+  proof, and once they approve, place it in Printful and mark the order shipped.
+</p>
+</body></html>`.trim();
+
+  return resend.emails.send({
+    from: FROM,
+    to: SUPPORT_INBOX,
+    reply_to: args.customer.email,
+    subject,
+    html,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Newsletter welcome — sent on signup with the 10% off promo code
 // ────────────────────────────────────────────────────────────────────────────
 
