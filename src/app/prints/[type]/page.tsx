@@ -211,7 +211,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
                   Don&apos;t see your {customType.label.toLowerCase()}?
                 </h2>
                 <p className="text-paper/75 max-w-xl leading-relaxed">
-                  We will make it. Same sizes and prices as the shop, with a proof before it prints.
+                  We will make it from scratch, with a proof before it prints.
                 </p>
               </div>
               <span className="inline-flex items-center gap-2 bg-paper text-ink px-7 py-4 rounded-full font-bold text-[15px] w-fit">

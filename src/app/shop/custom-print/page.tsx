@@ -10,12 +10,11 @@ import CustomPrintBuilder from './CustomPrintBuilder';
 export const metadata: Metadata = {
   title: 'Custom Art Print of Your Place',
   description:
-    'Order a custom art print of your golf course, airport, city, skyline, or F1 circuit. Pick a size, pay online, and we design it and send a proof before it prints.',
+    'Order a custom art print of your golf course, airport, marathon, city, stadium, skyline, or F1 circuit. Pick a size, pay online, and we design it and send a proof before it prints.',
   alternates: { canonical: '/shop/custom-print' },
 };
 
-// Prices follow the live shop, so re-read them regularly rather than baking
-// them in at build time.
+// Example images come from the live shop, so re-read them regularly.
 export const revalidate = 300;
 
 export default async function CustomPrintPage({
@@ -24,7 +23,7 @@ export default async function CustomPrintPage({
   searchParams: { type?: string };
 }) {
   const admin = createAdminClient();
-  const pricing = await getCustomPrintPricing(admin);
+  const pricing = getCustomPrintPricing();
 
   // One example image per type so the builder shows the style being ordered.
   const { data: examples } = await admin
@@ -38,6 +37,8 @@ export default async function CustomPrintPage({
   for (const row of (examples ?? []) as { print_type_slug: CustomPrintType; image_url: string }[]) {
     exampleImages[row.print_type_slug] ??= row.image_url;
   }
+  // Marathons live in their own table, not gallery_items.
+  exampleImages.marathon ??= '/marathons/las-vegas-marathon-new.png';
 
   const available = CUSTOM_PRINT_TYPES.filter((t) => pricing[t.type] && Object.keys(pricing[t.type]!).length > 0);
   const initialType = getCustomPrintType(searchParams.type)?.type ?? available[0]?.type ?? 'golf';
@@ -55,8 +56,8 @@ export default async function CustomPrintPage({
             Your print.
           </h1>
           <p className="text-base md:text-xl text-paper/75 max-w-2xl leading-relaxed">
-            Do not see your course, airport, or city in the shop? Order it here. Same sizes and prices as the
-            shop. We design it, email you a proof, and print it once you approve.
+            Your course, your race, your airport, your city. Tell us the place, pick a size, and check out. We
+            design it, email you a proof, and print it once you approve.
           </p>
         </div>
       </section>

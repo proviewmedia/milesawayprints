@@ -76,8 +76,8 @@ export async function POST(req: Request) {
     // price is rejected rather than charged at the client's number.
     const isMarathon = (it: CartItem) =>
       it.type === 'marathon' && Boolean(it.customization?.marathon_slug);
-    // Custom prints (src/data/custom-prints.ts) are priced from the shop's
-    // own price ladder for that print type, never from the client.
+    // Custom prints (src/data/custom-prints.ts) are priced from a fixed table
+    // that matches the Etsy custom listings, never from the client.
     const isCustomPrint = (it: CartItem) => isCustomPrintItem(it);
     const hasCustomPrint = items.some(isCustomPrint);
 
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
       marathonSlugs.length
         ? admin.from('marathons').select('slug, printful_prices').in('slug', marathonSlugs)
         : Promise.resolve({ data: [] as { slug: string; printful_prices: Record<string, number> | null }[] }),
-      hasCustomPrint ? getCustomPrintPricing(admin) : Promise.resolve({}),
+      Promise.resolve(hasCustomPrint ? getCustomPrintPricing() : {}),
     ]);
     const galleryBySlug = new Map((galleryRes.data ?? []).map((r) => [r.slug, r]));
     const marathonBySlug = new Map((marathonRes.data ?? []).map((r) => [r.slug, r]));

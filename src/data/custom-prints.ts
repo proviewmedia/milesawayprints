@@ -3,14 +3,15 @@ import type { PrintType } from './prints';
 /**
  * Custom art prints: the customer names a place we have not made yet, picks a
  * size, and pays at checkout. We design it, send a proof, and fulfill it by
- * hand (it is never auto-submitted to Printful). Sizes and prices mirror the
- * live shop for the same print type, resolved server-side in
- * src/lib/custom-print-pricing.ts so the two can never drift apart.
+ * hand (it is never auto-submitted to Printful). Prices match the custom
+ * listings on the Etsy shop (CUSTOM_PRINT_PRICES below) and are charged
+ * server-side by /api/checkout from the same table.
  *
- * Marathons are not here on purpose: they have their own customizer.
+ * Marathon here means a race we do not have a template for. Races we do have
+ * (Las Vegas, Chicago) keep their own customizer at /marathons/[slug].
  */
 export interface CustomPrintTypeConfig {
-  type: Extract<PrintType, 'golf' | 'airport' | 'city' | 'skyline' | 'f1'>;
+  type: Extract<PrintType, 'golf' | 'airport' | 'marathon' | 'city' | 'stadium' | 'skyline' | 'f1'>;
   label: string;
   /** Label and placeholder for the "which place" field. */
   placeLabel: string;
@@ -35,11 +36,25 @@ export const CUSTOM_PRINT_TYPES: CustomPrintTypeConfig[] = [
     detailsPlaceholder: 'A first solo flight date, a tail number, text you want on it...',
   },
   {
+    type: 'marathon',
+    label: 'Marathon',
+    placeLabel: 'Race and year',
+    placePlaceholder: 'Vancouver Marathon 2026',
+    detailsPlaceholder: 'Runner name, bib number, finish time, full or half, landmarks to include...',
+  },
+  {
     type: 'city',
     label: 'City map',
     placeLabel: 'City or neighborhood',
     placePlaceholder: 'Brooklyn, New York',
     detailsPlaceholder: 'A street to center on, a pin for your home, coordinates...',
+  },
+  {
+    type: 'stadium',
+    label: 'Stadium',
+    placeLabel: 'Stadium or team',
+    placePlaceholder: 'Allegiant Stadium, Las Vegas Raiders',
+    detailsPlaceholder: 'A seat or section, a game date, a score, a name...',
   },
   {
     type: 'skyline',
@@ -92,6 +107,29 @@ export function sortSizes(sizes: string[]): string[] {
 
 /** Pricing payload passed from the server to the builder: type -> size -> cents. */
 export type CustomPrintPricing = Partial<Record<CustomPrintType, Record<string, number>>>;
+
+/** Print prices in cents, shipping included, matching the custom listings on
+ *  etsy.com/shop/TheInqPress (Nov 2026). Skyline and F1 have no Etsy listing
+ *  and use the base ladder shared by city, stadium, and marathon. */
+const BASE_LADDER: Record<string, number> = {
+  '8x10': 3200,
+  '11x14': 3400,
+  '12x16': 3600,
+  '12x18': 3800,
+  '16x20': 4000,
+  '18x24': 4200,
+  '24x36': 4400,
+};
+
+export const CUSTOM_PRINT_PRICES: Record<CustomPrintType, Record<string, number>> = {
+  golf: { '8x10': 4300, '11x14': 4500, '12x16': 4700, '12x18': 4800, '16x20': 4900, '18x24': 5100, '24x36': 5300 },
+  airport: { '8x10': 3800, '11x14': 4000, '12x16': 4200, '12x18': 4200, '16x20': 4400, '18x24': 4600, '24x36': 4800 },
+  marathon: BASE_LADDER,
+  city: BASE_LADDER,
+  stadium: BASE_LADDER,
+  skyline: BASE_LADDER,
+  f1: BASE_LADDER,
+};
 
 export const MAX_PLACE_LENGTH = 120;
 export const MAX_DETAILS_LENGTH = 600;
