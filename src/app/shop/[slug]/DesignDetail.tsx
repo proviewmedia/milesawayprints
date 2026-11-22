@@ -150,7 +150,7 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
           <div className="grid md:grid-cols-[1.2fr_1fr] gap-10 lg:gap-16">
             {/* Preview — Printful images fill the tile; SVG previews sit inside it */}
             <div className="md:sticky md:top-32 md:self-start">
-              <div className="bg-soft min-h-[60vh] flex items-center justify-center overflow-hidden">
+              <div className="bg-soft min-h-[60vh] flex items-center justify-center overflow-hidden border border-ink/10">
                 {design.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -171,16 +171,16 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
             {/* Details */}
             <div>
               <div className="flex items-baseline justify-between gap-3 mb-1">
-                <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-ink">
+                <h1 className="display text-4xl md:text-5xl text-ink">
                   {design.name}
                 </h1>
-                <div className="text-2xl md:text-3xl font-medium text-ink whitespace-nowrap">
+                <div className="font-display font-black text-2xl md:text-3xl text-ink whitespace-nowrap">
                   ${price}
                 </div>
               </div>
               <Link
                 href={`/prints/${design.type}`}
-                className="text-sm text-mid underline underline-offset-2 hover:text-ink"
+                className="eyebrow text-mid hover:text-ink"
               >
                 {cfg.detailsLabel}
               </Link>
@@ -214,8 +214,8 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
                       <button
                         key={s}
                         onClick={() => setSize(s)}
-                        className={`min-h-[44px] py-3 rounded-lg border text-sm transition-colors ${
-                          size === s ? 'border-ink text-ink' : 'border-border text-mid hover:text-ink'
+                        className={`min-h-[44px] py-3 rounded-lg border-2 text-sm font-bold transition-colors ${
+                          size === s ? 'border-ink bg-ink text-paper' : 'border-ink/15 text-ink hover:border-ink'
                         }`}
                       >
                         {s}
@@ -228,7 +228,7 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
               {/* Quantity stepper */}
               <div className="mb-7">
                 <div className="text-[13px] font-medium text-ink mb-2.5">Quantity</div>
-                <div className="inline-flex items-center border border-border rounded-full overflow-hidden">
+                <div className="inline-flex items-center border-2 border-ink/15 rounded-full overflow-hidden">
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -306,7 +306,7 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
                 onClick={handleAdd}
                 disabled={!canAdd}
                 aria-live="polite"
-                className={`w-full py-4 rounded-full text-sm font-medium transition-colors mb-3 inline-flex items-center justify-center gap-2 ${
+                className={`w-full py-4 rounded-full text-sm font-bold transition-colors mb-3 inline-flex items-center justify-center gap-2 ${
                   added
                     ? 'bg-mint text-paper'
                     : canAdd
@@ -374,19 +374,19 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
           decision point. JSON-LD already exposes these for SEO; now
           customers see them too. Only renders when reviews exist. */}
       {reviews && reviews.length > 0 && (
-        <section className="py-14 md:py-20 border-t border-border">
+        <section className="py-14 md:py-20 border-t border-ink">
           <div className="max-w-[1100px] mx-auto px-6">
-            <h2 className="text-xl md:text-2xl font-medium tracking-tight text-ink mb-8">
-              What customers say
+            <h2 className="display text-4xl md:text-6xl text-ink mb-8">
+              Customers say
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
               {reviews.slice(0, 2).map((r, i) => (
                 <article
                   key={i}
-                  className="border border-border rounded-2xl p-5 md:p-6 bg-paper"
+                  className="border-t-2 border-ink pt-5 md:pt-6"
                 >
                   <div
-                    className="flex gap-0.5 text-warm mb-3"
+                    className="flex gap-0.5 text-ink mb-3"
                     aria-label={`${r.rating} out of 5 stars`}
                   >
                     {Array.from({ length: 5 }).map((_, j) => (
@@ -402,7 +402,7 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
                   <p className="text-mid text-[15px] leading-relaxed mb-4">
                     &ldquo;{r.body}&rdquo;
                   </p>
-                  <p className="text-[13px] text-ink">{r.author}</p>
+                  <p className="text-[13px] font-bold text-ink">{r.author}</p>
                 </article>
               ))}
             </div>
@@ -414,12 +414,12 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
           FAQPage JSON-LD with the same items so Google rich results
           match what users see. */}
       {faqs && faqs.length > 0 && (
-        <section className="py-14 md:py-20 border-t border-border">
+        <section className="py-14 md:py-20 border-t border-ink">
           <div className="max-w-[860px] mx-auto px-6">
-            <h2 className="text-xl md:text-2xl font-medium tracking-tight text-ink mb-6">
-              Frequently asked questions
+            <h2 className="display text-4xl md:text-6xl text-ink mb-8">
+              Common questions
             </h2>
-            <div className="border-t border-border">
+            <div className="border-t border-ink">
               {faqs.map((f, i) => {
                 const key = `faq-${i}`;
                 return (
@@ -442,10 +442,10 @@ export default function DesignDetail({ design, related, reviews, faqs }: Props) 
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="py-16 md:py-24 border-t border-border">
+        <section className="py-16 md:py-24 border-t border-ink">
           <div className="max-w-[1400px] mx-auto px-6">
-            <div className="mb-8">
-              <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-ink">
+            <div className="mb-10">
+              <h2 className="display text-4xl md:text-6xl text-ink">
                 You might also like
               </h2>
             </div>

@@ -5,6 +5,8 @@ import { CartItem } from '@/contexts/CartContext';
 import { STRIPE_ALLOWED_COUNTRIES } from '@/data/countries';
 import { DEFAULT_DIGITAL_PRICE_CENTS } from '@/data/shop';
 import { SITE_URL } from '@/lib/site';
+import { isCustomPrintItem, MAX_DETAILS_LENGTH, MAX_PLACE_LENGTH } from '@/data/custom-prints';
+import { getCustomPrintPricing } from '@/lib/custom-print-pricing';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -74,6 +76,10 @@ export async function POST(req: Request) {
     // price is rejected rather than charged at the client's number.
     const isMarathon = (it: CartItem) =>
       it.type === 'marathon' && Boolean(it.customization?.marathon_slug);
+    // Custom prints (src/data/custom-prints.ts) are priced from the shop's
+    // own price ladder for that print type, never from the client.
+    const isCustomPrint = (it: CartItem) => isCustomPrintItem(it);
+    const hasCustomPrint = items.some(isCustomPrint);
 
     const marathonSlugs = Array.from(
       new Set(
@@ -81,10 +87,10 @@ export async function POST(req: Request) {
       ),
     );
     const gallerySlugs = Array.from(
-      new Set(items.filter((it) => !isMarathon(it)).map((it) => it.slug)),
+      new Set(items.filter((it) => !isMarathon(it) && !isCustomPrint(it)).map((it) => it.slug)),
     );
 
-    const [galleryRes, marathonRes] = await Promise.all([
+    const [galleryRes, marathonRes, customPricing] = await Promise.all([
       gallerySlugs.length
         ? admin
             .from('gallery_items')
@@ -94,11 +100,20 @@ export async function POST(req: Request) {
       marathonSlugs.length
         ? admin.from('marathons').select('slug, printful_prices').in('slug', marathonSlugs)
         : Promise.resolve({ data: [] as { slug: string; printful_prices: Record<string, number> | null }[] }),
+      hasCustomPrint ? getCustomPrintPricing(admin) : Promise.resolve({}),
     ]);
     const galleryBySlug = new Map((galleryRes.data ?? []).map((r) => [r.slug, r]));
     const marathonBySlug = new Map((marathonRes.data ?? []).map((r) => [r.slug, r]));
 
     const authoritativePriceCents = (it: CartItem): number | null => {
+      if (isCustomPrint(it)) {
+        if (it.format !== 'physical') return null;
+        const type = it.customization?.custom_type as keyof typeof customPricing | undefined;
+        const place = (it.customization?.place ?? '').trim();
+        if (!type || !place) return null;
+        const cents = (customPricing as Record<string, Record<string, number>>)[type]?.[it.size];
+        return typeof cents === 'number' && cents > 0 ? cents : null;
+      }
       if (isMarathon(it)) {
         const row = marathonBySlug.get(it.customization!.marathon_slug as string);
         const cents = row?.printful_prices?.[it.size];
@@ -118,7 +133,24 @@ export async function POST(req: Request) {
     for (const it of items) {
       const cents = authoritativePriceCents(it);
       if (cents == null) unpriceable.push(it.name);
-      else serverItems.push({ ...it, priceCents: cents });
+      else if (isCustomPrint(it)) {
+        // Rebuild the customization from known keys only, length-capped,
+        // and pin quantity to 1: every custom print is its own design.
+        const c = it.customization ?? {};
+        const place = String(c.place ?? '').trim().slice(0, MAX_PLACE_LENGTH);
+        serverItems.push({
+          ...it,
+          priceCents: cents,
+          quantity: 1,
+          location: place,
+          customization: {
+            custom_print: 'true',
+            custom_type: String(c.custom_type),
+            place,
+            details: String(c.details ?? '').trim().slice(0, MAX_DETAILS_LENGTH),
+          },
+        });
+      } else serverItems.push({ ...it, priceCents: cents });
     }
     if (unpriceable.length > 0) {
       return NextResponse.json(

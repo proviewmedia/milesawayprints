@@ -41,7 +41,7 @@ export default function DesignCard({ design }: Props) {
           so the lift floats around everything rather than hugging the image.
           The -m-3/p-3 pair keeps the resting layout identical (no inset) while
           giving the hovered card breathing room inside a soft, rounded shadow. */}
-      <div className="-m-3 p-3 rounded-2xl transition-all duration-300 group-hover:shadow-[0_18px_44px_-20px_rgba(14,14,14,0.22)] group-hover:bg-paper">
+      <div>
       {/* Image tile.
           - Marathon items: render the supplied PNG poster contained inside
             a matted, drop-shadowed frame. Tile aspect matches the other
@@ -49,7 +49,7 @@ export default function DesignCard({ design }: Props) {
           - Printful product images: full-bleed `object-cover` over bg-soft.
           - SVG previews (no image_url): WallFrame + PrintPreview fallback. */}
       {isMarathon && design.image_url ? (
-        <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-white flex items-center justify-center">
+        <div className="relative aspect-[4/5] overflow-hidden bg-white border border-ink/10 group-hover:border-ink transition-colors flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={design.image_url}
@@ -58,7 +58,7 @@ export default function DesignCard({ design }: Props) {
           />
         </div>
       ) : (
-        <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-soft">
+        <div className="relative aspect-[4/5] overflow-hidden bg-soft border border-ink/10 group-hover:border-ink transition-colors">
           {design.image_url ? (
             <Image
               src={design.image_url}
@@ -81,11 +81,11 @@ export default function DesignCard({ design }: Props) {
       )}
 
       {/* Caption */}
-      <div className="mt-4">
-        <div className="text-[15px] text-ink truncate">{design.name}</div>
-        <div className="text-[13px] text-mid mt-0.5 truncate">{typeLabel}</div>
-        <div className="text-[13px] text-ink font-medium mt-1.5">
-          <span className="text-mid font-normal">From</span> ${fromPrice}
+      <div className="mt-3">
+        <div className="eyebrow text-mid truncate">{typeLabel}</div>
+        <div className="text-[15px] font-bold text-ink truncate mt-1.5 group-hover:underline underline-offset-2">{design.name}</div>
+        <div className="text-[13px] text-ink mt-1">
+          <span className="text-mid">From</span> <span className="font-bold">${fromPrice}</span>
         </div>
       </div>
       </div>

@@ -12,12 +12,12 @@ export default function CategoryFaq({ faqs }: Props) {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="pb-20 border-t border-border">
+    <section className="pb-20 border-t border-ink">
       <div className="max-w-[800px] mx-auto px-6 pt-14 md:pt-20">
-        <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight mb-8">
-          Frequently asked questions
+        <h2 className="display text-4xl md:text-6xl text-ink mb-8">
+          Common questions
         </h2>
-        <div className="border-t border-border">
+        <div className="border-t border-ink">
           {faqs.map((it, i) => {
             const isOpen = open === i;
             return (
@@ -27,7 +27,7 @@ export default function CategoryFaq({ faqs }: Props) {
                   className="w-full flex items-center justify-between gap-4 py-5 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="text-[15px] text-ink">{it.q}</span>
+                  <span className="text-[15px] font-bold text-ink">{it.q}</span>
                   <ChevronDown
                     size={16}
                     strokeWidth={1.75}

@@ -17,6 +17,8 @@ import {
   faqPageJsonLd,
 } from '@/lib/seo';
 import { isSiteBannerActive } from '@/data/site-banner';
+import { getCustomPrintType } from '@/data/custom-prints';
+import { ArrowRight } from 'lucide-react';
 import CategoryFaq from './CategoryFaq';
 
 const VALID_TYPES: PrintType[] = ['golf', 'stadium', 'airport', 'marathon', 'city', 'skyline', 'f1'];
@@ -88,6 +90,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
   if (!isValidType(params.type)) notFound();
   const type = params.type;
   const config = PRINT_CONFIGS[type];
+  const customType = getCustomPrintType(type);
 
   const products = await getProductsOfType(type);
 
@@ -127,31 +130,31 @@ export default async function PrintPage({ params }: { params: { type: string } }
       <NavbarShell />
 
       {/* Hero — H1 + lede. Visible breadcrumbs above for crawlers + users. */}
-      <section className="pt-28 md:pt-32 pb-10 md:pb-14">
-        <div className="max-w-[1100px] mx-auto px-6">
-          <nav aria-label="Breadcrumb" className="mb-4">
-            <ol className="flex items-center gap-1.5 text-[13px] text-mid">
+      <section className="bg-ink text-paper pt-32 md:pt-40 pb-12 md:pb-16 mb-12 md:mb-16">
+        <div className="max-w-[1400px] mx-auto px-6">
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex items-center gap-1.5 text-[13px] text-paper/60">
               <li>
-                <Link href="/" className="hover:text-ink">
+                <Link href="/" className="hover:text-paper">
                   Home
                 </Link>
               </li>
               <li aria-hidden>›</li>
               <li>
-                <Link href="/shop" className="hover:text-ink">
+                <Link href="/shop" className="hover:text-paper">
                   Shop
                 </Link>
               </li>
               <li aria-hidden>›</li>
-              <li className="text-ink" aria-current="page">
+              <li className="text-paper" aria-current="page">
                 {config.detailsLabel}
               </li>
             </ol>
           </nav>
-          <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-4">
+          <h1 className="display text-[11vw] md:text-[6.5vw] xl:text-[104px] mb-6 max-w-5xl">
             {config.title}
           </h1>
-          <p className="text-mid text-base md:text-lg max-w-2xl leading-relaxed">
+          <p className="text-paper/75 text-base md:text-xl max-w-2xl leading-relaxed">
             {config.lede}
           </p>
           {/* Date-windowed Father's Day cross-link, only on golf during the
@@ -160,7 +163,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
           {type === 'golf' && isSiteBannerActive() && (
             <Link
               href="/gifts/fathers-day"
-              className="inline-flex items-center gap-2 mt-6 px-4 py-2.5 bg-ink text-paper rounded-full text-sm font-medium hover:bg-black transition-colors"
+              className="inline-flex items-center gap-2 mt-8 px-5 py-3 bg-paper text-ink rounded-full text-sm font-bold hover:bg-soft transition-colors"
             >
               Father&apos;s Day gift? See our 6 iconic course picks →
             </Link>
@@ -172,7 +175,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
       {products.length > 0 && (
         <section className="pb-14 md:pb-20">
           <div className="max-w-[1400px] mx-auto px-6">
-            <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight mb-8">
+            <h2 className="display text-4xl md:text-6xl text-ink mb-10">
               Popular {config.detailsLabel.toLowerCase()} prints
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
@@ -184,7 +187,7 @@ export default async function PrintPage({ params }: { params: { type: string } }
               <div className="mt-10 text-center">
                 <Link
                   href={`/shop?category=${type}`}
-                  className="inline-block bg-ink text-paper px-6 py-3 rounded-full text-sm font-medium hover:bg-black transition-colors"
+                  className="inline-block bg-ink text-paper px-7 py-3.5 rounded-full text-sm font-bold hover:bg-black transition-colors"
                 >
                   Browse all {products.length} {config.detailsLabel.toLowerCase()} prints
                 </Link>
@@ -194,10 +197,36 @@ export default async function PrintPage({ params }: { params: { type: string } }
         </section>
       )}
 
+      {/* Custom print CTA: the shop also makes prints of places not listed */}
+      {customType && (
+        <section className="border-y border-ink">
+          <Link
+            href={`/shop/custom-print?type=${customType.type}`}
+            className="group block bg-ink text-paper hover:bg-black transition-colors"
+          >
+            <div className="max-w-[1400px] mx-auto px-6 py-12 md:py-16 grid md:grid-cols-[1fr_auto] gap-6 md:items-center">
+              <div>
+                <p className="eyebrow text-paper/60 mb-4">Custom prints</p>
+                <h2 className="display text-4xl md:text-6xl mb-4">
+                  Don&apos;t see your {customType.label.toLowerCase()}?
+                </h2>
+                <p className="text-paper/75 max-w-xl leading-relaxed">
+                  We will make it. Same sizes and prices as the shop, with a proof before it prints.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-2 bg-paper text-ink px-7 py-4 rounded-full font-bold text-[15px] w-fit">
+                Order a custom print
+                <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" className="transition-transform group-hover:translate-x-1" />
+              </span>
+            </div>
+          </Link>
+        </section>
+      )}
+
       {/* Why section — evergreen body copy for SEO */}
       <section className="py-14 md:py-20">
         <div className="max-w-[800px] mx-auto px-6">
-          <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight mb-6">
+          <h2 className="display text-4xl md:text-6xl text-ink mb-8">
             Why people love these
           </h2>
           <div className="space-y-5">
@@ -215,17 +244,17 @@ export default async function PrintPage({ params }: { params: { type: string } }
 
       {/* Explore more — keyword-rich internal links across the category
           landing pages. Spreads crawl + authority sideways. */}
-      <section className="py-14 md:py-20 border-t border-border">
+      <section className="py-14 md:py-20 border-t border-ink">
         <div className="max-w-[1100px] mx-auto px-6">
-          <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight mb-6">
-            Explore more print collections
+          <h2 className="display text-4xl md:text-6xl text-ink mb-8">
+            More collections
           </h2>
           <div className="flex flex-wrap gap-3">
             {VALID_TYPES.filter((t) => t !== type).map((t) => (
               <Link
                 key={t}
                 href={`/prints/${t}`}
-                className="px-4 py-2 rounded-full border border-border text-sm text-ink hover:bg-soft transition-colors"
+                className="px-5 py-2.5 rounded-full border-2 border-ink/15 text-sm font-bold text-ink hover:border-ink transition-colors"
               >
                 {TYPE_NAV_LABEL[t]}
               </Link>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, ArrowRight, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
 import DesignCard from '@/components/DesignCard';
 import QuickShopModal from '@/components/QuickShopModal';
 import { Collection, DesignSummary } from '@/data/shop';
@@ -116,20 +117,32 @@ export default function ShopClient({ designs, collections }: Props) {
     <>
       {/* Compact hero — sits flush against the navbar so the filter bar
           can dock immediately under it without an empty band in between. */}
-      <section className="pt-28 md:pt-32 pb-4 md:pb-6">
-        <div className="max-w-[800px] mx-auto px-6 text-center">
-          <h1 className="display text-[2.5rem] sm:text-5xl md:text-7xl text-ink pt-3 mb-3">
-            Shop
-          </h1>
-          <p className="text-mid text-base md:text-lg">
-            Stadiums, airports, marathons, golf courses, cities, and skylines — printed on archival paper.
-          </p>
+      <section className="bg-ink text-paper pt-32 md:pt-40 pb-12 md:pb-16">
+        <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-[1fr_auto] gap-8 md:items-end">
+          <div>
+            <p className="eyebrow text-paper/60 mb-6">The print shop</p>
+            <h1 className="display text-[14vw] md:text-[8vw] xl:text-[128px] mb-6">Art prints</h1>
+            <p className="text-base md:text-xl text-paper/75 max-w-xl leading-relaxed">
+              Golf courses, airports, skylines, cities, marathons, and F1 circuits, designed in house and
+              printed to order on archival paper.
+            </p>
+          </div>
+          <Link
+            href="/shop/custom-print"
+            className="group inline-flex items-center justify-between gap-6 border-2 border-paper px-6 py-5 hover:bg-paper hover:text-ink transition-colors md:max-w-xs"
+          >
+            <span>
+              <span className="block font-display font-black uppercase text-xl tracking-tight">Don&apos;t see your place?</span>
+              <span className="block text-sm opacity-75 mt-1">Order a custom print of it</span>
+            </span>
+            <ArrowRight size={20} strokeWidth={2.25} aria-hidden="true" className="flex-shrink-0 transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </section>
 
       {/* Collections */}
       {collections.length > 0 && (
-        <section className="pb-10 md:pb-14">
+        <section className="pt-12 md:pt-16 pb-10 md:pb-14">
           <div className="max-w-[1400px] mx-auto px-6 space-y-12">
             {collections.map((col) => (
               <CollectionRow
@@ -150,7 +163,7 @@ export default function ShopClient({ designs, collections }: Props) {
           Desktop navbar: similar, utility bar shows country/about text. */}
       <section
         id="grid"
-        className="border-b border-border bg-paper sticky z-30"
+        className="border-y border-ink bg-paper sticky z-30"
         style={{ top: `${navHeight}px` }}
       >
         <div className="max-w-[1400px] mx-auto px-6 py-5 md:py-4 flex flex-col md:flex-row md:flex-wrap md:items-center md:justify-between gap-3 md:gap-4">
@@ -169,14 +182,11 @@ export default function ShopClient({ designs, collections }: Props) {
                   role="tab"
                   aria-selected={category === c.value}
                   onClick={() => setCategory(c.value)}
-                  className={`relative px-3 py-2 text-sm whitespace-nowrap transition-opacity ${
-                    category === c.value ? 'text-ink' : 'text-mid hover:text-ink'
+                  className={`relative px-4 py-2 rounded-full font-display font-black uppercase text-[13px] tracking-tight whitespace-nowrap transition-colors ${
+                    category === c.value ? 'bg-ink text-paper' : 'text-ink/60 hover:text-ink'
                   }`}
                 >
                   {c.label}
-                  {category === c.value && (
-                    <span aria-hidden="true" className="absolute left-3 right-3 bottom-0 h-px bg-ink" />
-                  )}
                 </button>
               ))}
             </div>
@@ -198,7 +208,7 @@ export default function ShopClient({ designs, collections }: Props) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search locations"
-                className="bg-paper border border-border rounded-full pl-9 pr-4 py-2 text-sm placeholder:text-light-mid w-full md:w-48 md:focus:w-60 focus:outline-none focus:border-ink transition-all"
+                className="bg-paper border-2 border-ink/15 rounded-full pl-9 pr-4 py-2 text-sm placeholder:text-light-mid w-full md:w-48 md:focus:w-60 focus:outline-none focus:border-ink transition-all"
               />
             </div>
 
@@ -206,7 +216,7 @@ export default function ShopClient({ designs, collections }: Props) {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortOption)}
-                className="appearance-none bg-paper border border-border rounded-full pl-4 pr-9 py-2 text-sm text-ink focus:outline-none focus:border-ink cursor-pointer"
+                className="appearance-none bg-paper border-2 border-ink/15 rounded-full pl-4 pr-9 py-2 text-sm font-bold text-ink focus:outline-none focus:border-ink cursor-pointer"
               >
                 <option value="featured">Featured</option>
                 <option value="name-asc">A–Z</option>
@@ -227,7 +237,7 @@ export default function ShopClient({ designs, collections }: Props) {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-center justify-between mb-8">
             <p className="text-sm text-mid">
-              <span className="text-ink">{filtered.length}</span>{' '}
+              <span className="text-ink font-bold">{filtered.length}</span>{' '}
               {filtered.length === 1 ? 'design' : 'designs'}
               {category !== 'all' && ` in ${PRINT_CONFIGS[category].detailsLabel}`}
               {query && ` matching "${query}"`}
@@ -247,9 +257,13 @@ export default function ShopClient({ designs, collections }: Props) {
 
           {filtered.length === 0 ? (
             <div className="py-20 text-center max-w-md mx-auto">
-              <h3 className="text-xl font-medium text-ink mb-2">No designs match those filters</h3>
+              <h3 className="font-display font-black uppercase text-2xl tracking-tight text-ink mb-2">No designs match</h3>
               <p className="text-sm text-mid mb-6">
-                Try a different category or clear the filters.
+                Try a different category, or{' '}
+                <Link href="/shop/custom-print" className="text-ink underline underline-offset-2">
+                  order a custom print
+                </Link>{' '}
+                of the place you are looking for.
               </p>
               <button
                 onClick={() => {
@@ -288,15 +302,15 @@ function CollectionRow({
     <div>
       <div className="flex items-end justify-between mb-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight">
+          <h2 className="display text-3xl md:text-5xl text-ink">
             {collection.name}
           </h2>
           {collection.description && (
             <p className="text-sm text-mid mt-1 max-w-lg">{collection.description}</p>
           )}
         </div>
-        <a href="#grid" className="hidden md:inline-flex items-center gap-1 text-sm text-ink underline underline-offset-2 hover:opacity-70">
-          See all <ArrowRight size={14} strokeWidth={1.75} />
+        <a href="#grid" className="hidden md:inline-flex items-center gap-1.5 text-sm font-bold text-ink hover:opacity-70">
+          See all <ArrowRight size={15} strokeWidth={2.25} />
         </a>
       </div>
       <div className="flex gap-6 overflow-x-auto pb-3 -mx-6 px-6 scrollbar-hide">
