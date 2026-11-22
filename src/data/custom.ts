@@ -32,7 +32,7 @@ export const CUSTOM_PRODUCTS: CustomProduct[] = [
   { slug: 'bags', methods: 'Screen printing, DTF, embroidery', name: 'Bags and totes', examples: 'Totes, backpacks, pouches', icon: 'shoppingBag' },
   { slug: 'drinkware', methods: 'Sublimation, UV printing, engraving', name: 'Drinkware', examples: 'Mugs, tumblers, water bottles', icon: 'coffee' },
   { slug: 'stickers', methods: 'Digital print, die-cut, vinyl', name: 'Stickers and labels', examples: 'Die-cut stickers, labels, decals', icon: 'sticker' },
-  { slug: 'posters', methods: 'Fine-art giclee, digital print', name: 'Posters and wall art', examples: 'Posters, fine-art prints, framed art', icon: 'frame' },
+  { slug: 'posters', methods: 'Fine-art giclee, digital print', name: 'Prints and posters', examples: 'Prints, posters, fine-art and framed art', icon: 'frame' },
   { slug: 'signs', methods: 'Large-format digital print', name: 'Signs and banners', examples: 'Banners, yard signs, event signage', icon: 'signpost' },
   { slug: 'promo', methods: 'UV printing, pad printing, engraving', name: 'Promo items', examples: 'Keychains, pens, patches, giveaways', icon: 'gift' },
   { slug: 'other', methods: 'We will recommend one', name: 'Something else', examples: 'Tell us what it is and we will find a way', icon: 'sparkles' },

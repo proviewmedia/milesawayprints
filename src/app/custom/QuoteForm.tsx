@@ -76,6 +76,10 @@ export default function QuoteForm({
 
   const totalBytes = files.reduce((n, f) => n + f.size, 0);
 
+  // When the product was picked on the tile grid above, don't ask again.
+  const askProduct = !initialProduct;
+  const n = (step: number) => (askProduct ? step : step - 1);
+
   const toggleProduct = (slug: ProductSlug) =>
     setProducts((prev) => (prev.includes(slug) ? prev.filter((p) => p !== slug) : [...prev, slug]));
 
@@ -95,10 +99,10 @@ export default function QuoteForm({
     e.preventDefault();
     // Same checks as the API, in form order, so the first problem is the one shown.
     if (products.length === 0) return setError('Choose at least one product in step 1.');
-    if (!quantity) return setError('Choose a quantity in step 2.');
-    if (!artwork) return setError('Tell us where your design stands in step 3.');
+    if (!quantity) return setError(`Choose a quantity in step ${n(2)}.`);
+    if (!artwork) return setError(`Tell us where your design stands in step ${n(3)}.`);
     if (totalBytes > MAX_UPLOAD_BYTES) return setError('Your files are over 4 MB in total. Remove one, or paste a link instead.');
-    if (!name.trim() || !email.trim()) return setError('Add your name and email in step 4 so we can send your quote.');
+    if (!name.trim() || !email.trim()) return setError(`Add your name and email in step ${n(4)} so we can send your quote.`);
 
     setStatus('sending');
     setError(null);
@@ -149,6 +153,7 @@ export default function QuoteForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {askProduct && (
       <Step n={1} title="What do you want printed?" hint="Pick everything that applies.">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {CUSTOM_PRODUCTS.map((p) => {
@@ -183,8 +188,36 @@ export default function QuoteForm({
           })}
         </div>
       </Step>
+      )}
 
-      <Step n={2} title="How many, and by when?">
+      {!askProduct && (
+        <div>
+          <p className="text-[13px] font-medium text-ink mb-2">
+            Also need <span className="font-normal text-mid">(optional)</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {CUSTOM_PRODUCTS.filter((p) => p.slug !== initialProduct && p.slug !== 'other').map((p) => {
+              const checked = products.includes(p.slug);
+              return (
+                <button
+                  key={p.slug}
+                  type="button"
+                  aria-pressed={checked}
+                  onClick={() => toggleProduct(p.slug)}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-[13px] transition-colors ${
+                    checked ? 'bg-ink border-ink text-paper' : 'border-border text-ink hover:border-ink/40'
+                  }`}
+                >
+                  {checked && <Check size={13} strokeWidth={2.5} aria-hidden="true" />}
+                  {p.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <Step n={n(2)} title="How many, and by when?">
         <p className="text-[13px] font-medium text-ink mb-2">Quantity</p>
         <div className="flex flex-wrap gap-2 mb-6" role="radiogroup" aria-label="Quantity">
           {QUANTITY_OPTIONS.map((q) => (
@@ -218,7 +251,7 @@ export default function QuoteForm({
         <p className="text-[13px] text-light-mid mt-2">Leave blank if there is no deadline.</p>
       </Step>
 
-      <Step n={3} title="Your design">
+      <Step n={n(3)} title="Your design">
         <div className="space-y-2 mb-6" role="radiogroup" aria-label="Design status">
           {ARTWORK_OPTIONS.map((a) => (
             <label
@@ -316,7 +349,7 @@ export default function QuoteForm({
         />
       </Step>
 
-      <Step n={4} title="Where should we send your quote?">
+      <Step n={n(4)} title="Where should we send your quote?">
         <div className="grid sm:grid-cols-2 gap-5">
           <div>
             <label htmlFor="name" className="block text-[13px] font-medium text-ink mb-2">Name</label>
