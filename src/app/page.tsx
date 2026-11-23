@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Star, ArrowRight, ArrowUpRight } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
@@ -39,6 +40,10 @@ async function getCover(type: PrintType, prefer?: string): Promise<DesignSummary
 }
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 const PRINT_TILES = [
   {

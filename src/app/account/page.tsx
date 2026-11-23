@@ -49,7 +49,8 @@ function statusDot(s: string | null | undefined): string {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Your account — The INQ Press',
+  title: 'Your account',
+  robots: { index: false, follow: false },
 };
 
 export default async function AccountPage() {

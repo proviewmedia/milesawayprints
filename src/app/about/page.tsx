@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'About',
+  title: 'About Us: A Las Vegas Custom Print Studio',
   description:
     'The INQ Press is a designer-led print studio in Las Vegas. Custom printing on apparel, merch, stickers, signs, and posters, plus our own collection of art prints. Started on Etsy in 2020.',
   alternates: { canonical: '/about' },

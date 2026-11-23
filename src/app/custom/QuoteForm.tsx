@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Check, FileUp, X } from 'lucide-react';
+import { trackLead } from '@/lib/track';
 import {
   CUSTOM_PRODUCTS,
   QUANTITY_OPTIONS,
@@ -125,6 +126,7 @@ export default function QuoteForm({
       const res = await fetch('/api/quote', { method: 'POST', body });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+      trackLead({ form: 'quote', products, quantity });
       setStatus('sent');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {

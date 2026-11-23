@@ -4,7 +4,8 @@
  * page emits the same shape Google validates against.
  */
 
-import { SITE_URL, SITE_NAME } from './site';
+import { SITE_URL, SITE_NAME, PHONE_E164 } from './site';
+import { SERVICE_AREAS, type ServiceArea } from '@/data/locations';
 export { SITE_URL, SITE_NAME };
 
 interface BreadcrumbItem {
@@ -29,23 +30,45 @@ export function organizationJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'OnlineStore',
+    '@id': `${SITE_URL}/#business`,
     name: SITE_NAME,
-    alternateName: 'MAP',
+    alternateName: 'INQ Press',
     url: SITE_URL,
     logo: `${SITE_URL}/icon`,
     image: `${SITE_URL}/apple-icon`,
+    telephone: PHONE_E164,
     description:
-      'Custom printing on apparel, merch, stickers, posters, and signs, with free quotes and a proof before anything prints. Plus art prints of airports, city skylines, marathon routes, golf courses, stadiums, and F1 circuits.',
-    sameAs: [
-      'https://www.etsy.com/shop/TheInqPress',
+      'Custom printing studio for shirts, hats, stickers, signs, merch, and prints, with free quotes and a proof before anything prints. Based in Las Vegas and serving Houston, College Station, Boston, Rhode Island, Florida, and customers everywhere by mail.',
+    // Service-area business: no public street address; every order ships.
+    areaServed: [
+      ...SERVICE_AREAS.flatMap((a) => a.areaServed).map((p) => ({
+        '@type': p.type,
+        name: p.name,
+      })),
+      { '@type': 'Country', name: 'United States' },
     ],
+    sameAs: ['https://www.etsy.com/shop/TheInqPress'],
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',
+      telephone: PHONE_E164,
       email: 'milesawayprintsllc@gmail.com',
-      areaServed: 'Worldwide',
+      areaServed: 'US',
       availableLanguage: ['English'],
     },
+  };
+}
+
+/** Custom printing offered in one service area (city pages). */
+export function serviceAreaJsonLd(area: ServiceArea) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `Custom printing in ${area.full}`,
+    serviceType: 'Custom printing',
+    url: `${SITE_URL}/custom-printing/${area.slug}`,
+    provider: { '@id': `${SITE_URL}/#business`, '@type': 'OnlineStore', name: SITE_NAME, url: SITE_URL, telephone: PHONE_E164 },
+    areaServed: area.areaServed.map((p) => ({ '@type': p.type, name: p.name })),
   };
 }
 

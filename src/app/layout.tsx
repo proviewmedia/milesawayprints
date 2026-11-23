@@ -11,6 +11,7 @@ import SiteBanner from '@/components/SiteBanner';
 import FirstVisitPopup from '@/components/FirstVisitPopup';
 import WelcomeCodeStasher from '@/components/WelcomeCodeStasher';
 import Analytics from '@/lib/analytics';
+import { GoogleTagBootstrap } from '@/lib/google-tag';
 
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { SITE_URL } from '@/lib/site';
@@ -43,7 +44,6 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: SITE_URL,
     siteName: 'The INQ Press',
     title: 'The INQ Press | Custom Printing and Art Prints',
     description:
@@ -71,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="bg-white min-h-screen">
+        <GoogleTagBootstrap />
         <Script
           id="org-jsonld"
           type="application/ld+json"

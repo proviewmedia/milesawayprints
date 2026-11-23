@@ -30,7 +30,7 @@ export default function CookieBanner() {
       <p className="font-display font-black uppercase text-xl tracking-tight text-ink mb-2">Cookies, briefly</p>
       <p className="text-[13px] text-mid leading-relaxed mb-4">
         We use a few essential cookies to keep the site working, plus optional
-        Google Analytics cookies to understand site usage. See our{' '}
+        analytics and advertising cookies. Without them we only count visits anonymously. See our{' '}
         <Link href="/privacy" className="text-ink underline underline-offset-2">
           privacy policy
         </Link>

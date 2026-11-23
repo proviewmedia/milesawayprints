@@ -9,7 +9,7 @@ import { CUSTOM_PRINT_TYPES, getCustomPrintType, type CustomPrintType } from '@/
 import OrderStart, { type Start } from './OrderStart';
 
 export const metadata: Metadata = {
-  title: 'Custom Printing: Order Prints or Get a Free Quote',
+  title: 'Custom Printing: Shirts, Hats, Stickers, Signs, and Prints',
   description:
     'Order a custom map print or your own artwork online with clear prices, or get a free quote on shirts, hats, stickers, signs, and merch. One piece or hundreds.',
   alternates: { canonical: '/custom' },

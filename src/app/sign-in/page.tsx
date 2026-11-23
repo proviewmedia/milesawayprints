@@ -4,7 +4,8 @@ import Footer from '@/components/Footer';
 import SignInForm from './SignInForm';
 
 export const metadata: Metadata = {
-  title: 'Sign in — The INQ Press',
+  title: 'Sign in',
+  robots: { index: false, follow: false },
   description: 'Sign in to view your orders, track shipments, and download digital files.',
 };
 

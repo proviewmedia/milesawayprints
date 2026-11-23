@@ -4,9 +4,11 @@
  * using each platform's native event name. Safe to call from anywhere
  * client-side — no-ops in SSR and when platforms aren't loaded.
  *
- * Server-side equivalents (Meta CAPI, Google Enhanced Conversions) for
- * `purchase` are fired from the Stripe webhook so attribution survives
- * ad-blockers.
+ * Google events always reach dataLayer: the consent-mode bootstrap in the
+ * root layout (src/lib/google-tag.tsx) defines window.gtag before page code
+ * runs, and gtag() below falls back to pushing onto dataLayer directly, so
+ * nothing fired early (e.g. purchase on the success page) is lost.
+ * There is no server-side tracking yet.
  */
 
 interface TrackItem {
@@ -29,8 +31,19 @@ declare global {
 }
 
 function gtag(...args: unknown[]) {
-  if (typeof window === 'undefined' || !window.gtag) return;
-  window.gtag(...args);
+  if (typeof window === 'undefined') return;
+  if (window.gtag) {
+    window.gtag(...args);
+    return;
+  }
+  // gtag.js not configured or not loaded yet: queue in the same format it
+  // reads on load.
+  const w = window as unknown as { dataLayer?: unknown[] };
+  w.dataLayer = w.dataLayer || [];
+  // eslint-disable-next-line prefer-rest-params
+  (function () {
+    w.dataLayer!.push(arguments);
+  }).apply(null, args as []);
 }
 
 function fbq(...args: unknown[]) {
@@ -118,4 +131,21 @@ function toGa4Item(i: TrackItem) {
     price: i.price,
     quantity: i.quantity,
   };
+}
+
+/** A quote request or contact message: the main conversion for custom
+ *  printing. Mark generate_lead as a key event in GA4. */
+export function trackLead(args: { form: 'quote' | 'contact'; products?: string[]; quantity?: string }) {
+  gtag('event', 'generate_lead', {
+    form: args.form,
+    products: args.products?.join(','),
+    quantity: args.quantity,
+  });
+  fbq('track', 'Lead', { content_category: args.form });
+}
+
+/** Newsletter or welcome-offer signup. */
+export function trackSignUp(source: string) {
+  gtag('event', 'sign_up', { method: 'email', source });
+  fbq('track', 'CompleteRegistration', { content_name: source });
 }

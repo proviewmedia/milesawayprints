@@ -117,7 +117,7 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     statLabels: ['Capacity', 'Opened', 'Location'],
     defaults: { name: 'Custom Stadium', location: 'Location', stat1: '54,251', stat2: '2009', stat3: '40.8296° N' },
     seoTitle: 'Custom Stadium Art Print | Personalized Sports Gift',
-    seoDescription: 'Create a custom stadium art print of your favorite venue. Personalized with stadium name, capacity, and location. Digital download or museum-quality print.',
+    seoDescription: 'Create a custom stadium art print of your favorite venue. Personalized with stadium name, capacity, and location. Museum-quality print, shipped to your door.',
     lede: 'Custom stadium art prints of the ballparks, arenas, and pitches you love. Drawn from above in minimalist line work — Yankee Stadium, Fenway, Wrigley, and any venue you request.',
     whyCopy: [
       'Stadiums are sacred to fans. We render the architecture, the seat bowl, and the field with the same care as the games played inside.',
@@ -152,12 +152,12 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     statLabels: ['Code', 'Runways', 'Elevation'],
     defaults: { name: 'Custom Airport', location: 'City, State', stat1: 'IATA', stat2: '4', stat3: '128 ft' },
     seoTitle: 'Custom Airport Map Print | Aviation Wall Art',
-    seoDescription: 'Create a custom airport map print showing runways and terminals. Personalized with airport name and details. Digital download or museum-quality print.',
+    seoDescription: 'Create a custom airport map print showing runways and terminals. Personalized with airport name and details. Museum-quality print, shipped to your door.',
     lede: 'Custom airport map prints — every runway, taxiway, and terminal in minimalist line work. From LAX and JFK to your hometown regional, drawn faithfully from real aviation data.',
     whyCopy: [
       'For pilots, frequent flyers, aviation geeks, and anyone with a sense of place tied to a particular airport. We map every runway and taxiway from FAA / AIP data.',
       'Personalize it with the IATA code, runway count, and elevation. A great gift for first solos, retirements, or the family member always on a plane.',
-      'Printed on archival paper. Digital download or physical print, shipped worldwide.',
+      'Printed on archival paper and shipped to your door.',
     ],
     faqs: [
       {
@@ -226,12 +226,12 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     statLabels: ['Lat', 'Long', 'Founded'],
     defaults: { name: 'Your City', location: 'Country', stat1: '37.77° N', stat2: '122.42° W', stat3: '1776' },
     seoTitle: 'Custom City Street Map Print | Personalized Map Art',
-    seoDescription: 'Create a custom city street map print of any city in the world. Personalized with coordinates and details. Digital download or museum-quality print.',
+    seoDescription: 'Create a custom city street map print of any city in the world. Personalized with coordinates and details. Museum-quality print, shipped to your door.',
     lede: 'Custom city street map prints — the streets that tell your story. Any city in the world, beautifully rendered with your personal coordinates and a title of your choice.',
     whyCopy: [
       'Streets-only minimalist style. We render the road network with elegant linework, no clutter, no logos — just the city you love.',
       'Personalize the title (your favorite neighborhood, anniversary date, an inside joke) and the coordinates. Great for housewarmings, weddings, and where-we-met memorabilia.',
-      'Printed on archival paper. Digital download or physical print, shipped worldwide.',
+      'Printed on archival paper and shipped to your door.',
     ],
     faqs: [
       {
@@ -261,7 +261,7 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     statLabels: ['Population', 'Founded', 'Location'],
     defaults: { name: 'City Skyline', location: 'Country', stat1: '—', stat2: '—', stat3: '—' },
     seoTitle: 'City Skyline Art Print | Minimalist Skyline Poster',
-    seoDescription: 'City skyline prints of iconic cities around the world — minimalist silhouette posters. Digital download or museum-quality print.',
+    seoDescription: 'City skyline prints of iconic cities around the world — minimalist silhouette posters. Museum-quality print, shipped to your door.',
     lede: 'Iconic city skylines in minimalist silhouette. New York, Chicago, Paris, Tokyo, and dozens more — each rendered as a clean profile against an open sky.',
     whyCopy: [
       'A skyline is shorthand for a city. We draw each one as a sharp silhouette, no clutter, faithful to the actual buildings.',
@@ -296,7 +296,7 @@ export const PRINT_CONFIGS: Record<PrintType, PrintConfig> = {
     statLabels: ['Length', 'Laps', 'First Held'],
     defaults: { name: 'Grand Prix', location: 'Circuit', stat1: '—', stat2: '—', stat3: '—' },
     seoTitle: 'F1 Circuit Art Print | Grand Prix Track Poster',
-    seoDescription: 'F1 Grand Prix circuit art prints — the legendary tracks of Formula 1. Digital download or museum-quality print.',
+    seoDescription: 'F1 Grand Prix circuit art prints — the legendary tracks of Formula 1. Museum-quality print, shipped to your door.',
     lede: 'F1 Grand Prix circuit prints — the legendary layouts of Formula 1. Monaco, Silverstone, Suzuka, Spa, COTA, and every track on the calendar, rendered with precision.',
     whyCopy: [
       'Built from real track data. Every corner, every chicane, every DRS zone — drawn to scale so you can actually trace the racing line.',

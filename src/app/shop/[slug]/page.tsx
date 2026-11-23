@@ -135,7 +135,7 @@ export default async function DesignPage({ params }: { params: { slug: string } 
   const result = await getDesign(params.slug);
   if (!result) notFound();
   const { design, related } = result;
-  const { aggregateRating, reviews } = await getReviewData(design.type);
+  const { reviews } = await getReviewData(design.type);
 
   const typeLabel = PRINT_CONFIGS[design.type]?.detailsLabel ?? 'Art Print';
   const productLd = buildProductJsonLd({
@@ -148,8 +148,9 @@ export default async function DesignPage({ params }: { params: { slug: string } 
       name: `Physical print — ${size}`,
       priceCents: cents,
     })),
-    aggregateRating,
-    reviews,
+    // No aggregateRating/review here: our reviews are pooled per print type
+    // or site-wide, and Google's review-snippet policy requires ratings for
+    // the specific product. Re-add once reviews are tied to a product.
   });
 
   const breadcrumbsLd = breadcrumbJsonLd([

@@ -13,70 +13,52 @@ export type ConsentValue = 'all' | 'essentials' | null;
 
 export function readConsent(): ConsentValue {
   if (typeof window === 'undefined') return null;
-  const v = localStorage.getItem(CONSENT_KEY);
-  return v === 'all' || v === 'essentials' ? v : null;
+  try {
+    const v = localStorage.getItem(CONSENT_KEY);
+    return v === 'all' || v === 'essentials' ? v : null;
+  } catch {
+    return null;
+  }
 }
 
+const GOOGLE_TAG_ID = GA_ID ?? GOOGLE_ADS_ID;
+
 /**
- * Loads all configured ad/analytics platforms only if the user has
- * consented to all cookies AND the platform's env var is set. Each
- * platform is independently gated — if you only set GA_ID, only GA
- * loads.
+ * Loads gtag.js for everyone (consent mode keeps it cookieless until
+ * accepted), relays banner choices to Google, and loads the Meta pixel
+ * only after "Accept all".
  */
 export default function Analytics() {
   const [consent, setConsent] = useState<ConsentValue>(null);
 
   useEffect(() => {
-    setConsent(readConsent());
-    const onStorage = () => setConsent(readConsent());
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('cookie-consent-change', onStorage);
+    const sync = () => {
+      const next = readConsent();
+      setConsent(next);
+      const state = next === 'all' ? 'granted' : 'denied';
+      window.gtag?.('consent', 'update', {
+        analytics_storage: state,
+        ad_storage: state,
+        ad_user_data: state,
+        ad_personalization: state,
+      });
+    };
+    sync();
+    window.addEventListener('storage', sync);
+    window.addEventListener('cookie-consent-change', sync);
     return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('cookie-consent-change', onStorage);
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('cookie-consent-change', sync);
     };
   }, []);
 
-  if (consent !== 'all') return null;
-
   return (
     <>
-      {GA_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="ga-init" strategy="afterInteractive">{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}', { anonymize_ip: true });
-            ${GOOGLE_ADS_ID ? `gtag('config', '${GOOGLE_ADS_ID}');` : ''}
-          `}</Script>
-        </>
+      {GOOGLE_TAG_ID && (
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`} strategy="afterInteractive" />
       )}
 
-      {/* Google Ads tag — piggybacks on the gtag.js GA loader above,
-          but if GA isn't configured we need our own loader. */}
-      {!GA_ID && GOOGLE_ADS_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="gads-init" strategy="afterInteractive">{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('js', new Date());
-            gtag('config', '${GOOGLE_ADS_ID}');
-          `}</Script>
-        </>
-      )}
-
-      {META_PIXEL_ID && (
+      {consent === 'all' && META_PIXEL_ID && (
         <Script id="meta-pixel" strategy="afterInteractive">{`
           !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){
           n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};

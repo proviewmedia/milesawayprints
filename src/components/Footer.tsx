@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import NewsletterSignup from './NewsletterSignup';
 import { QUOTE_PRODUCTS } from '@/data/custom';
+import { SERVICE_AREAS } from '@/data/locations';
+import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/site';
 
 const LINK = 'text-sm text-paper/60 hover:text-paper transition-colors';
 const HEADING = 'eyebrow text-paper mb-5';
@@ -108,7 +110,27 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 pt-6 border-t border-paper/15 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-paper/50">
+        <div className="mt-14 pt-6 border-t border-paper/15">
+          <p className="text-sm text-paper/60 leading-relaxed">
+            <Link href="/custom-printing" className="text-paper font-bold hover:underline underline-offset-2">
+              Where we print:
+            </Link>{' '}
+            {SERVICE_AREAS.map((a, i) => (
+              <span key={a.slug}>
+                <Link href={`/custom-printing/${a.slug}`} className="hover:text-paper transition-colors">
+                  {a.name}
+                </Link>
+                {i < SERVICE_AREAS.length - 1 ? ' · ' : ''}
+              </span>
+            ))}
+            {' · '}
+            <a href={`tel:${PHONE_E164}`} className="hover:text-paper transition-colors">
+              {PHONE_DISPLAY}
+            </a>
+          </p>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-paper/15 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-paper/50">
           <p>&copy; {new Date().getFullYear()} The INQ Press. All rights reserved.</p>
           <div className="flex gap-5">
             <Link href="/privacy" className="hover:text-paper transition-colors">Privacy</Link>

@@ -17,3 +17,7 @@ export const SITE_NAME = 'The INQ Press';
  * Printful webhooks are registered on the old host and do not follow redirects.
  */
 export const LEGACY_HOSTS = ['milesawayprints.com', 'www.milesawayprints.com'];
+
+/** Business phone, shown on Contact and in structured data. */
+export const PHONE_DISPLAY = '(702) 527-1837';
+export const PHONE_E164 = '+17025271837';

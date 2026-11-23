@@ -10,8 +10,6 @@ import {
   breadcrumbJsonLd,
   productJsonLd as buildProductJsonLd,
 } from '@/lib/seo';
-import { getReviewData } from '@/lib/reviews';
-import type { PrintType } from '@/data/prints';
 import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
@@ -30,16 +28,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq('slug', params.slug)
     .eq('active', true)
     .maybeSingle();
-  if (!data) return { title: 'Marathon — The INQ Press' };
-  const title = `${data.city} Marathon Print | The INQ Press`;
-  const description = `Custom ${data.city} Marathon and Half Marathon prints — personalized with your name, bib, finish time, and race date.`;
+  if (!data) return { title: 'Marathon print' };
+  // The root title template appends "| The INQ Press" to <title>; OG/Twitter
+  // titles don't get the template, so they carry the brand themselves.
+  const title = `Personalized ${data.city} Marathon Print`;
+  const socialTitle = `${title} | The INQ Press`;
+  const description = `Personalized ${data.city} Marathon and Half Marathon prints with your name, bib number, finish time, and race date.`;
   const ogImageUrl = `/api/og/marathon/${params.slug}`;
   return {
     title,
     description,
     alternates: { canonical: `/marathons/${params.slug}` },
     openGraph: {
-      title,
+      title: socialTitle,
       description,
       url: `/marathons/${params.slug}`,
       type: 'website',
@@ -47,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: socialTitle,
       description,
       images: [ogImageUrl],
     },
@@ -81,10 +82,6 @@ export default async function MarathonPage({ params }: Props) {
     priceCents: cents,
   }));
 
-  // Reviews use the same site-wide fallback as skylines (no per-marathon
-  // reviews yet). Clears the Google "Missing review/aggregateRating"
-  // warnings on this URL.
-  const { aggregateRating, reviews } = await getReviewData('marathon' as PrintType);
 
   const productLd = buildProductJsonLd({
     name: `${marathon.city} Marathon Print`,
@@ -95,8 +92,9 @@ export default async function MarathonPage({ params }: Props) {
     url: `/marathons/${marathon.slug}`,
     category: 'Marathon Print',
     offers,
-    aggregateRating,
-    reviews,
+    // No aggregateRating/review here: our reviews are pooled per print type
+    // or site-wide, and Google's review-snippet policy requires ratings for
+    // the specific product. Re-add once reviews are tied to a product.
   });
 
   const breadcrumbsLd = breadcrumbJsonLd([

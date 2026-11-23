@@ -4,8 +4,8 @@ import Footer from '@/components/Footer';
 import ResetPasswordForm from './ResetPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Set a new password — The INQ Press',
-  description: 'Set a new password for your The INQ Press account.',
+  title: 'Set a new password',
+  description: 'Set a new password for your INQ Press account.',
   alternates: { canonical: '/reset-password' },
   robots: { index: false, follow: false },
 };

@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { ArrowRight, Mail, Package, HelpCircle } from 'lucide-react';
 import NavbarShell from '@/components/NavbarShell';
 import Footer from '@/components/Footer';
+import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/site';
 import ContactForm from './ContactForm';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Contact',
+  title: 'Contact Us: Custom Printing Quotes and Orders',
   description:
     'Contact The INQ Press. Get a free quote for custom printing, ask about an order, or send us a message. We reply within 1 to 2 business days.',
   alternates: { canonical: '/contact' },
@@ -85,9 +86,21 @@ export default function ContactPage() {
               </a>
             </div>
             <div className="border-t border-ink pt-6 mt-6">
+              <p className="eyebrow text-mid mb-2">Phone</p>
+              <a href={`tel:${PHONE_E164}`} className="text-ink font-medium underline underline-offset-2">
+                {PHONE_DISPLAY}
+              </a>
+            </div>
+            <div className="border-t border-ink pt-6 mt-6">
               <p className="eyebrow text-mid mb-2">Studio</p>
               <p className="text-ink">Las Vegas, Nevada</p>
-              <p className="text-[13px] text-mid mt-1">Online studio. Every order ships to your door.</p>
+              <p className="text-[13px] text-mid mt-1">
+                Online studio serving{' '}
+                <Link href="/custom-printing" className="text-ink underline underline-offset-2">
+                  Houston, College Station, Las Vegas, Boston, Rhode Island, and Florida
+                </Link>
+                . Every order ships to your door.
+              </p>
             </div>
           </div>
           <div>

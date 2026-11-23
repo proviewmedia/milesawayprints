@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
     'How The INQ Press handles your information — what we collect, who we share with, and your rights.',
+  alternates: { canonical: '/privacy' },
 };
 
 const LAST_UPDATED = 'April 29, 2026';
@@ -103,6 +104,10 @@ export default function PrivacyPage() {
                 disable cookies in your browser at any time.
               </li>
             </ul>
+            <p className="mt-4">
+              If you decline, Google Analytics still receives anonymous, cookieless signals (Google Consent
+              Mode), such as that a page was viewed. No cookies are stored and no advertising data is used.
+            </p>
           </PolicySection>
 
           <PolicySection title="Affiliate links">

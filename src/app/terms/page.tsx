@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: 'Terms of Service',
   description:
     'Terms of using The INQ Press — purchase license, intellectual property, liability, governing law.',
+  alternates: { canonical: '/terms' },
 };
 
 const LAST_UPDATED = 'April 29, 2026';

@@ -1,3 +1,4 @@
+import { SERVICE_AREAS } from './locations';
 import { GUIDES } from './resources';
 
 export interface SitePage {
@@ -29,6 +30,8 @@ export const SITE_PAGES: SitePage[] = [
   { title: 'City street prints', href: '/prints/city', keywords: 'street map town home', description: 'Browse city street map prints.' },
   { title: 'Skyline prints', href: '/prints/skyline', keywords: 'skyline city buildings downtown', description: 'Browse skyline prints.' },
   { title: 'F1 circuit prints', href: '/prints/f1', keywords: 'formula 1 f1 race track circuit grand prix', description: 'Browse F1 circuit prints.' },
+  { title: 'Where we print', href: '/custom-printing', keywords: 'locations near me local print shop houston college station texas las vegas nevada boston rhode island providence florida miami orlando tampa', description: 'Service areas and shipping across the US.' },
+  ...SERVICE_AREAS.map((a) => ({ title: `Custom printing in ${a.name}`, href: `/custom-printing/${a.slug}`, keywords: `${a.full.toLowerCase()} print shop near me local custom shirts stickers signs`, description: a.seoDescription })),
   { title: 'About', href: '/about', keywords: 'story mission company', description: 'Why we make prints, and how.' },
   { title: 'Gifts', href: '/gifts', keywords: 'gift wrap message birthday wedding anniversary', description: 'Make a print into a gift.' },
   { title: 'My account', href: '/account', keywords: 'orders profile shipping address sign in', description: 'Sign in or view your orders.' },

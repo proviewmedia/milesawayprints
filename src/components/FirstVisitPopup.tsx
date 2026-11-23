@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { X, ArrowRight, Check } from 'lucide-react';
+import { trackSignUp } from '@/lib/track';
 
 const DISMISS_KEY = 'first-visit-popup-dismissed';
 const DELAY_MS = 8000;
@@ -103,6 +104,7 @@ export default function FirstVisitPopup() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Sign up failed');
+      if (!data.alreadySubscribed) trackSignUp('first-visit-popup');
       setStatus('success');
       setMessage(
         data.alreadySubscribed

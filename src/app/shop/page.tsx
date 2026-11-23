@@ -8,9 +8,10 @@ import { PrintType } from '@/data/prints';
 import { DesignSummary, Collection, toDesignSummary, GalleryItemWithMeta } from '@/data/shop';
 
 export const metadata: Metadata = {
-  title: 'Shop All Prints',
+  title: 'Shop Art Prints: Golf, Airport, City, Skyline, F1, Marathon',
   description:
-    'Browse every design in the The INQ Press collection. Skylines, F1 circuits, golf courses, stadiums, airports, marathons, and cities — ready to ship.',
+    'Browse every design in The INQ Press collection. Skylines, F1 circuits, golf courses, stadiums, airports, marathons, and cities — ready to ship.',
+  alternates: { canonical: '/shop' },
 };
 
 export const dynamic = 'force-dynamic';

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowRight, Check } from 'lucide-react';
+import { trackSignUp } from '@/lib/track';
 
 interface Props {
   source: 'footer' | 'gift-page' | 'checkout-success' | 'home';
@@ -31,6 +32,7 @@ export default function NewsletterSignup({ source, variant = 'compact', onDark =
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Sign up failed');
+      if (!data.alreadySubscribed) trackSignUp(source ?? 'newsletter');
       setStatus('success');
       setMessage(
         data.alreadySubscribed

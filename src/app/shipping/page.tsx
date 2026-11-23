@@ -7,9 +7,10 @@ import PolicyCTA from '@/components/PolicyCTA';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Shipping',
+  title: 'Shipping Times and Costs',
   description:
     'How The INQ Press ships your order — production times, delivery windows, tracking, packaging, and international rules.',
+  alternates: { canonical: '/shipping' },
 };
 
 export default function ShippingPage() {

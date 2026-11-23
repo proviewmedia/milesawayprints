@@ -2,6 +2,7 @@ import { GUIDES } from '@/data/resources';
 import { createAdminClient } from '@/lib/supabase';
 import { SITE_URL as BASE } from '@/lib/site';
 import { GIFT_ORDER } from '@/data/gifts';
+import { SERVICE_AREAS } from '@/data/locations';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,12 +30,16 @@ interface UrlEntry {
  * image-search queries like "chicago skyline print".
  */
 export async function GET() {
-  const now = new Date();
+  // Static pages: the date their content last changed, not request time
+  // (a lastmod that is always 'now' teaches Google to ignore it).
+  const now = new Date('2026-11-22');
   const admin = createAdminClient();
 
   const staticUrls: UrlEntry[] = [
     { loc: `${BASE}/`, lastmod: now, changefreq: 'weekly', priority: 1.0 },
     { loc: `${BASE}/custom`, lastmod: now, changefreq: 'monthly', priority: 0.95 },
+    { loc: `${BASE}/custom-printing`, lastmod: now, changefreq: 'monthly', priority: 0.8 },
+    ...SERVICE_AREAS.map((a): UrlEntry => ({ loc: `${BASE}/custom-printing/${a.slug}`, lastmod: now, changefreq: 'monthly', priority: 0.85 })),
     { loc: `${BASE}/how-it-works`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE}/resources`, lastmod: now, changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE}/resources/print-size-calculator`, lastmod: now, changefreq: 'monthly', priority: 0.6 },
@@ -56,7 +61,6 @@ export async function GET() {
     { loc: `${BASE}/contact`, lastmod: now, changefreq: 'monthly', priority: 0.5 },
     { loc: `${BASE}/privacy`, lastmod: now, changefreq: 'yearly', priority: 0.3 },
     { loc: `${BASE}/terms`, lastmod: now, changefreq: 'yearly', priority: 0.3 },
-    { loc: `${BASE}/sign-in`, lastmod: now, changefreq: 'yearly', priority: 0.2 },
   ];
 
   const types = ['golf', 'stadium', 'airport', 'marathon', 'city', 'skyline', 'f1'];

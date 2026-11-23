@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { trackLead } from '@/lib/track';
 
 export default function ContactForm() {
   const openedAt = useRef<number>(Date.now());
@@ -35,6 +36,7 @@ export default function ContactForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not send');
+      trackLead({ form: 'contact' });
       setStatus('sent');
     } catch (err) {
       setStatus('error');
