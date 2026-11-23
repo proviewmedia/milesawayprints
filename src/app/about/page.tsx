@@ -9,7 +9,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 export const metadata: Metadata = {
   title: 'About Us: A Las Vegas Custom Print Studio',
   description:
-    'The INQ Press is a designer-led print studio in Las Vegas. Custom printing on apparel, merch, stickers, signs, and posters, plus our own collection of art prints. Started on Etsy in 2020.',
+    'The INQ Press is a designer-led print studio in Las Vegas. Custom printing on apparel, merch, stickers, signs, and posters, plus our own collection of art prints. Started on Etsy in 2020 as Miles Away Prints.',
   alternates: { canonical: '/about' },
 };
 
@@ -99,13 +99,13 @@ export default function AboutPage() {
           </div>
           <div className="space-y-5 text-base md:text-lg leading-relaxed text-ink md:pt-10">
             <p>
-              It started in 2020 with a single airport diagram on Etsy. People wanted prints of the
+              It started in 2020 as Miles Away Prints, with a single airport diagram on Etsy. People wanted prints of the
               places that meant something to them, so the shop grew: golf courses, marathon routes,
               F1 circuits, skylines, and stadiums. More than 800 Etsy orders later, the same
               question kept coming in. Can you print this for me?
             </p>
             <p>
-              So we said yes. The INQ Press is the next step: a studio that brings the same design
+              So we said yes, and Miles Away Prints became The INQ Press: a studio that brings the same design
               care to anything you want printed. Team shirts, event banners, stickers for your
               brand, a gift for one person. You bring the idea, we handle the rest.
             </p>

@@ -32,7 +32,8 @@ export function organizationJsonLd() {
     '@type': 'OnlineStore',
     '@id': `${SITE_URL}/#business`,
     name: SITE_NAME,
-    alternateName: 'INQ Press',
+    // Former name kept so searches for it still find the business.
+    alternateName: ['INQ Press', 'Miles Away Prints'],
     url: SITE_URL,
     logo: `${SITE_URL}/icon`,
     image: `${SITE_URL}/apple-icon`,
